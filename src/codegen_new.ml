@@ -311,20 +311,23 @@ let gen_spawn_instance party module_map inst_id module_name =
   
   (* Spawn module actor with downstream modules list *)
   let spawn_module = 
-    Printf.sprintf "    register(%s, spawn(fun() -> %s([], [], 0, #{}, %s) end))"
+    Printf.sprintf "    register(%s, spawn(fun() -> %s(%s) end))"
       module_actor module_actor downstream_str
   in
   
   (* Spawn input node actors for each extern_input *)
   let input_names = module_info.extern_input in
   let spawn_input_nodes = List.map (fun input_name ->
-    let input_actor = node_actor_name party_id inst_id input_name in
+    let input_actor = input_node_actor_name party_id inst_id input_name in
     Printf.sprintf "    register(%s, spawn(fun() -> %s() end))"
       input_actor input_actor
   ) input_names in
   
-  (* Spawn computation node actors for each node in the module *)
+  (* Spawn computation node actors for each non-input node in the module *)
   let nodes = module_info.node in
+  let computation_nodes = List.filter (fun (node_id, _, _, _) ->
+    not (List.mem node_id input_names)
+  ) nodes in
   let spawn_nodes = List.map (fun (node_id, _, init_opt, _) ->
     let node_actor = node_actor_name party_id inst_id node_id in
     let init_value = match init_opt with
@@ -334,7 +337,7 @@ let gen_spawn_instance party module_map inst_id module_name =
     (* Node actors now have Buffer, State, NextVer parameters *)
     Printf.sprintf "    register(%s, spawn(fun() -> %s(#{}, %s, 0) end))"
       node_actor node_actor init_value
-  ) nodes in
+  ) computation_nodes in
   
   String.concat ",\n" ([spawn_module] @ spawn_input_nodes @ spawn_nodes)
 
@@ -415,10 +418,11 @@ let gen_exports parties module_map =
     Printf.sprintf "-export([%s/1])." (party_actor_name party.party_id)
   ) parties in
   
+  (* Module actor exports - arity /1 (DownstreamModules only) *)
   let module_exports = List.concat_map (fun party ->
     List.concat_map (fun (outputs, _, _) ->
       List.map (fun inst_id ->
-        Printf.sprintf "-export([%s/5])." (module_actor_name party.party_id inst_id)
+        Printf.sprintf "-export([%s/1])." (module_actor_name party.party_id inst_id)
       ) outputs
     ) party.instances
   ) parties in
@@ -430,7 +434,7 @@ let gen_exports parties module_map =
       let input_names = module_info.extern_input in
       List.concat_map (fun inst_id ->
         List.map (fun input_name ->
-          Printf.sprintf "-export([%s/0])." (node_actor_name party.party_id inst_id input_name)
+          Printf.sprintf "-export([%s/0])." (input_node_actor_name party.party_id inst_id input_name)
         ) input_names
       ) outputs
     ) party.instances
@@ -440,11 +444,15 @@ let gen_exports parties module_map =
   let node_exports = List.concat_map (fun party ->
     List.concat_map (fun (outputs, module_name, _) ->
       let module_info : Module.t = M.find module_name module_map in
-      let nodes = module_info.node in
+      let input_names = module_info.extern_input in
+      (* Filter out input nodes, only export computation nodes *)
+      let computation_nodes = List.filter (fun (node_id, _, _, _) ->
+        not (List.mem node_id input_names)
+      ) module_info.node in
       List.concat_map (fun inst_id ->
         List.map (fun (node_id, _, _, _) ->
           Printf.sprintf "-export([%s/3])." (node_actor_name party.party_id inst_id node_id)
-        ) nodes
+        ) computation_nodes
       ) outputs
     ) party.instances
   ) parties in
