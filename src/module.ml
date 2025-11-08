@@ -57,11 +57,13 @@ let make_type program =
 
 let of_program program =
   let (const, func, extern_input, node, newnode, leader) = collect program.definition in
+  (* Add in_node declarations to extern_input *)
+  let all_extern_input = extern_input @ extract_node (List.map remove_type program.in_node) in
   {
     id = program.id;
     party = program.party;
     source = extract_node (List.map remove_type program.in_node);
-    extern_input = extern_input;
+    extern_input = all_extern_input;
     sink = extract_node (List.map remove_type program.out_node);
     const = const;
     node = node;

@@ -3,60 +3,440 @@ open Util
 
 (* Generate Erlang code from new inst_program structure *)
 
-(* Helper: Convert qualified_id to string *)
-let string_of_qualified_id = function
-  | SimpleId id -> id
-  | QualifiedId (party_id, inst_id) -> party_id ^ "_" ^ inst_id
+(* === Import helper functions and types from Codegen === *)
+
+(* Erlang identifier types *)
+type erl_id = 
+  | EIConst of string 
+  | EIFun of string * int
+  | EINative of string * int
+  | EIVar of string
+  | EISigVar of string
+  | EILast of erl_id
+
+exception AtLastError of string
+
+(* Convert erl_id to Erlang string *)
+let string_of_eid ?(raw=true) = function
+  | EIConst(id) -> "const_" ^ id ^ "()"
+  | EIFun(id, n) -> (if raw then "fun_" ^ id
+                            else "fun ?MODULE:fun_" ^ id ^ "/" ^ string_of_int n)
+  | EINative(id, n) -> (if raw then id
+                            else "fun ?MODULE:" ^ id ^ "/" ^ string_of_int n)
+  | EIVar(id) -> (match id with
+    | "_" -> "_"
+    | s -> "V" ^ s)
+  | EISigVar(id) -> "S" ^ id
+  | EILast(EISigVar(id)) -> "LS" ^ id
+  | EILast(EIConst(id)) | EILast(EIFun(id, _)) | EILast(EINative(id, _)) | EILast(EIVar(id)) ->
+    (raise (AtLastError(id ^ " is not node")))
+  | EILast(EILast _) ->
+    (raise (AtLastError("@last operator cannot be applied twice, make another delay node")))
+
+(* Convert MPFRP expression to Erlang code *)
+let erlang_of_expr env e = 
+  let rec f env = function
+    | EConst CUnit -> "void"
+    | EConst (CBool b) -> string_of_bool b
+    | EConst (CInt i)  -> string_of_int i
+    | EConst (CFloat f)  -> Printf.sprintf "%f" f
+    | EConst (CChar c) -> string_of_int (int_of_char c)
+    | EId id -> string_of_eid ~raw:false (try_find id env)
+    | EAnnot (id, ALast) -> string_of_eid (EILast(try_find id env))
+    | EApp (id, es) ->
+      string_of_eid (try_find id env) ^ "(" ^ (concat_map "," (f env) es) ^ ")"
+    | EBin (BCons, hd, tl) ->
+      "[" ^ f env hd ^ "|" ^ f env tl ^ "]"
+    | EBin (op, e1, e2) -> "(" ^ f env e1 ^ (match op with
+        | BMul -> " * "   | BDiv -> " / "        | BMod -> " rem "
+        | BAdd -> " + "   | BSub -> " - "        | BShL -> " bsl "
+        | BShR -> " bsr " | BLt -> " < "         | BLte -> " =< "
+        | BGt -> " > "    | BGte -> " >= "       | BEq -> " == "
+        | BNe -> " /= "   | BAnd -> " band "     | BXor -> " bxor "
+        | BOr -> " bor "  | BLAnd -> " andalso " | BLOr -> " orelse " | _ -> "") ^ f env e2 ^ ")"
+    | EUni (op, e) -> (match op with 
+      | UNot -> "(not " ^ f env e ^ ")"
+      | UNeg -> "-" ^ f env e
+      | UInv -> "(bnot " ^ f env e ^ ")") 
+    | ELet (binders, e) -> 
+      let bid = List.map (fun (i,_,_) -> string_of_eid (EIVar(i))) binders in
+      let bex = List.map (fun (_,e,_) -> f env e) binders in
+      let newenv = List.fold_left (fun env (i,_,_) -> M.add i (EIVar(i)) env) env binders in
+      "(case {" ^ String.concat "," bex ^ "} of " ^ 
+      "{" ^ String.concat "," bid ^ "} -> " ^ f newenv e ^ " end)"
+    | EIf(c, a, b) -> 
+      "(case " ^ f env c ^ " of true -> " ^ f env a ^ "; false -> " ^ f env b ^ " end)"
+    | EList es ->
+      "[" ^ (concat_map "," (f env) es) ^ "]"
+    | ETuple es ->
+      "{" ^ (concat_map "," (f env) es) ^ "}"
+    | EFun (args, e) ->
+      let newenv = List.fold_left (fun env i -> M.add i (EIVar(i)) env) env args in
+      "(" ^ concat_map "," (fun i -> string_of_eid (EIVar i)) args ^ ") -> " ^ f newenv e
+    | ECase(m, list) -> 
+      let rec pat = function
+        | PWild -> ("_", [])
+        | PNil  -> ("[]", [])
+        | PConst c -> (f env (EConst c), [])
+        | PVar v -> (string_of_eid (EIVar v), [v])
+        | PTuple ts -> 
+          let (s, vs) = List.split (List.map pat ts) in
+          ("{" ^ (String.concat "," s) ^ "}", List.flatten vs) 
+        | PCons (hd, tl) ->
+          let (hdt, hdbinds) = pat hd in
+          let (tlt, tlbinds) = pat tl in
+          ("[" ^ hdt ^ "|" ^ tlt ^ "]", hdbinds @ tlbinds) in
+      let body (p, e) =
+        let (ps, pvs) = pat p in
+        let newenv = List.fold_left (fun e i -> M.add i (EIVar i) e) env pvs in
+        ps ^ " -> " ^ f newenv e
+      in
+      "(case " ^ f env m ^ " of " ^
+        concat_map "; " body list ^
+      " end)"
+  in f env e
+
+(* Create environment for expression evaluation *)
+let create_env (module_info : Module.t) =
+  let user_funs =
+    List.map (fun (i,_) -> (i, EIConst i)) module_info.const
+    @ List.map (function
+        | (i, Module.InternFun EFun(args, _)) -> (i, EIFun (i, List.length args))
+        | (i, Module.NativeFun (arg_t, _)) -> (i, EINative (i, List.length arg_t))
+        | _ -> assert false) module_info.func
+  in
+  List.fold_left (fun m (i,e) -> M.add i e m) M.empty user_funs
+
+(* Get initial value for a node *)
+let get_init_value (module_info : Module.t) node_id =
+  let rec find_node = function
+    | [] -> None
+    | (id, _, init_opt, _) :: rest ->
+        if id = node_id then Some init_opt else find_node rest
+  in
+  match find_node module_info.node with
+  | Some (Some init_expr) -> Some init_expr
+  | _ -> None
+
+(* Generate registered name for module actor *)
+let module_actor_name party_id inst_id =
+  String.uncapitalize_ascii party_id ^ "_" ^ inst_id
+
+(* Generate registered name for node actor *)
+let node_actor_name party_id inst_id node_id =
+  String.uncapitalize_ascii party_id ^ "_" ^ inst_id ^ "_" ^ node_id
+
+(* Generate registered name for party actor *)
+let party_actor_name party_id =
+  "party_" ^ String.uncapitalize_ascii party_id
+
+(* Helper: Convert qualified_id to registered actor name *)
+let qualified_id_to_actor_name party_id = function
+  | SimpleId id -> module_actor_name party_id id
+  | QualifiedId (other_party_id, inst_id) -> 
+      module_actor_name other_party_id inst_id
+
+(* Helper: Get downstream modules (dependencies) for an instance *)
+let get_downstream_modules party inst_id =
+  (* Find the newnode definition for this instance *)
+  let rec find_in_instances = function
+    | [] -> []
+    | (outputs, _, inputs) :: rest ->
+        if List.mem inst_id outputs then inputs
+        else find_in_instances rest
+  in
+  let inputs = find_in_instances party.instances in
+  List.map (qualified_id_to_actor_name party.party_id) inputs
+
+(* Helper: Get all instances from a party block *)
+let get_all_instances party =
+  List.concat_map (fun (outputs, _, _) -> outputs) party.instances
+
+(* Helper: Build instance to module mapping *)
+let build_inst_module_map party =
+  List.fold_left (fun map (outputs, module_name, _) ->
+    List.fold_left (fun m inst_id ->
+      M.add inst_id module_name m
+    ) map outputs
+  ) M.empty party.instances
 
 (* Generate party actor code *)
 let gen_party_actor party =
-  let party_name = String.uncapitalize_ascii party.party_id in
-  let leader_ref = string_of_qualified_id (SimpleId party.leader) in
+  let party_name = party_actor_name party.party_id in
+  let leader_name = module_actor_name party.party_id party.leader in
   Printf.sprintf
-    "party_%s() ->\n\
+    "%s(Ver) ->\n\
     \    timer:sleep(%d),\n\
-    \    %s ! sync_pulse,\n\
-    \    party_%s().\n"
+    \    %s ! {sync_pulse, %s, Ver},\n\
+    \    %s(Ver + 1).\n"
     party_name
     party.periodic_ms
-    leader_ref
+    leader_name
+    party_name
     party_name
 
-(* Generate module actor skeleton *)
-let gen_module_actor_skeleton inst_id module_name =
+(* Generate module actor skeleton for one instance *)
+let gen_module_actor party_id inst_id module_name module_info =
+  let actor_name = module_actor_name party_id inst_id in
+  
+  (* Generate receive loop with downstream modules *)
   Printf.sprintf
-    "%s_module() ->\n\
-    \    %% TODO: Implement module actor for %s\n\
+    "%s(Ver_buffer, In_buffer, P_ver, InputMap, DownstreamModules) ->\n\
     \    receive\n\
-    \        _ -> ok\n\
+    \        {sync_pulse, Party, Ver} ->\n\
+    \            %% Process sync_pulse and forward to downstream modules\n\
+    \            lists:foreach(fun(Module) -> Module ! {sync_pulse, Party, Ver} end, DownstreamModules),\n\
+    \            %% TODO: Request data from downstream modules\n\
+    \            %s(Ver_buffer, In_buffer, P_ver, InputMap, DownstreamModules);\n\
+    \        {data, From, Value} ->\n\
+    \            %% Store incoming data in InputMap\n\
+    \            NewInputMap = maps:put(From, Value, InputMap),\n\
+    \            %% TODO: Check if we have all required inputs and compute\n\
+    \            %s(Ver_buffer, In_buffer, P_ver, NewInputMap, DownstreamModules)\n\
     \    end.\n"
-    (String.uncapitalize_ascii inst_id)
-    module_name
+    actor_name
+    actor_name
+    actor_name
+
+(* Generate input node actor - receives data and tags it with input name *)
+let gen_input_node_actor party_id inst_id input_name =
+  let actor_name = node_actor_name party_id inst_id input_name in
+  let target_node = node_actor_name party_id inst_id "data" in  (* Assumes computation node is named 'data' *)
+  actor_name ^ "() ->\n" ^
+  indent 1 "receive\n" ^
+  indent 2 "{{Party, Ver}, Val} ->\n" ^
+  indent 3 target_node ^ " ! {{Party, Ver}, " ^ input_name ^ ", Val};\n" ^
+  indent 2 "_ ->\n" ^
+  indent 3 "void\n" ^
+  indent 1 "end,\n" ^
+  indent 1 actor_name ^ "().\n"
+
+(* Generate node actor for one node with computation logic and buffering *)
+let gen_node_actor party_id inst_id node_id module_name (module_info : Module.t) downstream_modules =
+  let actor_name = node_actor_name party_id inst_id node_id in
+  
+  (* Find node definition *)
+  let node_def = List.find (fun (id, _, _, _) -> id = node_id) module_info.node in
+  let (_, _, _, expr) = node_def in
+  
+  (* Create environment for expression evaluation *)
+  let env = create_env module_info in
+  
+  (* Get list of input names (extern_input) for this module *)
+  let input_names = module_info.extern_input in
+  
+  (* Build pattern match for checking if all inputs are present *)
+  let input_pattern = 
+    if List.length input_names = 0 then
+      "_"
+    else
+      "#{" ^ String.concat ", " (List.map (fun name -> 
+        name ^ " := S" ^ name
+      ) input_names) ^ "}"
+  in
+  
+  (* Build environment for expression evaluation with signal variables *)
+  (* This maps input names (e.g., "client1") to EISigVar which renders as "Sclient1" *)
+  let input_env = List.fold_left (fun e id ->
+    M.add id (EISigVar id) e
+  ) env input_names in
+  
+  (* Add module's own nodes to environment as signal variables *)
+  let input_env = List.fold_left (fun e (id, _, _, _) ->
+    M.add id (EISigVar id) e
+  ) input_env module_info.node in
+  
+  (* Generate the computation expression *)
+  let computation_code = erlang_of_expr input_env expr in
+  
+  (* Build the function code with buffering logic *)
+  actor_name ^ "(Buffer, State, NextVer) ->\n" ^
+  indent 1 "receive\n" ^
+  indent 2 "{{Party, Ver}, InputName, Val} ->\n" ^
+  indent 3 "%% Update buffer with received input\n" ^
+  indent 3 "VersionKey = {Party, Ver},\n" ^
+  indent 3 "NewBuffer = maps:update_with(VersionKey,\n" ^
+  indent 4 "fun(InputMap) -> maps:put(InputName, Val, InputMap) end,\n" ^
+  indent 4 "#{InputName => Val},\n" ^
+  indent 4 "Buffer),\n" ^
+  indent 3 "%% Check if all inputs are ready for this version\n" ^
+  indent 3 "case maps:find(VersionKey, NewBuffer) of\n" ^
+  indent 4 "{ok, " ^ input_pattern ^ "} ->\n" ^
+  indent 5 "%% All inputs ready, compute the value\n" ^
+  indent 5 "ProcessedValue = " ^ computation_code ^ ",\n" ^
+  indent 5 "%% Send result to downstream modules\n" ^
+  indent 5 "lists:foreach(fun(DownstreamModule) ->\n" ^
+  indent 6 "DownstreamModule ! {VersionKey, " ^ node_id ^ ", ProcessedValue}\n" ^
+  indent 5 "end, [" ^ String.concat ", " downstream_modules ^ "]),\n" ^
+  indent 5 "%% Remove processed version from buffer and update state\n" ^
+  indent 5 "CleanBuffer = maps:remove(VersionKey, NewBuffer),\n" ^
+  indent 5 actor_name ^ "(CleanBuffer, ProcessedValue, NextVer);\n" ^
+  indent 4 "_ ->\n" ^
+  indent 5 "%% Not all inputs ready yet, wait for more\n" ^
+  indent 5 actor_name ^ "(NewBuffer, State, NextVer)\n" ^
+  indent 3 "end\n" ^
+  indent 1 "end.\n"
+
+(* Generate spawn and register code for one instance *)
+let gen_spawn_instance party module_map inst_id module_name =
+  let module_info : Module.t = try M.find module_name module_map with Not_found -> 
+    failwith ("Module " ^ module_name ^ " not found") 
+  in
+  let party_id = party.party_id in
+  let module_actor = module_actor_name party_id inst_id in
+  
+  (* Get downstream modules (dependencies) for this instance *)
+  let downstream = get_downstream_modules party inst_id in
+  let downstream_str = "[" ^ String.concat ", " downstream ^ "]" in
+  
+  (* Spawn module actor with downstream modules list *)
+  let spawn_module = 
+    Printf.sprintf "    register(%s, spawn(fun() -> %s([], [], 0, #{}, %s) end))"
+      module_actor module_actor downstream_str
+  in
+  
+  (* Spawn input node actors for each extern_input *)
+  let input_names = module_info.extern_input in
+  let spawn_input_nodes = List.map (fun input_name ->
+    let input_actor = node_actor_name party_id inst_id input_name in
+    Printf.sprintf "    register(%s, spawn(fun() -> %s() end))"
+      input_actor input_actor
+  ) input_names in
+  
+  (* Spawn computation node actors for each node in the module *)
+  let nodes = module_info.node in
+  let spawn_nodes = List.map (fun (node_id, _, init_opt, _) ->
+    let node_actor = node_actor_name party_id inst_id node_id in
+    let init_value = match init_opt with
+      | Some _ -> "undefined"  (* TODO: Evaluate init expression properly *)
+      | None -> "undefined"
+    in
+    (* Node actors now have Buffer, State, NextVer parameters *)
+    Printf.sprintf "    register(%s, spawn(fun() -> %s(#{}, %s, 0) end))"
+      node_actor node_actor init_value
+  ) nodes in
+  
+  String.concat ",\n" ([spawn_module] @ spawn_input_nodes @ spawn_nodes)
+
+(* Generate spawn code for all instances in a party *)
+let gen_spawn_party party module_map =
+  let party_id = party.party_id in
+  
+  (* First spawn party actor *)
+  let party_spawn = 
+    Printf.sprintf "    register(%s, spawn(fun() -> %s(0) end))"
+      (party_actor_name party_id)
+      (party_actor_name party_id)
+  in
+  
+  (* Then spawn all instances *)
+  let instance_spawns = List.concat_map (fun (outputs, module_name, _) ->
+    List.map (fun inst_id ->
+      gen_spawn_instance party module_map inst_id module_name
+    ) outputs
+  ) party.instances in
+  
+  String.concat ",\n" ([party_spawn] @ instance_spawns)
+
+(* Generate all actor definitions *)
+let gen_all_actors parties module_map =
+  let party_actors = List.map gen_party_actor parties in
+  
+  let module_actors = List.concat_map (fun party ->
+    List.concat_map (fun (outputs, module_name, _) ->
+      let module_info = M.find module_name module_map in
+      List.map (fun inst_id ->
+        gen_module_actor party.party_id inst_id module_name module_info
+      ) outputs
+    ) party.instances
+  ) parties in
+  
+  (* Generate input node actors for each instance *)
+  let input_node_actors = List.concat_map (fun party ->
+    List.concat_map (fun (outputs, module_name, _) ->
+      let module_info : Module.t = M.find module_name module_map in
+      let input_names = module_info.extern_input in
+      List.concat_map (fun inst_id ->
+        List.map (fun input_name ->
+          gen_input_node_actor party.party_id inst_id input_name
+        ) input_names
+      ) outputs
+    ) party.instances
+  ) parties in
+  
+  (* Generate computation node actors for each instance *)
+  let node_actors = List.concat_map (fun party ->
+    List.concat_map (fun (outputs, module_name, _) ->
+      let module_info : Module.t = M.find module_name module_map in
+      let nodes = module_info.node in
+      List.concat_map (fun inst_id ->
+        (* Get downstream modules for this instance *)
+        let downstream = get_downstream_modules party inst_id in
+        List.map (fun (node_id, _, _, _) ->
+          gen_node_actor party.party_id inst_id node_id module_name module_info downstream
+        ) nodes
+      ) outputs
+    ) party.instances
+  ) parties in
+  
+  String.concat "\n" (party_actors @ module_actors @ input_node_actors @ node_actors)
 
 (* Generate start function *)
-let gen_start parties =
-  let spawn_parties = List.map (fun p ->
-    Printf.sprintf "    spawn(fun party_%s/0)" 
-      (String.uncapitalize_ascii p.party_id)
-  ) parties in
-  Printf.sprintf
-    "start() ->\n\
-    %s.\n"
-    (String.concat ",\n" spawn_parties)
+let gen_start parties module_map =
+  let spawn_code = String.concat ",\n" (List.map (fun party ->
+    gen_spawn_party party module_map
+  ) parties) in
+  
+  Printf.sprintf "start() ->\n%s.\n" spawn_code
 
 (* Generate exports *)
-let gen_exports parties =
+let gen_exports parties module_map =
+  let party_exports = List.map (fun party ->
+    Printf.sprintf "-export([%s/1])." (party_actor_name party.party_id)
+  ) parties in
+  
+  let module_exports = List.concat_map (fun party ->
+    List.concat_map (fun (outputs, _, _) ->
+      List.map (fun inst_id ->
+        Printf.sprintf "-export([%s/5])." (module_actor_name party.party_id inst_id)
+      ) outputs
+    ) party.instances
+  ) parties in
+  
+  (* Export input node actors (arity 0 for loop function) *)
+  let input_node_exports = List.concat_map (fun party ->
+    List.concat_map (fun (outputs, module_name, _) ->
+      let module_info : Module.t = M.find module_name module_map in
+      let input_names = module_info.extern_input in
+      List.concat_map (fun inst_id ->
+        List.map (fun input_name ->
+          Printf.sprintf "-export([%s/0])." (node_actor_name party.party_id inst_id input_name)
+        ) input_names
+      ) outputs
+    ) party.instances
+  ) parties in
+  
+  (* Export computation node actors (arity 3: Buffer, State, NextVer) *)
+  let node_exports = List.concat_map (fun party ->
+    List.concat_map (fun (outputs, module_name, _) ->
+      let module_info : Module.t = M.find module_name module_map in
+      let nodes = module_info.node in
+      List.concat_map (fun inst_id ->
+        List.map (fun (node_id, _, _, _) ->
+          Printf.sprintf "-export([%s/3])." (node_actor_name party.party_id inst_id node_id)
+        ) nodes
+      ) outputs
+    ) party.instances
+  ) parties in
+  
   "-export([start/0]).\n" ^
-  String.concat "" (List.map (fun p ->
-    Printf.sprintf "-export([party_%s/0]).\n" 
-      (String.uncapitalize_ascii p.party_id)
-  ) parties)
+  String.concat "\n" (party_exports @ module_exports @ input_node_exports @ node_exports) ^ "\n"
 
 (* Main code generation function *)
 let gen_new_inst inst_prog module_map =
   let module_header = "-module(main).\n" in
-  let exports = gen_exports inst_prog.parties in
-  let party_actors = String.concat "\n" (List.map gen_party_actor inst_prog.parties) in
-  let start_func = gen_start inst_prog.parties in
+  let exports = gen_exports inst_prog.parties module_map in
+  let actor_defs = gen_all_actors inst_prog.parties module_map in
+  let start_func = gen_start inst_prog.parties module_map in
   
-  module_header ^ exports ^ "\n" ^ party_actors ^ "\n" ^ start_func
+  module_header ^ exports ^ "\n" ^ actor_defs ^ "\n" ^ start_func
