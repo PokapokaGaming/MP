@@ -131,6 +131,18 @@ let node_actor_name party_id inst_id node_id =
 let input_node_actor_name party_id inst_id input_name =
   String.uncapitalize_ascii party_id ^ "_" ^ inst_id ^ "_" ^ input_name
 
+(* Generate function name for module actor (module-based) *)
+let module_actor_func_name module_name =
+  String.uncapitalize_ascii module_name ^ "_module_actor"
+
+(* Generate function name for input node actor (module-based) *)
+let input_node_actor_func_name module_name input_name =
+  String.uncapitalize_ascii module_name ^ "_input_" ^ input_name
+
+(* Generate function name for computation node actor (module-based) *)
+let node_actor_func_name module_name node_id =
+  String.uncapitalize_ascii module_name ^ "_node_" ^ node_id
+
 (* Generate registered name for party actor *)
 let party_actor_name party_id =
   "party_" ^ String.uncapitalize_ascii party_id
@@ -181,8 +193,9 @@ let gen_party_actor party =
     party_name
 
 (* Generate module actor with Ver_buffer and In_buffer (mpfrp-original style) *)
-let gen_module_actor party_id inst_id module_name module_info =
-  let actor_name = module_actor_name party_id inst_id in
+(* Module-based: generates one function per module type *)
+let gen_module_actor module_name module_info =
+  let actor_name = module_actor_func_name module_name in
   let input_names = module_info.Module.extern_input in
   
   (* Generate clauses for Ver_buffer processing with lists:foldl *)
@@ -210,7 +223,7 @@ let gen_module_actor party_id inst_id module_name module_info =
   
   (* Generate clauses for In_buffer processing - one clause per input *)
   let in_foldl_clauses = List.map (fun input_name ->
-    let input_actor = input_node_actor_name party_id inst_id input_name in
+    let input_actor = input_node_actor_func_name module_name input_name in
     Printf.sprintf
       "                        {{Party, Ver}, %s, Val} when Ver > P_verT ->\n\
       \                                {[Msg | Buf], P_verT};\n\
@@ -253,9 +266,10 @@ let gen_module_actor party_id inst_id module_name module_info =
   "        end.\n"
 
 (* Generate input node actor - receives data and tags it with input name *)
-let gen_input_node_actor party_id inst_id input_name =
-  let actor_name = input_node_actor_name party_id inst_id input_name in
-  let target_node = node_actor_name party_id inst_id "data" in  (* Assumes computation node is named 'data' *)
+(* Module-based: generates one function per module type *)
+let gen_input_node_actor module_name input_name =
+  let actor_name = input_node_actor_func_name module_name input_name in
+  let target_node = node_actor_func_name module_name "data" in  (* Assumes computation node is named 'data' *)
   actor_name ^ "() ->\n" ^
   "        receive\n" ^
   "                {{Party, Ver}, Val} ->\n" ^
@@ -266,8 +280,9 @@ let gen_input_node_actor party_id inst_id input_name =
   "        " ^ actor_name ^ "().\n"
 
 (* Generate node actor for one node with computation logic and buffering *)
-let gen_node_actor party_id inst_id node_id module_name (module_info : Module.t) downstream_modules =
-  let actor_name = node_actor_name party_id inst_id node_id in
+(* Module-based: generates one function per module type *)
+let gen_node_actor module_name node_id (module_info : Module.t) =
+  let actor_name = node_actor_func_name module_name node_id in
   
   (* Find node definition *)
   let node_def = List.find (fun (id, _, _, _) -> id = node_id) module_info.node in
@@ -304,7 +319,7 @@ let gen_node_actor party_id inst_id node_id module_name (module_info : Module.t)
   let computation_code = erlang_of_expr input_env expr in
   
   (* Build the function code with buffering logic *)
-  actor_name ^ "(Buffer, State, NextVer) ->\n" ^
+  actor_name ^ "(Buffer, State, NextVer, DownstreamModules) ->\n" ^
   "        receive\n" ^
   "                {{Party, Ver}, InputName, Val} ->\n" ^
   "                        %% Update buffer with received input\n" ^
@@ -321,13 +336,13 @@ let gen_node_actor party_id inst_id node_id module_name (module_info : Module.t)
   "                                        %% Send result to downstream modules\n" ^
   "                                        lists:foreach(fun(DownstreamModule) ->\n" ^
   "                                                DownstreamModule ! {VersionKey, " ^ node_id ^ ", ProcessedValue}\n" ^
-  "                                        end, [" ^ String.concat ", " downstream_modules ^ "]),\n" ^
+  "                                        end, DownstreamModules),\n" ^
   "                                        %% Remove processed version from buffer and update state\n" ^
   "                                        CleanBuffer = maps:remove(VersionKey, NewBuffer),\n" ^
-  "                                        " ^ actor_name ^ "(CleanBuffer, ProcessedValue, NextVer);\n" ^
+  "                                        " ^ actor_name ^ "(CleanBuffer, ProcessedValue, NextVer, DownstreamModules);\n" ^
   "                                _ ->\n" ^
   "                                        %% Not all inputs ready yet, wait for more\n" ^
-  "                                        " ^ actor_name ^ "(NewBuffer, State, NextVer)\n" ^
+  "                                        " ^ actor_name ^ "(NewBuffer, State, NextVer, DownstreamModules)\n" ^
   "                        end\n" ^
   "        end.\n"
 
@@ -396,45 +411,35 @@ let gen_spawn_party party module_map =
   String.concat ",\n" ([party_spawn] @ instance_spawns)
 
 (* Generate all actor definitions *)
+(* Module-based: generates one set of functions per module type *)
 let gen_all_actors parties module_map =
   let party_actors = List.map gen_party_actor parties in
   
-  let module_actors = List.concat_map (fun party ->
-    List.concat_map (fun (outputs, module_name, _) ->
-      let module_info = M.find module_name module_map in
-      List.map (fun inst_id ->
-        gen_module_actor party.party_id inst_id module_name module_info
-      ) outputs
-    ) party.instances
-  ) parties in
+  (* Generate module actors - one per module type, not per instance *)
+  let module_actors = M.fold (fun module_name module_info acc ->
+    (gen_module_actor module_name module_info) :: acc
+  ) module_map [] in
   
-  (* Generate input node actors for each instance *)
-  let input_node_actors = List.concat_map (fun party ->
-    List.concat_map (fun (outputs, module_name, _) ->
-      let module_info : Module.t = M.find module_name module_map in
-      let input_names = module_info.extern_input in
-      List.concat_map (fun inst_id ->
-        List.map (fun input_name ->
-          gen_input_node_actor party.party_id inst_id input_name
-        ) input_names
-      ) outputs
-    ) party.instances
-  ) parties in
+  (* Generate input node actors - one per module type and input name *)
+  let input_node_actors = M.fold (fun module_name module_info acc ->
+    let input_names = module_info.extern_input in
+    List.map (fun input_name ->
+      gen_input_node_actor module_name input_name
+    ) input_names @ acc
+  ) module_map [] in
   
-  (* Generate computation node actors for each instance *)
-  let node_actors = List.concat_map (fun party ->
-    List.concat_map (fun (outputs, module_name, _) ->
-      let module_info : Module.t = M.find module_name module_map in
-      let nodes = module_info.node in
-      List.concat_map (fun inst_id ->
-        (* Get downstream modules for this instance *)
-        let downstream = get_downstream_modules party inst_id in
-        List.map (fun (node_id, _, _, _) ->
-          gen_node_actor party.party_id inst_id node_id module_name module_info downstream
-        ) nodes
-      ) outputs
-    ) party.instances
-  ) parties in
+  (* Generate computation node actors - one per module type and node *)
+  let node_actors = M.fold (fun module_name module_info acc ->
+    let nodes = module_info.node in
+    let input_names = module_info.extern_input in
+    (* Filter out input nodes, only generate computation nodes *)
+    let computation_nodes = List.filter (fun (node_id, _, _, _) ->
+      not (List.mem node_id input_names)
+    ) nodes in
+    List.map (fun (node_id, _, _, _) ->
+      gen_node_actor module_name node_id module_info
+    ) computation_nodes @ acc
+  ) module_map [] in
   
   String.concat "\n" (party_actors @ module_actors @ input_node_actors @ node_actors)
 
