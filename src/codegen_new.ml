@@ -180,56 +180,90 @@ let gen_party_actor party =
     party_name
     party_name
 
-(* Generate module actor skeleton for one instance *)
-(* Generate module actor - routes messages to input node actors *)
+(* Generate module actor with Ver_buffer and In_buffer (mpfrp-original style) *)
 let gen_module_actor party_id inst_id module_name module_info =
   let actor_name = module_actor_name party_id inst_id in
   let input_names = module_info.Module.extern_input in
   
-  (* Generate pattern matching clauses for routing data to input node actors *)
-  let data_routing_clauses = List.map (fun input_name ->
+  (* Generate clauses for Ver_buffer processing with lists:foldl *)
+  (* When Ver == P_verT, forward sync_pulse to downstream and request nodes *)
+  let ver_foldl_body =
+    let downstream_forwards = 
+      "                lists:foreach(fun(Module) -> Module ! {Party, Ver} end, DownstreamModules)," in
+    Printf.sprintf
+      "        {NBuffer, P_ver0} = lists:foldl(fun (Version, {Buf, P_verT}) ->\n\
+      \                case Version of\n\
+      \                        {Party, Ver} when Ver > P_verT ->\n\
+      \                                {[{Party, Ver} | Buf], P_verT};\n\
+      \                        {Party, Ver} when Ver =:= P_verT ->\n\
+      %s\n\
+      \                                %% TODO: Request computation nodes\n\
+      \                                {Buf, P_verT + 1};\n\
+      \                        {Party, Ver} when Ver < P_verT ->\n\
+      \                                {Buf, P_verT};\n\
+      \                        _ ->\n\
+      \                                {Buf, P_verT}\n\
+      \                end\n\
+      \        end, {[], P_ver}, Ver_buffer)"
+      downstream_forwards
+  in
+  
+  (* Generate clauses for In_buffer processing - one clause per input *)
+  let in_foldl_clauses = List.map (fun input_name ->
     let input_actor = input_node_actor_name party_id inst_id input_name in
     Printf.sprintf
-      "        {{Party, Ver}, %s, Val} ->\n\
-      \            %s ! {{Party, Ver}, Val},\n\
-      \            %s(DownstreamModules)"
+      "                        {{Party, Ver}, %s, Val} when Ver > P_verT ->\n\
+      \                                {[Msg | Buf], P_verT};\n\
+      \                        {{Party, Ver}, %s, Val} when Ver =:= P_verT ->\n\
+      \                                %s ! {{Party, Ver}, Val},\n\
+      \                                lists:foreach(fun(Module) -> Module ! {Party, Ver} end, DownstreamModules),\n\
+      \                                {Buf, P_verT + 1};\n\
+      \                        {{Party, Ver}, %s, Val} when Ver < P_verT ->\n\
+      \                                %s ! {{Party, Ver}, Val},\n\
+      \                                {Buf, P_verT}"
+      input_name
       input_name
       input_actor
-      actor_name
+      input_name
+      input_actor
   ) input_names in
   
-  let data_routing = String.concat ";\n" data_routing_clauses in
+  let in_foldl_body = 
+    Printf.sprintf
+      "        {NInBuffer, P_verN} = lists:foldl(fun (Msg, {Buf, P_verT}) ->\n\
+      \                case Msg of\n\
+      %s%s\n\
+      \                        _ ->\n\
+      \                                {Buf, P_verT}\n\
+      \                end\n\
+      \        end, {[], P_ver0}, In_buffer)"
+      (String.concat ";\n" in_foldl_clauses)
+      (if in_foldl_clauses = [] then "" else ";")
+  in
   
-  (* Generate receive loop *)
-  Printf.sprintf
-    "%s(DownstreamModules) ->\n\
-    \    receive\n\
-    \        {sync_pulse, Party, Ver} ->\n\
-    \            %% Forward sync_pulse to downstream modules\n\
-    \            lists:foreach(fun(Module) -> Module ! {sync_pulse, Party, Ver} end, DownstreamModules),\n\
-    \            %s(DownstreamModules);\n\
-    %s\n\
-    \    end.\n"
-    actor_name
-    actor_name
-    (if data_routing = "" then 
-       "        _ -> " ^ actor_name ^ "(DownstreamModules)" 
-     else 
-       data_routing ^ ";\n        _ -> " ^ actor_name ^ "(DownstreamModules)")
-
+  (* Generate complete module actor *)
+  actor_name ^ "(Ver_buffer, In_buffer, Party, P_ver, DownstreamModules) ->\n" ^
+  ver_foldl_body ^ ",\n" ^
+  in_foldl_body ^ ",\n" ^
+  "        receive\n" ^
+  "                {_, _} = Ver_msg ->\n" ^
+  "                        " ^ actor_name ^ "(lists:reverse([Ver_msg | NBuffer]), NInBuffer, Party, P_verN, DownstreamModules);\n" ^
+  "                {_, _, _} = In_msg ->\n" ^
+  "                        " ^ actor_name ^ "(NBuffer, lists:reverse([In_msg | NInBuffer]), Party, P_verN, DownstreamModules)\n" ^
+  "        end.\n"
 
 (* Generate input node actor - receives data and tags it with input name *)
 let gen_input_node_actor party_id inst_id input_name =
-  let actor_name = node_actor_name party_id inst_id input_name in
+  let actor_name = input_node_actor_name party_id inst_id input_name in
   let target_node = node_actor_name party_id inst_id "data" in  (* Assumes computation node is named 'data' *)
   actor_name ^ "() ->\n" ^
-  indent 1 "receive\n" ^
-  indent 2 "{{Party, Ver}, Val} ->\n" ^
-  indent 3 target_node ^ " ! {{Party, Ver}, " ^ input_name ^ ", Val};\n" ^
-  indent 2 "_ ->\n" ^
-  indent 3 "void\n" ^
-  indent 1 "end,\n" ^
-  indent 1 actor_name ^ "().\n"
+  "        receive\n" ^
+  "                {{Party, Ver}, Val} ->\n" ^
+  "                        " ^ target_node ^ " ! {{Party, Ver}, " ^ input_name ^ ", Val};\n" ^
+  "                _ ->\n" ^
+  "                        void\n" ^
+  "        end,\n" ^
+  "        " ^ actor_name ^ "().\n"
 
 (* Generate node actor for one node with computation logic and buffering *)
 let gen_node_actor party_id inst_id node_id module_name (module_info : Module.t) downstream_modules =
@@ -271,31 +305,31 @@ let gen_node_actor party_id inst_id node_id module_name (module_info : Module.t)
   
   (* Build the function code with buffering logic *)
   actor_name ^ "(Buffer, State, NextVer) ->\n" ^
-  indent 1 "receive\n" ^
-  indent 2 "{{Party, Ver}, InputName, Val} ->\n" ^
-  indent 3 "%% Update buffer with received input\n" ^
-  indent 3 "VersionKey = {Party, Ver},\n" ^
-  indent 3 "NewBuffer = maps:update_with(VersionKey,\n" ^
-  indent 4 "fun(InputMap) -> maps:put(InputName, Val, InputMap) end,\n" ^
-  indent 4 "#{InputName => Val},\n" ^
-  indent 4 "Buffer),\n" ^
-  indent 3 "%% Check if all inputs are ready for this version\n" ^
-  indent 3 "case maps:find(VersionKey, NewBuffer) of\n" ^
-  indent 4 "{ok, " ^ input_pattern ^ "} ->\n" ^
-  indent 5 "%% All inputs ready, compute the value\n" ^
-  indent 5 "ProcessedValue = " ^ computation_code ^ ",\n" ^
-  indent 5 "%% Send result to downstream modules\n" ^
-  indent 5 "lists:foreach(fun(DownstreamModule) ->\n" ^
-  indent 6 "DownstreamModule ! {VersionKey, " ^ node_id ^ ", ProcessedValue}\n" ^
-  indent 5 "end, [" ^ String.concat ", " downstream_modules ^ "]),\n" ^
-  indent 5 "%% Remove processed version from buffer and update state\n" ^
-  indent 5 "CleanBuffer = maps:remove(VersionKey, NewBuffer),\n" ^
-  indent 5 actor_name ^ "(CleanBuffer, ProcessedValue, NextVer);\n" ^
-  indent 4 "_ ->\n" ^
-  indent 5 "%% Not all inputs ready yet, wait for more\n" ^
-  indent 5 actor_name ^ "(NewBuffer, State, NextVer)\n" ^
-  indent 3 "end\n" ^
-  indent 1 "end.\n"
+  "        receive\n" ^
+  "                {{Party, Ver}, InputName, Val} ->\n" ^
+  "                        %% Update buffer with received input\n" ^
+  "                        VersionKey = {Party, Ver},\n" ^
+  "                        NewBuffer = maps:update_with(VersionKey,\n" ^
+  "                                fun(InputMap) -> maps:put(InputName, Val, InputMap) end,\n" ^
+  "                                #{InputName => Val},\n" ^
+  "                                Buffer),\n" ^
+  "                        %% Check if all inputs are ready for this version\n" ^
+  "                        case maps:find(VersionKey, NewBuffer) of\n" ^
+  "                                {ok, " ^ input_pattern ^ "} ->\n" ^
+  "                                        %% All inputs ready, compute the value\n" ^
+  "                                        ProcessedValue = " ^ computation_code ^ ",\n" ^
+  "                                        %% Send result to downstream modules\n" ^
+  "                                        lists:foreach(fun(DownstreamModule) ->\n" ^
+  "                                                DownstreamModule ! {VersionKey, " ^ node_id ^ ", ProcessedValue}\n" ^
+  "                                        end, [" ^ String.concat ", " downstream_modules ^ "]),\n" ^
+  "                                        %% Remove processed version from buffer and update state\n" ^
+  "                                        CleanBuffer = maps:remove(VersionKey, NewBuffer),\n" ^
+  "                                        " ^ actor_name ^ "(CleanBuffer, ProcessedValue, NextVer);\n" ^
+  "                                _ ->\n" ^
+  "                                        %% Not all inputs ready yet, wait for more\n" ^
+  "                                        " ^ actor_name ^ "(NewBuffer, State, NextVer)\n" ^
+  "                        end\n" ^
+  "        end.\n"
 
 (* Generate spawn and register code for one instance *)
 let gen_spawn_instance party module_map inst_id module_name =
@@ -309,10 +343,10 @@ let gen_spawn_instance party module_map inst_id module_name =
   let downstream = get_downstream_modules party inst_id in
   let downstream_str = "[" ^ String.concat ", " downstream ^ "]" in
   
-  (* Spawn module actor with downstream modules list *)
+  (* Spawn module actor with Ver_buffer, In_buffer, Party, P_ver, DownstreamModules *)
   let spawn_module = 
-    Printf.sprintf "    register(%s, spawn(fun() -> %s(%s) end))"
-      module_actor module_actor downstream_str
+    Printf.sprintf "    register(%s, spawn(fun() -> %s([], [], %s, 0, %s) end))"
+      module_actor module_actor (String.uncapitalize_ascii party_id) downstream_str
   in
   
   (* Spawn input node actors for each extern_input *)
@@ -418,11 +452,11 @@ let gen_exports parties module_map =
     Printf.sprintf "-export([%s/1])." (party_actor_name party.party_id)
   ) parties in
   
-  (* Module actor exports - arity /1 (DownstreamModules only) *)
+  (* Module actor exports - arity /5 (Ver_buffer, In_buffer, Party, P_ver, DownstreamModules) *)
   let module_exports = List.concat_map (fun party ->
     List.concat_map (fun (outputs, _, _) ->
       List.map (fun inst_id ->
-        Printf.sprintf "-export([%s/1])." (module_actor_name party.party_id inst_id)
+        Printf.sprintf "-export([%s/5])." (module_actor_name party.party_id inst_id)
       ) outputs
     ) party.instances
   ) parties in
