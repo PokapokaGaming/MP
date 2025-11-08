@@ -1,0 +1,6 @@
+module Server
+in client1: Int,
+   client2: Int,
+   client3: Int
+out data: (Int, Int, Int)
+node data: (Int, Int, Int) = (client1, client2, client3)

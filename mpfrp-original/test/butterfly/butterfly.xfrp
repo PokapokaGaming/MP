@@ -1,0 +1,14 @@
+module Butterfly
+party p
+in
+  in1{p} : Int,
+  in2{p} : Int
+out 
+  out1{p} : (Int, Int),
+  out2{p} : (Int, Int)
+party p = periodic(2500)
+node a{p} = in1 * 10 + in2
+node b{p} = in2 * 10 + in1
+
+node out1{p}:(Int, Int) = (a, b)
+node out2{p}:(Int, Int) = (a, b)

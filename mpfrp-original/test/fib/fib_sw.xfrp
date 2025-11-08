@@ -1,0 +1,10 @@
+module Fib_sw
+party p
+in
+  dummy{p} : Int
+out 
+  sw{p} : Bool
+
+native fun key_input(): Bool
+node init[True] input{p} = key_input()
+node sw{p} = input

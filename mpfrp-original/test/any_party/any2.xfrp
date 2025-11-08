@@ -1,0 +1,16 @@
+module Any2
+party p, q, r, s, t
+in
+  in1{p}: Int,
+  in2{q}: Int,
+  in3{r}: Int,
+  in4{s}: Int,
+  in5{t}: Int
+
+out
+  dummy{t}: Int
+
+party r = any_party(p, q)
+party t = periodic(4500)
+
+node dummy{t}: Int = 1

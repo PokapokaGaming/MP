@@ -1,0 +1,3 @@
+module Butterfly_inst
+newnode (dummy1, dummy2) = Butterfly{g}(in1, in2)
+newnode (in1, in2) = Butterfly_in{g}(dummy1, dummy2)

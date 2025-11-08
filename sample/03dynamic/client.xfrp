@@ -1,0 +1,7 @@
+module Client
+in data: (Int, Int, Int)
+out progress: Int
+
+native fun key_input(): Int
+node input: Int = key_input()
+node progress: Int = input

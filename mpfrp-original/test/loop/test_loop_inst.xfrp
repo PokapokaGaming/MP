@@ -1,0 +1,2 @@
+module Test_loop_inst
+newnode (act) = Test_loop{p, q}(act)

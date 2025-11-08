@@ -1,0 +1,23 @@
+party Main
+leader = data
+periodic(60000)
+newnode (data) = Server(c1, c2, c3)
+newnode (c1) = Client(data)
+newnode (c2) = Client(data)
+newnode (c3) = Client(data)
+party Sub
+leader = data
+periodic(3000)
+newnode (data) = Server(c1, c2, c3)
+newnode (c1) = Client(data)
+newnode (c2) = Client(data)
+newnode (c3) = Client(Main.data)
+party_template s_and_c
+template s_tpl = Server
+template c_tpl1 = Client
+template c_tpl2 = Client
+default_connect
+s_tpl(c_tpl1, c_tpl2)
+c_tpl1(s_tpl)
+c_tpl2(s_tpl)
+Main.data(s_tpl)

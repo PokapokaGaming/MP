@@ -1,0 +1,6 @@
+module B
+party p
+in a{p}: Int
+out b{p}: Int
+
+node b{p} = 1

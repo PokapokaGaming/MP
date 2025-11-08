@@ -1,0 +1,8 @@
+module Test_mod_cir_B
+party p
+in
+  in_b{p} : Int
+out 
+  out_b{p} : Int
+
+node out_b{p} = in_b

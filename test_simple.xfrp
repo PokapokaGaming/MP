@@ -1,0 +1,9 @@
+party P1
+leader = x
+periodic(1000)
+newnode (x) = M1(y)
+
+party P2
+leader = z
+periodic(2000)
+newnode (z) = M2(w)

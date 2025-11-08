@@ -1,0 +1,14 @@
+out(fan, true) -> io:fwrite("T\n");
+out(fan, false) -> io:fwrite("F\n").
+
+in() ->
+    Tmp = rand:uniform() * 5 + 20,
+    in1 ! Tmp,
+    io:format("tmp: ~p~n", [Tmp]),
+    timer:sleep(1000),
+    Hmd = rand:uniform() * 50 + 50,
+    in2 ! Hmd,
+    io:format("hmd: ~p~n", [Hmd]),
+    timer:sleep(1000),
+    in().
+

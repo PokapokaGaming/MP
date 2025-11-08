@@ -1,0 +1,14 @@
+party Main
+leader = data
+periodic(60000)
+newnode (data) = Server(c1, c2, c3)
+newnode (c1) = Client(data)
+newnode (c2) = Client(data)
+newnode (c3) = Client(data)
+party Sub
+leader = data
+periodic(3000)
+newnode (data) = Server(c1, c2, c3)
+newnode (c1) = Client(data)
+newnode (c2) = Client(data)
+newnode (c3) = Client(Main.data)

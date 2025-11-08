@@ -1,0 +1,8 @@
+out(o, Value) ->　io:format("~p~n",[Value]).
+
+in() ->
+    Key = rand:uniform(10),
+    key ! Key,
+    io:format("a = ~p~n",[Key]),
+    timer:sleep(500),
+    in().

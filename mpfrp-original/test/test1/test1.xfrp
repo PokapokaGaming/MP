@@ -1,0 +1,45 @@
+# having nodes which depend on several party
+module Test1
+party p, q, r
+in
+  in1{p} : Int,
+  in2{p} : Int,
+  in3{q} : Int,
+  in4{q} : Int,
+  in5{r} : Int
+out
+  outp{p} : (Int, Int),
+  outq{q} : (Int, Int, Int),
+  outr{r} : (Int, Int, Int, Int, Int),
+
+  # alternative to input
+  key1{p}: Int,
+  key2{p}: Int,
+  key3{q}: Int,
+  key4{q}: Int,
+  key5{r}: Int
+
+party p = periodic(3000)
+party q = periodic(5000)
+party r = periodic(9000)
+
+native fun key_input(): Int
+
+node pq{p}: (Int, Int) = (in1, in3)
+node ppq{q}: (Int, Int, Int) = (in1, in2, in3)
+node ppqqr{r}: (Int, Int, Int, Int, Int) = (in1, in2, in3, in4, in5)
+
+node input1{p}: Int = key_input()
+node input2{p}: Int = key_input()
+node input3{q}: Int = key_input()
+node input4{q}: Int = key_input()
+node input5{r}: Int = key_input()
+node key1{p}: Int = input1
+node key2{p}: Int = input2
+node key3{q}: Int = input3
+node key4{q}: Int = input4
+node key5{r}: Int = input5
+
+node outp{p}: (Int, Int) = pq
+node outq{q}: (Int, Int, Int) = ppq
+node outr{r}: (Int, Int, Int, Int, Int) = ppqqr

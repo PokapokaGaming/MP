@@ -1,0 +1,14 @@
+module Butterfly_in
+party p
+in
+  dummy1{p} : Int,
+  dummy2{p} : Int
+out 
+  out1{p} : Int,
+  out2{p} : Int
+
+native fun key_input(): Int
+node in1{p}:Int = key_input()
+node in2{p}:Int = key_input()
+node out1{p}:Int = in1
+node out2{p}:Int = in2

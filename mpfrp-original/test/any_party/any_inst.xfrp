@@ -1,0 +1,3 @@
+module Any_inst
+newnode (a, b, c, d, e) = Any1{p, q, r, s, t}(a)
+newnode (f) = Any2{p, q, r, s, t}(a, b, c, d, e)

@@ -1,0 +1,13 @@
+module Parameter
+party p
+in
+  dummy{p} : Bool
+out
+  tmp{p}: Float,
+  hmd{p}: Float
+
+native fun key_input(): Float
+node in1{p}: Float = key_input()
+node in2{p}: Float = key_input()
+node tmp{p}: Float = in1
+node hmd{p}: Float = in2

@@ -1,0 +1,9 @@
+out(ab, {A,B}) ->
+    io:format("(~p, ~p)~n", [A, B]).
+
+in() ->
+    Val = rand:uniform(10),
+    split_1_num ! Val,
+    io:format("~p~n", [Val]),
+    timer:sleep(1300),
+    in().

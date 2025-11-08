@@ -1,0 +1,13 @@
+module Fan_controller
+party p
+in
+  tmp{p}: Float,
+  hmd{p}: Float
+out
+  fan{p}: Bool
+
+party p = periodic(3000)
+
+const th: Float = 75.0
+node di{p}: Float = 0.81 * tmp + 0.01 * hmd * (0.99 * tmp - 14.3) + 46.3
+node fan{p}: Bool = di >= th

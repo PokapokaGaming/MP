@@ -1,0 +1,17 @@
+out(outp, {A, B}) -> 
+    io:format("outp: (~p, ~p)~n", [A, B]);
+out(outq, {A, B, C}) ->
+    io:format("outq: (~p, ~p, ~p)~n", [A, B, C]);
+out(outr, {A, B, C, D, E}) ->
+    io:format("outr: (~p, ~p, ~p, ~p, ~p)~n", [A, B, C, D, E]).
+
+in() ->
+    {A, B, C, D, E} = {rand:uniform(9), rand:uniform(9), rand:uniform(9), rand:uniform(9), rand:uniform(9)},
+    io:format("Emit (~p, ~p, ~p, ~p, ~p)~n", [A, B, C, D, E]),
+    input1 ! A,
+    input2 ! B,
+    input3 ! C,
+    input4 ! D,
+    input5 ! E,
+    timer:sleep(1000),
+    in().

@@ -1,0 +1,3 @@
+module D
+newnode (nn1, nn2) = A{x, y}(nn3, nn2)
+newnode (nn3, nn4) = B{x, y}(nn1, nn4)

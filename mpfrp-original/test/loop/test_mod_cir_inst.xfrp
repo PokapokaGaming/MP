@@ -1,0 +1,3 @@
+module Test_mod_cir_inst
+newnode (nn1) = Test_mod_cir_A{p}(nn2)
+newnode (nn2) = Test_mod_cir_B{p}(nn1)

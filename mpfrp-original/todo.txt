@@ -1,0 +1,26 @@
+- Check parties in io declaration at the beginning match
+those in node definition.
+
+- For a sink and a dependent source, if they belong to the
+same party and there are nodes belonging to other party on
+the path, request message doesn't work (perhaps such codes
+should be prohibited).
+
+- Currently, different parties in a program cannot be
+treated as the same party in the instance program. It is
+necessary to fix generated code (mainly args of modules)
+by using set or other.
+  ex)
+  a.xfrp
+  ------------------------
+  module A
+  party a1, a2, a3
+  in src
+  out dst
+  ...
+  ------------------------
+  inst.xfrp
+  ------------------------
+  module Inst
+  ❌(nn) = A{p, q, p}(nn)
+  ------------------------

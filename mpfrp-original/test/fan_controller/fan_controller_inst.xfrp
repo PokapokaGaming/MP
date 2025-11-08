@@ -1,0 +1,3 @@
+module Fan_controller_inst
+newnode (fan) = Fan_controller{p}(tmp, hmd)
+newnode (tmp, hmd) = Parameter{p}(fan)

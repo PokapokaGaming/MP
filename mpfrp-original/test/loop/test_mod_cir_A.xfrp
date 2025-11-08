@@ -1,0 +1,9 @@
+module Test_mod_cir_A
+party p
+in
+  in_a{p} : Int
+out 
+  out_a{p} : Int
+
+party p = periodic(1000)
+node out_a{p} = in_a

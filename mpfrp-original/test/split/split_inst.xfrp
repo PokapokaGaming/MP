@@ -1,0 +1,2 @@
+module Split_inst
+newnode (nn) = Split{p}(nn)

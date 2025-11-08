@@ -1,0 +1,3 @@
+module Fib_inst
+newnode (dummy) = Fib{p}(sw)
+newnode (sw) = Fib_sw{p}(dummy)

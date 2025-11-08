@@ -1,0 +1,4 @@
+module doubler
+in counter: Int
+out d: Int
+node d = 2*counter

@@ -1,0 +1,15 @@
+module Split
+party p
+in
+  dummy{p} : Int
+out
+  ab{p} : (Int, Int)
+
+native fun key_input(): Int
+party p = periodic(3000)
+
+node num{p} = key_input()
+node a{p} = num * 2
+node b{p} = num + num
+
+node ab{p} = (a, b)

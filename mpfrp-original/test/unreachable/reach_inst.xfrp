@@ -1,0 +1,3 @@
+module Reach_inst
+newnode (nn1) = A{pp}(nn1)
+newnode (nn2) = B{pp}(nn2)

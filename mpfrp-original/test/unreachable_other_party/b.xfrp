@@ -1,0 +1,10 @@
+module B
+party r, s
+in a{r}: Int,
+   b{s}: Int
+out c{r}: Int,
+    d{s}: Int
+
+party s = periodic(1000)
+node c{r} = 2
+node d{s} = 2

@@ -1,0 +1,8 @@
+module Client
+party p
+in data{p}: (Int, Int, Int)
+out progress{p}: Int
+
+native fun key_input(): Int
+node input{p}: Int = key_input()
+node progress{p}: Int = input

@@ -1,0 +1,5 @@
+party main
+leader = d1
+periodic(1000)
+newnode (c1) = counter()
+newnode (d1) = doubler(c1)

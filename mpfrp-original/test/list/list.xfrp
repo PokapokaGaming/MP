@@ -1,0 +1,26 @@
+module List
+party p
+in
+  a{p} : Int
+out 
+  o{p} : [(Int, Int)],
+  key{p} : Int
+
+party p = periodic(1500)
+
+native fun key_input(): Int
+fun assoc_incr(target: (Int, Int), list: [(Int, Int)], found: Bool): [(Int, Int)] = case target of
+  (word, n) -> 
+    case list of
+      [] -> if found then [] else [(word, n)];
+      (x, y) :: xs ->
+        if x == word then
+          (x, y + n) :: assoc_incr(target, xs, True)
+        else
+          (x, y) :: assoc_incr(target, xs, found);
+  ;
+
+node map{p}: (Int, Int) = (a, 1)
+node input{p}: Int = key_input()
+node key{p}: Int = input
+node init[[]] o{p}: [(Int, Int)] = assoc_incr(map, o@last, False)

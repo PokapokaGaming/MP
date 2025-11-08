@@ -1,0 +1,11 @@
+module Test_loop
+  party p, q
+  in a{p} : Int
+  out b{p} : Int
+
+party p = periodic(8)
+party q = periodic(8)
+
+node c{p}:Int = a + d
+node d{p} = c
+node b{p} = c

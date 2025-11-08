@@ -1,0 +1,10 @@
+module Fib
+party p
+in
+  sw{p} : Bool
+out 
+  fib{p} : Int
+
+party p = periodic(3000)
+node init[1] fibDelay{p}:Int = case sw of True -> fib@last;False -> fibDelay@last;
+node init[0] fib{p} : Int = case sw of True -> fib@last + fibDelay@last;False -> fib@last;

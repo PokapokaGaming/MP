@@ -1,0 +1,2 @@
+module List_inst
+newnode (nn1, nn2) = List{p}(nn2)
