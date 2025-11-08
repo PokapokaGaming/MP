@@ -1,5 +1,6 @@
 open Syntax
 open Util
+open Module
 
 (* Generate Erlang code from new inst_program structure *)
 
@@ -126,6 +127,10 @@ let module_actor_name party_id inst_id =
 let node_actor_name party_id inst_id node_id =
   String.uncapitalize_ascii party_id ^ "_" ^ inst_id ^ "_" ^ node_id
 
+(* Generate registered name for input node actor *)
+let input_node_actor_name party_id inst_id input_name =
+  String.uncapitalize_ascii party_id ^ "_" ^ inst_id ^ "_" ^ input_name
+
 (* Generate registered name for party actor *)
 let party_actor_name party_id =
   "party_" ^ String.uncapitalize_ascii party_id
@@ -176,27 +181,42 @@ let gen_party_actor party =
     party_name
 
 (* Generate module actor skeleton for one instance *)
+(* Generate module actor - routes messages to input node actors *)
 let gen_module_actor party_id inst_id module_name module_info =
   let actor_name = module_actor_name party_id inst_id in
+  let input_names = module_info.Module.extern_input in
   
-  (* Generate receive loop with downstream modules *)
+  (* Generate pattern matching clauses for routing data to input node actors *)
+  let data_routing_clauses = List.map (fun input_name ->
+    let input_actor = input_node_actor_name party_id inst_id input_name in
+    Printf.sprintf
+      "        {{Party, Ver}, %s, Val} ->\n\
+      \            %s ! {{Party, Ver}, Val},\n\
+      \            %s(DownstreamModules)"
+      input_name
+      input_actor
+      actor_name
+  ) input_names in
+  
+  let data_routing = String.concat ";\n" data_routing_clauses in
+  
+  (* Generate receive loop *)
   Printf.sprintf
-    "%s(Ver_buffer, In_buffer, P_ver, InputMap, DownstreamModules) ->\n\
+    "%s(DownstreamModules) ->\n\
     \    receive\n\
     \        {sync_pulse, Party, Ver} ->\n\
-    \            %% Process sync_pulse and forward to downstream modules\n\
+    \            %% Forward sync_pulse to downstream modules\n\
     \            lists:foreach(fun(Module) -> Module ! {sync_pulse, Party, Ver} end, DownstreamModules),\n\
-    \            %% TODO: Request data from downstream modules\n\
-    \            %s(Ver_buffer, In_buffer, P_ver, InputMap, DownstreamModules);\n\
-    \        {data, From, Value} ->\n\
-    \            %% Store incoming data in InputMap\n\
-    \            NewInputMap = maps:put(From, Value, InputMap),\n\
-    \            %% TODO: Check if we have all required inputs and compute\n\
-    \            %s(Ver_buffer, In_buffer, P_ver, NewInputMap, DownstreamModules)\n\
+    \            %s(DownstreamModules);\n\
+    %s\n\
     \    end.\n"
     actor_name
     actor_name
-    actor_name
+    (if data_routing = "" then 
+       "        _ -> " ^ actor_name ^ "(DownstreamModules)" 
+     else 
+       data_routing ^ ";\n        _ -> " ^ actor_name ^ "(DownstreamModules)")
+
 
 (* Generate input node actor - receives data and tags it with input name *)
 let gen_input_node_actor party_id inst_id input_name =
