@@ -1,7 +1,5 @@
 module Client
-in data: (Int, Int, Int)
+in dummy: Int
 out progress: Int
 
-native fun key_input(): Int
-node input: Int = key_input()
-node progress: Int = input
+node progress: Int = 0

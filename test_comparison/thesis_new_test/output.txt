@@ -1,0 +1,8 @@
+NEW_DATA[progress]=0
+NEW_DATA[progress]=0
+NEW_DATA[progress]=0
+NEW_DATA[progress]=0
+NEW_DATA[progress]=0
+NEW_DATA[progress]=0
+NEW_DATA[data]={0,0,0}
+NEW_DATA[data]={0,0,0}

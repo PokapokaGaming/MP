@@ -1,0 +1,5 @@
+module Doubler
+in dummy: Int, counter: Int
+out d: Int
+
+node d: Int = 2 * counter

@@ -1,0 +1,238 @@
+-module(main).
+-export([start/0]).
+-export([party_actor/4]).
+-export([server_module_actor/5]).
+-export([client_module_actor/5]).
+-export([server_input_client1/0]).
+-export([server_input_client2/0]).
+-export([server_input_client3/0]).
+-export([client_input_data/0]).
+-export([server_node_data/4]).
+-export([client_node_progress/4]).
+
+party_actor(Leader, Periodic, PartyName, Ver) ->
+    io:format("PARTY[~p] sending {~p, ~p} to ~p~n", [PartyName, PartyName, Ver, Leader]),
+    Leader ! {PartyName, Ver},
+    timer:sleep(Periodic),
+    party_actor(Leader, Periodic, PartyName, Ver + 1).
+
+server_module_actor(Ver_buffer, In_buffer, Party, P_ver, DownstreamModules) ->
+        {NBuffer, P_ver0} = lists:foldl(fun (Version, {Buf, P_verT}) ->
+                case Version of
+                        {Party, Ver} when Ver > P_verT ->
+                                {[{Party, Ver} | Buf], P_verT};
+                        {Party, Ver} when Ver =:= P_verT ->
+                lists:foreach(fun(Module) -> Module ! {Party, Ver} end, DownstreamModules),
+                                % TODO: Request computation nodes
+                                io:format("SERVER_MODULE received {~p, ~p}, sending to downstream~n", [Party, Ver]),
+                                {Buf, P_verT + 1};
+                        {Party, Ver} when Ver < P_verT ->
+                                {Buf, P_verT};
+                        _ ->
+                                {Buf, P_verT}
+                end
+        end, {[], P_ver}, Ver_buffer),
+        {NInBuffer, P_verN} = lists:foldl(fun (Msg, {Buf, P_verT}) ->
+                case Msg of
+                        {{Party, Ver}, client1, Val} when Ver > P_verT ->
+                                {[Msg | Buf], P_verT};
+                        {{Party, Ver}, client1, Val} when Ver =:= P_verT ->
+                                server_input_client1 ! {{Party, Ver}, Val},
+                                lists:foreach(fun(Module) -> Module ! {Party, Ver} end, DownstreamModules),
+                                {Buf, P_verT + 1};
+                        {{Party, Ver}, client1, Val} when Ver < P_verT ->
+                                server_input_client1 ! {{Party, Ver}, Val},
+                                {Buf, P_verT};
+                        {{Party, Ver}, client2, Val} when Ver > P_verT ->
+                                {[Msg | Buf], P_verT};
+                        {{Party, Ver}, client2, Val} when Ver =:= P_verT ->
+                                server_input_client2 ! {{Party, Ver}, Val},
+                                lists:foreach(fun(Module) -> Module ! {Party, Ver} end, DownstreamModules),
+                                {Buf, P_verT + 1};
+                        {{Party, Ver}, client2, Val} when Ver < P_verT ->
+                                server_input_client2 ! {{Party, Ver}, Val},
+                                {Buf, P_verT};
+                        {{Party, Ver}, client3, Val} when Ver > P_verT ->
+                                {[Msg | Buf], P_verT};
+                        {{Party, Ver}, client3, Val} when Ver =:= P_verT ->
+                                server_input_client3 ! {{Party, Ver}, Val},
+                                lists:foreach(fun(Module) -> Module ! {Party, Ver} end, DownstreamModules),
+                                {Buf, P_verT + 1};
+                        {{Party, Ver}, client3, Val} when Ver < P_verT ->
+                                server_input_client3 ! {{Party, Ver}, Val},
+                                {Buf, P_verT};
+                        _ ->
+                                {Buf, P_verT}
+                end
+        end, {[], P_ver0}, In_buffer),
+        receive
+                {_, _} = Ver_msg ->
+                        server_module_actor(lists:reverse([Ver_msg | NBuffer]), NInBuffer, Party, P_verN, DownstreamModules);
+                {_, _, _} = In_msg ->
+                        server_module_actor(NBuffer, lists:reverse([In_msg | NInBuffer]), Party, P_verN, DownstreamModules)
+        end.
+
+client_module_actor(Ver_buffer, In_buffer, Party, P_ver, DownstreamModules) ->
+        {NBuffer, P_ver0} = lists:foldl(fun (Version, {Buf, P_verT}) ->
+                case Version of
+                        {Party, Ver} when Ver > P_verT ->
+                                {[{Party, Ver} | Buf], P_verT};
+                        {Party, Ver} when Ver =:= P_verT ->
+                lists:foreach(fun(Module) -> Module ! {Party, Ver} end, DownstreamModules),
+                                % TODO: Request computation nodes
+                                {Buf, P_verT + 1};
+                        {Party, Ver} when Ver < P_verT ->
+                                {Buf, P_verT};
+                        _ ->
+                                {Buf, P_verT}
+                end
+        end, {[], P_ver}, Ver_buffer),
+        {NInBuffer, P_verN} = lists:foldl(fun (Msg, {Buf, P_verT}) ->
+                case Msg of
+                        {{Party, Ver}, data, Val} when Ver > P_verT ->
+                                {[Msg | Buf], P_verT};
+                        {{Party, Ver}, data, Val} when Ver =:= P_verT ->
+                                client_input_data ! {{Party, Ver}, Val},
+                                lists:foreach(fun(Module) -> Module ! {Party, Ver} end, DownstreamModules),
+                                {Buf, P_verT + 1};
+                        {{Party, Ver}, data, Val} when Ver < P_verT ->
+                                client_input_data ! {{Party, Ver}, Val},
+                                {Buf, P_verT};
+                        _ ->
+                                {Buf, P_verT}
+                end
+        end, {[], P_ver0}, In_buffer),
+        receive
+                {_, _} = Ver_msg ->
+                        client_module_actor(lists:reverse([Ver_msg | NBuffer]), NInBuffer, Party, P_verN, DownstreamModules);
+                {_, _, _} = In_msg ->
+                        client_module_actor(NBuffer, lists:reverse([In_msg | NInBuffer]), Party, P_verN, DownstreamModules)
+        end.
+
+server_input_client1() ->
+        receive
+                {{Party, Ver}, Val} ->
+                        server_node_data ! {{Party, Ver}, client1, Val};
+                _ ->
+                        void
+        end,
+        server_input_client1().
+
+server_input_client2() ->
+        receive
+                {{Party, Ver}, Val} ->
+                        server_node_data ! {{Party, Ver}, client2, Val};
+                _ ->
+                        void
+        end,
+        server_input_client2().
+
+server_input_client3() ->
+        receive
+                {{Party, Ver}, Val} ->
+                        server_node_data ! {{Party, Ver}, client3, Val};
+                _ ->
+                        void
+        end,
+        server_input_client3().
+
+client_input_data() ->
+        receive
+                {{Party, Ver}, Val} ->
+                        client_node_data ! {{Party, Ver}, data, Val};
+                _ ->
+                        void
+        end,
+        client_input_data().
+
+server_node_data(Buffer, State, NextVer, RoutingMap) ->
+        receive
+                {{Party, Ver}, InputName, Val} ->
+                        %% Update buffer with received input
+                        VersionKey = {Party, Ver},
+                        NewBuffer = maps:update_with(VersionKey,
+                                fun(InputMap) -> maps:put(InputName, Val, InputMap) end,
+                                #{InputName => Val},
+                                Buffer),
+                        %% Check if all inputs are ready for this version
+                        case maps:find(VersionKey, NewBuffer) of
+                                {ok, #{client1 := Sclient1, client2 := Sclient2, client3 := Sclient3}} ->
+                                        %% All inputs ready, compute the value
+                                        ProcessedValue = {Sclient1,Sclient2,Sclient3},
+                                        io:format("NEW_DATA[~s]=~p~n", ["data", ProcessedValue]),
+                                        %% Get routing targets for this node output from RoutingMap
+                                        Targets = maps:get('data', RoutingMap, []),
+                                        %% Send result to each target with the specified input tag
+                                        lists:foreach(fun({TargetInstance, TargetInputTag}) ->
+                                                TargetInstance ! {VersionKey, TargetInputTag, ProcessedValue}
+                                        end, Targets),
+                                        %% Remove processed version from buffer and update state
+                                        CleanBuffer = maps:remove(VersionKey, NewBuffer),
+                                        server_node_data(CleanBuffer, ProcessedValue, NextVer, RoutingMap);
+                                _ ->
+                                        %% Not all inputs ready yet, wait for more
+                                        server_node_data(NewBuffer, State, NextVer, RoutingMap)
+                        end
+        end.
+
+client_node_progress(Buffer, State, NextVer, RoutingMap) ->
+        receive
+                {{Party, Ver}, InputName, Val} ->
+                        %% Update buffer with received input
+                        VersionKey = {Party, Ver},
+                        NewBuffer = maps:update_with(VersionKey,
+                                fun(InputMap) -> maps:put(InputName, Val, InputMap) end,
+                                #{InputName => Val},
+                                Buffer),
+                        %% Check if all inputs are ready for this version
+                        case maps:find(VersionKey, NewBuffer) of
+                                {ok, #{data := Sdata}} ->
+                                        %% All inputs ready, compute the value
+                                        ProcessedValue = 0,
+                                        io:format("NEW_DATA[~s]=~p~n", ["progress", ProcessedValue]),
+                                        %% Get routing targets for this node output from RoutingMap
+                                        Targets = maps:get('progress', RoutingMap, []),
+                                        %% Send result to each target with the specified input tag
+                                        lists:foreach(fun({TargetInstance, TargetInputTag}) ->
+                                                TargetInstance ! {VersionKey, TargetInputTag, ProcessedValue}
+                                        end, Targets),
+                                        %% Remove processed version from buffer and update state
+                                        CleanBuffer = maps:remove(VersionKey, NewBuffer),
+                                        client_node_progress(CleanBuffer, ProcessedValue, NextVer, RoutingMap);
+                                _ ->
+                                        %% Not all inputs ready yet, wait for more
+                                        client_node_progress(NewBuffer, State, NextVer, RoutingMap)
+                        end
+        end.
+
+start() ->
+    register(party_main, spawn(?MODULE, party_actor, [main_data, 60000, party_main, 0])),
+    register(main_data, spawn(?MODULE, server_module_actor, [[], [], main, 0, [main_c1, main_c2, main_c3]])),
+    register(main_data_client1, spawn(?MODULE, server_input_client1, [])),
+    register(main_data_client2, spawn(?MODULE, server_input_client2, [])),
+    register(main_data_client3, spawn(?MODULE, server_input_client3, [])),
+    register(main_data_data, spawn(?MODULE, server_node_data, [#{}, undefined, 0, #{'data' => [{main_c3, data}, {main_c2, data}, {main_c1, data}]}])),
+    register(main_c1, spawn(?MODULE, client_module_actor, [[], [], main, 0, [main_data]])),
+    register(main_c1_data, spawn(?MODULE, client_input_data, [])),
+    register(main_c1_progress, spawn(?MODULE, client_node_progress, [#{}, undefined, 0, #{'progress' => [{main_data, client1}]}])),
+    register(main_c2, spawn(?MODULE, client_module_actor, [[], [], main, 0, [main_data]])),
+    register(main_c2_data, spawn(?MODULE, client_input_data, [])),
+    register(main_c2_progress, spawn(?MODULE, client_node_progress, [#{}, undefined, 0, #{'progress' => [{main_data, client2}]}])),
+    register(main_c3, spawn(?MODULE, client_module_actor, [[], [], main, 0, [main_data]])),
+    register(main_c3_data, spawn(?MODULE, client_input_data, [])),
+    register(main_c3_progress, spawn(?MODULE, client_node_progress, [#{}, undefined, 0, #{'progress' => [{main_data, client3}]}])),
+    register(party_sub, spawn(?MODULE, party_actor, [sub_data, 3000, party_sub, 0])),
+    register(sub_data, spawn(?MODULE, server_module_actor, [[], [], sub, 0, [sub_c1, sub_c2, sub_c3]])),
+    register(sub_data_client1, spawn(?MODULE, server_input_client1, [])),
+    register(sub_data_client2, spawn(?MODULE, server_input_client2, [])),
+    register(sub_data_client3, spawn(?MODULE, server_input_client3, [])),
+    register(sub_data_data, spawn(?MODULE, server_node_data, [#{}, undefined, 0, #{'data' => [{sub_c3, data}, {sub_c2, data}, {sub_c1, data}]}])),
+    register(sub_c1, spawn(?MODULE, client_module_actor, [[], [], sub, 0, [sub_data]])),
+    register(sub_c1_data, spawn(?MODULE, client_input_data, [])),
+    register(sub_c1_progress, spawn(?MODULE, client_node_progress, [#{}, undefined, 0, #{'progress' => [{sub_data, client1}]}])),
+    register(sub_c2, spawn(?MODULE, client_module_actor, [[], [], sub, 0, [sub_data]])),
+    register(sub_c2_data, spawn(?MODULE, client_input_data, [])),
+    register(sub_c2_progress, spawn(?MODULE, client_node_progress, [#{}, undefined, 0, #{'progress' => [{sub_data, client2}]}])),
+    register(sub_c3, spawn(?MODULE, client_module_actor, [[], [], sub, 0, [main_data]])),
+    register(sub_c3_data, spawn(?MODULE, client_input_data, [])),
+    register(sub_c3_progress, spawn(?MODULE, client_node_progress, [#{}, undefined, 0, #{'progress' => [{sub_data, client3}]}])).

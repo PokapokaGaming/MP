@@ -214,6 +214,7 @@ let bind (cs, ls) = "#{" ^ String.concat ", " (
 
 let same_party_code n dep (inst_id, inst_info) env id expr output_lst =
   indent n "Curr = " ^ erlang_of_expr env expr ^ ",\n"
+  ^ indent n "io:format(\"ORIGINAL_DATA[~s_~s]=~p~n\", [\"" ^ String.uncapitalize_ascii inst_id ^ "\", \"" ^ id ^ "\", Curr]),\n"
   ^ (if dep.is_output then
       indent n ("out(" ^ String.uncapitalize_ascii inst_id ^ "_" ^ id ^ ", Curr),\n")
       ^ let target_module_lst = try_find (try_find id inst_info.out_nns) inst_info.inst_in_map in
@@ -247,6 +248,7 @@ let other_party_code n dep (inst_id, inst_info) env id expr output_lst =
   ^ indent (n + 2) "void;\n"
   ^ indent (n + 1) "_ ->\n"
   ^ indent (n + 2) "Curr = " ^ erlang_of_expr env expr ^ ",\n"
+  ^ indent (n + 2) "io:format(\"ORIGINAL_DATA[~s_~s]=~p~n\", [\"" ^ String.uncapitalize_ascii inst_id ^ "\", \"" ^ id ^ "\", Curr]),\n"
   ^ (if dep.is_output then
       indent (n + 2) ("out(" ^ String.uncapitalize_ascii inst_id ^ "_" ^ id ^ ", Curr),\n")
       ^ let target_module_lst = try_find (try_find id inst_info.out_nns) inst_info.inst_in_map in

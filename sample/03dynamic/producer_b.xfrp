@@ -1,0 +1,5 @@
+module ProducerB
+in dummy: Int
+out value: Int
+
+node init[200] value: Int = value@last + 10

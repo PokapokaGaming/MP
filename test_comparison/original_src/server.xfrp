@@ -1,0 +1,8 @@
+module Server
+party p
+in client1{p}: Int,
+   client2{p}: Int,
+   client3{p}: Int
+out data{p}: (Int, Int, Int)
+party p = periodic(60000)
+node data{p}: (Int, Int, Int) = (client1, client2, client3)

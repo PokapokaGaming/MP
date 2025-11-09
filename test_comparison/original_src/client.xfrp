@@ -1,0 +1,5 @@
+module Client
+party p
+out progress{p}: Int
+
+node progress{p}: Int = 0

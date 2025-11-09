@@ -1,0 +1,7 @@
+module CounterB
+party p
+in dummy_b{p}: Int
+out b{p}: Int
+
+party p = periodic(100)
+node init[10] b{p}: Int = b@last + 10

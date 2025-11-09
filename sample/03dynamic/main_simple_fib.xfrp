@@ -1,0 +1,4 @@
+party Main
+leader = fib_inst
+periodic(500)
+newnode (fib_inst) = SimpleFib(fib_inst)

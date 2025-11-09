@@ -1,0 +1,6 @@
+party Main
+leader = ca
+periodic(100)
+newnode (ca) = CounterA(ad)
+newnode (cb) = CounterB(ad)
+newnode (ad) = Adder(ca, cb)

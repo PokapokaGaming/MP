@@ -1,0 +1,58 @@
+main.erl:44:18: Warning: variable 'Value' is unused
+%   44| out(counter_1_c, Value) -> void;
+%     |                  ^
+
+main.erl:45:18: Warning: variable 'Value' is unused
+%   45| out(doubler_2_d, Value) -> void;
+%     |                  ^
+
+main.erl:72:22: Warning: variable 'Val' is unused
+%   72| 			{{p, Ver}, dummy, Val} when Ver > P_verT ->
+%     | 			                  ^
+
+main.erl:93:8: Warning: variable 'Ver' is unused
+%   93| 		{{p, Ver}, Val} ->
+%     | 		     ^
+
+main.erl:93:14: Warning: variable 'Val' is unused
+%   93| 		{{p, Ver}, Val} ->
+%     | 		           ^
+
+main.erl:179:22: Warning: variable 'Val' is unused
+%  179| 			{{p, Ver}, dummy, Val} when Ver > P_verT ->
+%     | 			                  ^
+
+main.erl:189:24: Warning: variable 'Val' is unused
+%  189| 			{{p, Ver}, counter, Val} when Ver > P_verT ->
+%     | 			                    ^
+
+main.erl:211:8: Warning: variable 'Ver' is unused
+%  211| 		{{p, Ver}, Val} ->
+%     | 		     ^
+
+main.erl:211:14: Warning: variable 'Val' is unused
+%  211| 		{{p, Ver}, Val} ->
+%     | 		           ^
+
+main.erl:241:26: Warning: variable 'V' is unused
+%  241| 						lists:foreach(fun (V) -> 
+%     | 						                   ^
+
+main.erl:264:28: Warning: variable 'V' is unused
+%  264| 								lists:foreach(fun (V) -> 
+%     | 								                   ^
+
+main.erl:282:27: Warning: variable 'Ver' is unused
+%  282| doubler_2_request_node(p, Ver) ->
+%     |                           ^
+
+ORIGINAL_DATA[counter_1_c]=1
+ORIGINAL_DATA[counter_1_c]=2
+ORIGINAL_DATA[doubler_2_d]=2
+ORIGINAL_DATA[counter_1_c]=3
+ORIGINAL_DATA[doubler_2_d]=4
+ORIGINAL_DATA[counter_1_c]=4
+ORIGINAL_DATA[doubler_2_d]=6
+ORIGINAL_DATA[counter_1_c]=5
+ORIGINAL_DATA[doubler_2_d]=8
+ORIGINAL_DATA[counter_1_c]=6

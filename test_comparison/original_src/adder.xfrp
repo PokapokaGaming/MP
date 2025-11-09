@@ -1,0 +1,5 @@
+module Adder
+party p
+in a{p}: Int, b{p}: Int
+out c{p}: Int
+node c{p}: Int = a + b

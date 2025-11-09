@@ -1,0 +1,4 @@
+party Main
+leader = c
+periodic(100)
+newnode (c) = Counter(c)

@@ -1,0 +1,25 @@
+PARTY ['Main'] SENDING SYNC_PULSE: Ver=0 to leader main_c
+MODULE [c] RECEIVED SYNC_PULSE: Ver=0, forwarding to 0 downstream modules
+NODE [count] RECEIVED REQUEST: Ver=0
+NEW_DATA[count]=1
+NODE [count] RECEIVED DATA: Tag=dummy, Ver=0, Val=1
+PARTY ['Main'] SENDING SYNC_PULSE: Ver=1 to leader main_c
+MODULE [c] RECEIVED SYNC_PULSE: Ver=1, forwarding to 0 downstream modules
+NODE [count] RECEIVED REQUEST: Ver=1
+NEW_DATA[count]=2
+NODE [count] RECEIVED DATA: Tag=dummy, Ver=1, Val=2
+PARTY ['Main'] SENDING SYNC_PULSE: Ver=2 to leader main_c
+MODULE [c] RECEIVED SYNC_PULSE: Ver=2, forwarding to 0 downstream modules
+NODE [count] RECEIVED REQUEST: Ver=2
+NEW_DATA[count]=3
+NODE [count] RECEIVED DATA: Tag=dummy, Ver=2, Val=3
+PARTY ['Main'] SENDING SYNC_PULSE: Ver=3 to leader main_c
+MODULE [c] RECEIVED SYNC_PULSE: Ver=3, forwarding to 0 downstream modules
+NODE [count] RECEIVED REQUEST: Ver=3
+NEW_DATA[count]=4
+NODE [count] RECEIVED DATA: Tag=dummy, Ver=3, Val=4
+PARTY ['Main'] SENDING SYNC_PULSE: Ver=4 to leader main_c
+MODULE [c] RECEIVED SYNC_PULSE: Ver=4, forwarding to 0 downstream modules
+NODE [count] RECEIVED REQUEST: Ver=4
+NEW_DATA[count]=5
+NODE [count] RECEIVED DATA: Tag=dummy, Ver=4, Val=5

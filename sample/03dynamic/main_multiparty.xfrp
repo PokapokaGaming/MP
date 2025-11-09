@@ -1,0 +1,14 @@
+party PartyA
+leader = pa
+periodic(100)
+newnode (pa) = ProducerA()
+
+party PartyB  
+leader = pb
+periodic(100)
+newnode (pb) = ProducerB()
+
+party PartyConsumer
+leader = consumer
+periodic(100)
+newnode (consumer) = Consumer(pa.value, pb.value)

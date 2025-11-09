@@ -1,0 +1,40 @@
+PARTY ['Main'] SENDING SYNC_PULSE: Ver=0 to leader main_data
+PARTY ['Sub'] SENDING SYNC_PULSE: Ver=0 to leader sub_data
+MODULE [data] RECEIVED SYNC_PULSE: Ver=0, forwarding to 3 downstream modules
+MODULE [data] RECEIVED SYNC_PULSE: Ver=0, forwarding to 3 downstream modules
+MODULE [c1] RECEIVED SYNC_PULSE: Ver=0, forwarding to 3 downstream modules
+MODULE [c2] RECEIVED SYNC_PULSE: Ver=0, forwarding to 3 downstream modules
+MODULE [c3] RECEIVED SYNC_PULSE: Ver=0, forwarding to 3 downstream modules
+MODULE [c1] RECEIVED SYNC_PULSE: Ver=0, forwarding to 3 downstream modules
+MODULE [c2] RECEIVED SYNC_PULSE: Ver=0, forwarding to 3 downstream modules
+MODULE [c3] RECEIVED SYNC_PULSE: Ver=0, forwarding to 3 downstream modules
+NODE [progress] RECEIVED REQUEST: Ver=0
+NODE [progress] RECEIVED REQUEST: Ver=0
+NODE [progress] RECEIVED REQUEST: Ver=0
+NODE [progress] RECEIVED REQUEST: Ver=0
+NODE [progress] RECEIVED REQUEST: Ver=0
+NODE [progress] RECEIVED REQUEST: Ver=0
+NODE [data] RECEIVED REQUEST: Ver=0
+NODE [data] RECEIVED REQUEST: Ver=0
+NEW_DATA[progress]=0
+NEW_DATA[progress]=0
+NEW_DATA[progress]=0
+NEW_DATA[progress]=0
+NEW_DATA[progress]=0
+NEW_DATA[progress]=0
+NODE [data] RECEIVED DATA: Tag=client3, Ver=0, Val=0
+NODE [data] RECEIVED DATA: Tag=client3, Ver=0, Val=0
+NODE [data] RECEIVED DATA: Tag=client2, Ver=0, Val=0
+NODE [data] RECEIVED DATA: Tag=client2, Ver=0, Val=0
+NODE [data] RECEIVED DATA: Tag=client1, Ver=0, Val=0
+NODE [data] RECEIVED DATA: Tag=client1, Ver=0, Val=0
+NODE [data] COMPUTING: Ver=0, Inputs=#{client1 => 0,client2 => 0,client3 => 0}
+NODE [data] COMPUTING: Ver=0, Inputs=#{client1 => 0,client2 => 0,client3 => 0}
+NEW_DATA[data]={0,0,0}
+NEW_DATA[data]={0,0,0}
+NODE [progress] RECEIVED DATA: Tag=dummy, Ver=0, Val={0,0,0}
+NODE [progress] RECEIVED DATA: Tag=dummy, Ver=0, Val={0,0,0}
+NODE [progress] RECEIVED DATA: Tag=dummy, Ver=0, Val={0,0,0}
+NODE [progress] RECEIVED DATA: Tag=dummy, Ver=0, Val={0,0,0}
+NODE [progress] RECEIVED DATA: Tag=dummy, Ver=0, Val={0,0,0}
+NODE [progress] RECEIVED DATA: Tag=dummy, Ver=0, Val={0,0,0}

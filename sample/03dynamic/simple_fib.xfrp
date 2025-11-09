@@ -1,0 +1,6 @@
+module SimpleFib
+in dummy: Int
+out fib: Int
+
+node init[1] fibDelay: Int = fib@last
+node init[0] fib: Int = fib@last + fibDelay@last

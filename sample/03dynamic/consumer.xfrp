@@ -1,0 +1,5 @@
+module Consumer
+in a: Int, b: Int
+out sum: Int
+
+node sum: Int = a + b

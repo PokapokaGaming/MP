@@ -1,0 +1,7 @@
+module Adder
+party p
+in a{p}: Int, b{p}: Int
+out c{p}: Int
+
+party p = periodic(100)
+node c{p}: Int = a + b

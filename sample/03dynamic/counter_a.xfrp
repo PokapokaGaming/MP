@@ -1,0 +1,5 @@
+module CounterA
+in dummy_a: Int
+out a: Int
+
+node init[1] a: Int = a@last + 1

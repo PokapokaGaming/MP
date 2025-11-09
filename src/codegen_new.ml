@@ -121,31 +121,31 @@ let get_init_value (module_info : Module.t) node_id =
 
 (* Generate registered name for module actor *)
 let module_actor_name party_id inst_id =
-  String.uncapitalize_ascii party_id ^ "_" ^ inst_id
+  String.lowercase_ascii party_id ^ "_" ^ inst_id
 
 (* Generate registered name for node actor *)
 let node_actor_name party_id inst_id node_id =
-  String.uncapitalize_ascii party_id ^ "_" ^ inst_id ^ "_" ^ node_id
+  String.lowercase_ascii party_id ^ "_" ^ inst_id ^ "_" ^ node_id
 
 (* Generate registered name for input node actor *)
 let input_node_actor_name party_id inst_id input_name =
-  String.uncapitalize_ascii party_id ^ "_" ^ inst_id ^ "_" ^ input_name
+  String.lowercase_ascii party_id ^ "_" ^ inst_id ^ "_" ^ input_name
 
 (* Generate function name for module actor (module-based) *)
 let module_actor_func_name module_name =
-  String.uncapitalize_ascii module_name ^ "_module_actor"
+  String.lowercase_ascii module_name ^ "_module_actor"
 
 (* Generate function name for input node actor (module-based) *)
 let input_node_actor_func_name module_name input_name =
-  String.uncapitalize_ascii module_name ^ "_input_" ^ input_name
+  String.lowercase_ascii module_name ^ "_input_" ^ input_name
 
 (* Generate function name for computation node actor (module-based) *)
 let node_actor_func_name module_name node_id =
-  String.uncapitalize_ascii module_name ^ "_node_" ^ node_id
+  String.lowercase_ascii module_name ^ "_node_" ^ node_id
 
 (* Generate registered name for party actor *)
 let party_actor_name party_id =
-  "party_" ^ String.uncapitalize_ascii party_id
+  "party_" ^ String.lowercase_ascii party_id
 
 (* Helper: Convert qualified_id to registered actor name *)
 let qualified_id_to_actor_name party_id = function
@@ -316,7 +316,21 @@ let gen_node_actor module_name node_id (module_info : Module.t) =
   ) input_env module_info.node in
   
   (* Generate the computation expression *)
-  let computation_code = erlang_of_expr input_env expr in
+  let computation_code_raw = erlang_of_expr input_env expr in
+  
+  (* Replace LSnode_id with State for self-referential @last *)
+  let ls_pattern = "LS" ^ node_id in
+  let rec replace_in_string str pattern replacement =
+    let len = String.length pattern in
+    let strlen = String.length str in
+    let rec search pos =
+      if pos > strlen - len then str
+      else if String.sub str pos len = pattern then
+        String.sub str 0 pos ^ replacement ^ String.sub str (pos + len) (strlen - pos - len)
+      else search (pos + 1)
+    in search 0
+  in
+  let computation_code = replace_in_string computation_code_raw ls_pattern "State" in
   
   (* Build the function code with buffering logic *)
   actor_name ^ "(Buffer, State, NextVer, DownstreamModules) ->\n" ^
@@ -352,7 +366,8 @@ let gen_spawn_instance party module_map inst_id module_name =
     failwith ("Module " ^ module_name ^ " not found") 
   in
   let party_id = party.party_id in
-  let module_actor = module_actor_name party_id inst_id in
+  let instance_node_actor = module_actor_name party_id inst_id in
+  let module_func = module_actor_func_name module_name in
   
   (* Get downstream modules (dependencies) for this instance *)
   let downstream = get_downstream_modules party inst_id in
@@ -361,15 +376,16 @@ let gen_spawn_instance party module_map inst_id module_name =
   (* Spawn module actor with Ver_buffer, In_buffer, Party, P_ver, DownstreamModules *)
   let spawn_module = 
     Printf.sprintf "    register(%s, spawn(fun() -> %s([], [], %s, 0, %s) end))"
-      module_actor module_actor (String.uncapitalize_ascii party_id) downstream_str
+      instance_node_actor module_func (String.lowercase_ascii party_id) downstream_str
   in
   
   (* Spawn input node actors for each extern_input *)
   let input_names = module_info.extern_input in
   let spawn_input_nodes = List.map (fun input_name ->
-    let input_actor = input_node_actor_name party_id inst_id input_name in
+    let input_actor_registered = input_node_actor_name party_id inst_id input_name in
+    let input_func = input_node_actor_func_name module_name input_name in
     Printf.sprintf "    register(%s, spawn(fun() -> %s() end))"
-      input_actor input_actor
+      input_actor_registered input_func
   ) input_names in
   
   (* Spawn computation node actors for each non-input node in the module *)
@@ -378,14 +394,15 @@ let gen_spawn_instance party module_map inst_id module_name =
     not (List.mem node_id input_names)
   ) nodes in
   let spawn_nodes = List.map (fun (node_id, _, init_opt, _) ->
-    let node_actor = node_actor_name party_id inst_id node_id in
+    let node_actor_registered = node_actor_name party_id inst_id node_id in
+    let node_func = node_actor_func_name module_name node_id in
     let init_value = match init_opt with
       | Some _ -> "undefined"  (* TODO: Evaluate init expression properly *)
       | None -> "undefined"
     in
-    (* Node actors now have Buffer, State, NextVer parameters *)
-    Printf.sprintf "    register(%s, spawn(fun() -> %s(#{}, %s, 0) end))"
-      node_actor node_actor init_value
+    (* Node actors now have Buffer, State, NextVer, DownstreamModules parameters *)
+    Printf.sprintf "    register(%s, spawn(fun() -> %s(#{}, %s, 0, []) end))"
+      node_actor_registered node_func init_value
   ) computation_nodes in
   
   String.concat ",\n" ([spawn_module] @ spawn_input_nodes @ spawn_nodes)
@@ -454,47 +471,36 @@ let gen_start parties module_map =
 (* Generate exports *)
 let gen_exports parties module_map =
   let party_exports = List.map (fun party ->
-    Printf.sprintf "-export([%s/1])." (party_actor_name party.party_id)
+    Printf.sprintf "-export([party_%s/1])." (String.lowercase_ascii party.party_id)
   ) parties in
   
   (* Module actor exports - arity /5 (Ver_buffer, In_buffer, Party, P_ver, DownstreamModules) *)
-  let module_exports = List.concat_map (fun party ->
-    List.concat_map (fun (outputs, _, _) ->
-      List.map (fun inst_id ->
-        Printf.sprintf "-export([%s/5])." (module_actor_name party.party_id inst_id)
-      ) outputs
-    ) party.instances
-  ) parties in
+  let module_exports = M.fold (fun module_name _ acc ->
+    let func_name = module_actor_func_name module_name in
+    Printf.sprintf "-export([%s/5])." func_name :: acc
+  ) module_map [] in
   
   (* Export input node actors (arity 0 for loop function) *)
-  let input_node_exports = List.concat_map (fun party ->
-    List.concat_map (fun (outputs, module_name, _) ->
-      let module_info : Module.t = M.find module_name module_map in
-      let input_names = module_info.extern_input in
-      List.concat_map (fun inst_id ->
-        List.map (fun input_name ->
-          Printf.sprintf "-export([%s/0])." (input_node_actor_name party.party_id inst_id input_name)
-        ) input_names
-      ) outputs
-    ) party.instances
-  ) parties in
+  let input_node_exports = M.fold (fun module_name module_info acc ->
+    let input_names = module_info.extern_input in
+    List.fold_left (fun acc2 input_name ->
+      let func_name = input_node_actor_func_name module_name input_name in
+      Printf.sprintf "-export([%s/0])." func_name :: acc2
+    ) acc input_names
+  ) module_map [] in
   
-  (* Export computation node actors (arity 3: Buffer, State, NextVer) *)
-  let node_exports = List.concat_map (fun party ->
-    List.concat_map (fun (outputs, module_name, _) ->
-      let module_info : Module.t = M.find module_name module_map in
-      let input_names = module_info.extern_input in
-      (* Filter out input nodes, only export computation nodes *)
-      let computation_nodes = List.filter (fun (node_id, _, _, _) ->
-        not (List.mem node_id input_names)
-      ) module_info.node in
-      List.concat_map (fun inst_id ->
-        List.map (fun (node_id, _, _, _) ->
-          Printf.sprintf "-export([%s/3])." (node_actor_name party.party_id inst_id node_id)
-        ) computation_nodes
-      ) outputs
-    ) party.instances
-  ) parties in
+  (* Export computation node actors (arity 4: Buffer, State, NextVer, DownstreamModules) *)
+  let node_exports = M.fold (fun module_name module_info acc ->
+    let input_names = module_info.extern_input in
+    (* Filter out input nodes, only export computation nodes *)
+    let computation_nodes = List.filter (fun (node_id, _, _, _) ->
+      not (List.mem node_id input_names)
+    ) module_info.node in
+    List.fold_left (fun acc2 (node_id, _, _, _) ->
+      let func_name = node_actor_func_name module_name node_id in
+      Printf.sprintf "-export([%s/4])." func_name :: acc2
+    ) acc computation_nodes
+  ) module_map [] in
   
   "-export([start/0]).\n" ^
   String.concat "\n" (party_exports @ module_exports @ input_node_exports @ node_exports) ^ "\n"
