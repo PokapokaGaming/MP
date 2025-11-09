@@ -181,15 +181,16 @@ let build_inst_module_map party =
 let gen_party_actor party =
   let party_name = party_actor_name party.party_id in
   let leader_name = module_actor_name party.party_id party.leader in
+  let party_atom = String.capitalize_ascii party.party_id in
   Printf.sprintf
     "%s(Ver) ->\n\
     \    timer:sleep(%d),\n\
-    \    %s ! {sync_pulse, %s, Ver},\n\
+    \    %s ! {'%s', Ver},\n\
     \    %s(Ver + 1).\n"
     party_name
     party.periodic_ms
     leader_name
-    party_name
+    party_atom
     party_name
 
 (* Generate module actor with Ver_buffer and In_buffer (mpfrp-original style) *)
@@ -198,41 +199,59 @@ let gen_module_actor module_name module_info =
   let actor_name = module_actor_func_name module_name in
   let input_names = module_info.Module.extern_input in
   
+  (* Get all computation nodes (excluding input nodes) *)
+  let all_nodes = module_info.Module.node in
+  let computation_nodes = List.filter (fun (node_id, _, _, _) ->
+    not (List.mem node_id input_names)
+  ) all_nodes in
+  
+  (* Generate request sending code for all computation nodes *)
+  let request_nodes_code = 
+    if computation_nodes = [] then ""
+    else
+      let node_requests = List.map (fun (node_id, _, _, _) ->
+        Printf.sprintf "                                NodeActor_%s = list_to_atom(string:to_lower(atom_to_list(IncomingParty)) ++ \"_\" ++ atom_to_list(InstanceId) ++ \"_%s\"),\n\
+        \                                NodeActor_%s ! {request, {IncomingParty, Ver}}" node_id node_id node_id
+      ) computation_nodes in
+      String.concat ",\n" node_requests ^ ",\n"
+  in
+  
   (* Generate clauses for Ver_buffer processing with lists:foldl *)
   (* When Ver == P_verT, forward sync_pulse to downstream and request nodes *)
   let ver_foldl_body =
     let downstream_forwards = 
-      "                lists:foreach(fun(Module) -> Module ! {Party, Ver} end, DownstreamModules)," in
+      "                lists:foreach(fun(Module) -> Module ! {IncomingParty, Ver} end, DownstreamModules)," in
     Printf.sprintf
       "        {NBuffer, P_ver0} = lists:foldl(fun (Version, {Buf, P_verT}) ->\n\
       \                case Version of\n\
-      \                        {Party, Ver} when Ver > P_verT ->\n\
-      \                                {[{Party, Ver} | Buf], P_verT};\n\
-      \                        {Party, Ver} when Ver =:= P_verT ->\n\
+      \                        {IncomingParty, Ver} when Ver > P_verT ->\n\
+      \                                {[{IncomingParty, Ver} | Buf], P_verT};\n\
+      \                        {IncomingParty, Ver} when Ver =:= P_verT ->\n\
       %s\n\
-      \                                %% TODO: Request computation nodes\n\
+      %s\
       \                                {Buf, P_verT + 1};\n\
-      \                        {Party, Ver} when Ver < P_verT ->\n\
+      \                        {IncomingParty, Ver} when Ver < P_verT ->\n\
       \                                {Buf, P_verT};\n\
       \                        _ ->\n\
       \                                {Buf, P_verT}\n\
       \                end\n\
       \        end, {[], P_ver}, Ver_buffer)"
       downstream_forwards
+      request_nodes_code
   in
   
   (* Generate clauses for In_buffer processing - one clause per input *)
   let in_foldl_clauses = List.map (fun input_name ->
     let input_actor = input_node_actor_func_name module_name input_name in
     Printf.sprintf
-      "                        {{Party, Ver}, %s, Val} when Ver > P_verT ->\n\
+      "                        {{IncomingParty, Ver}, %s, Val} when Ver > P_verT ->\n\
       \                                {[Msg | Buf], P_verT};\n\
-      \                        {{Party, Ver}, %s, Val} when Ver =:= P_verT ->\n\
-      \                                %s ! {{Party, Ver}, Val},\n\
-      \                                lists:foreach(fun(Module) -> Module ! {Party, Ver} end, DownstreamModules),\n\
+      \                        {{IncomingParty, Ver}, %s, Val} when Ver =:= P_verT ->\n\
+      \                                %s ! {{IncomingParty, Ver}, Val},\n\
+      \                                lists:foreach(fun(Module) -> Module ! {IncomingParty, Ver} end, DownstreamModules),\n\
       \                                {Buf, P_verT + 1};\n\
-      \                        {{Party, Ver}, %s, Val} when Ver < P_verT ->\n\
-      \                                %s ! {{Party, Ver}, Val},\n\
+      \                        {{IncomingParty, Ver}, %s, Val} when Ver < P_verT ->\n\
+      \                                %s ! {{IncomingParty, Ver}, Val},\n\
       \                                {Buf, P_verT}"
       input_name
       input_name
@@ -255,14 +274,14 @@ let gen_module_actor module_name module_info =
   in
   
   (* Generate complete module actor *)
-  actor_name ^ "(Ver_buffer, In_buffer, Party, P_ver, DownstreamModules) ->\n" ^
+  actor_name ^ "(Ver_buffer, In_buffer, Party, P_ver, InstanceId, DownstreamModules) ->\n" ^
   ver_foldl_body ^ ",\n" ^
   in_foldl_body ^ ",\n" ^
   "        receive\n" ^
   "                {_, _} = Ver_msg ->\n" ^
-  "                        " ^ actor_name ^ "(lists:reverse([Ver_msg | NBuffer]), NInBuffer, Party, P_verN, DownstreamModules);\n" ^
+  "                        " ^ actor_name ^ "(lists:reverse([Ver_msg | NBuffer]), NInBuffer, Party, P_verN, InstanceId, DownstreamModules);\n" ^
   "                {_, _, _} = In_msg ->\n" ^
-  "                        " ^ actor_name ^ "(NBuffer, lists:reverse([In_msg | NInBuffer]), Party, P_verN, DownstreamModules)\n" ^
+  "                        " ^ actor_name ^ "(NBuffer, lists:reverse([In_msg | NInBuffer]), Party, P_verN, InstanceId, DownstreamModules)\n" ^
   "        end.\n"
 
 (* Generate input node actor - receives data and tags it with input name *)
@@ -332,33 +351,61 @@ let gen_node_actor module_name node_id (module_info : Module.t) =
   in
   let computation_code = replace_in_string computation_code_raw ls_pattern "State" in
   
+  (* Build receive clauses based on whether there are inputs *)
+  let receive_clauses = 
+    if List.length input_names = 0 then
+      (* No inputs - compute immediately on request *)
+      "        receive\n" ^
+      "                {request, {Party, Ver}} ->\n" ^
+      "                        VersionKey = {Party, Ver},\n" ^
+      "                        ProcessedValue = " ^ computation_code ^ ",\n" ^
+      "                        io:format(\"NEW_DATA[~s]=~p~n\", [\"" ^ node_id ^ "\", ProcessedValue]),\n" ^
+      "                        lists:foreach(fun(DownstreamModule) ->\n" ^
+      "                                DownstreamModule ! {VersionKey, " ^ node_id ^ ", ProcessedValue}\n" ^
+      "                        end, DownstreamModules),\n" ^
+      "                        " ^ actor_name ^ "(Buffer, ProcessedValue, NextVer, DownstreamModules)\n" ^
+      "        end.\n"
+    else
+      (* Has inputs - wait for all inputs before computing, or compute on request if no dependencies *)
+      "        receive\n" ^
+      "                {request, {Party, Ver}} ->\n" ^
+      "                        VersionKey = {Party, Ver},\n" ^
+      "                        ProcessedValue = " ^ computation_code ^ ",\n" ^
+      "                        io:format(\"NEW_DATA[~s]=~p~n\", [\"" ^ node_id ^ "\", ProcessedValue]),\n" ^
+      "                        lists:foreach(fun(DownstreamModule) ->\n" ^
+      "                                DownstreamModule ! {VersionKey, " ^ node_id ^ ", ProcessedValue}\n" ^
+      "                        end, DownstreamModules),\n" ^
+      "                        " ^ actor_name ^ "(Buffer, ProcessedValue, NextVer, DownstreamModules);\n" ^
+      "                {{Party, Ver}, InputName, Val} ->\n" ^
+      "                        %% Update buffer with received input\n" ^
+      "                        VersionKey = {Party, Ver},\n" ^
+      "                        NewBuffer = maps:update_with(VersionKey,\n" ^
+      "                                fun(InputMap) -> maps:put(InputName, Val, InputMap) end,\n" ^
+      "                                #{InputName => Val},\n" ^
+      "                                Buffer),\n" ^
+      "                        %% Check if all inputs are ready for this version\n" ^
+      "                        case maps:find(VersionKey, NewBuffer) of\n" ^
+      "                                {ok, " ^ input_pattern ^ "} ->\n" ^
+      "                                        %% All inputs ready, compute the value\n" ^
+      "                                        ProcessedValue = " ^ computation_code ^ ",\n" ^
+      "                                        io:format(\"NEW_DATA[~s]=~p~n\", [\"" ^ node_id ^ "\", ProcessedValue]),\n" ^
+      "                                        %% Send result to downstream modules\n" ^
+      "                                        lists:foreach(fun(DownstreamModule) ->\n" ^
+      "                                                DownstreamModule ! {VersionKey, " ^ node_id ^ ", ProcessedValue}\n" ^
+      "                                        end, DownstreamModules),\n" ^
+      "                                        %% Remove processed version from buffer and update state\n" ^
+      "                                        CleanBuffer = maps:remove(VersionKey, NewBuffer),\n" ^
+      "                                        " ^ actor_name ^ "(CleanBuffer, ProcessedValue, NextVer, DownstreamModules);\n" ^
+      "                                _ ->\n" ^
+      "                                        %% Not all inputs ready yet, wait for more\n" ^
+      "                                        " ^ actor_name ^ "(NewBuffer, State, NextVer, DownstreamModules)\n" ^
+      "                        end\n" ^
+      "        end.\n"
+  in
+  
   (* Build the function code with buffering logic *)
   actor_name ^ "(Buffer, State, NextVer, DownstreamModules) ->\n" ^
-  "        receive\n" ^
-  "                {{Party, Ver}, InputName, Val} ->\n" ^
-  "                        %% Update buffer with received input\n" ^
-  "                        VersionKey = {Party, Ver},\n" ^
-  "                        NewBuffer = maps:update_with(VersionKey,\n" ^
-  "                                fun(InputMap) -> maps:put(InputName, Val, InputMap) end,\n" ^
-  "                                #{InputName => Val},\n" ^
-  "                                Buffer),\n" ^
-  "                        %% Check if all inputs are ready for this version\n" ^
-  "                        case maps:find(VersionKey, NewBuffer) of\n" ^
-  "                                {ok, " ^ input_pattern ^ "} ->\n" ^
-  "                                        %% All inputs ready, compute the value\n" ^
-  "                                        ProcessedValue = " ^ computation_code ^ ",\n" ^
-  "                                        %% Send result to downstream modules\n" ^
-  "                                        lists:foreach(fun(DownstreamModule) ->\n" ^
-  "                                                DownstreamModule ! {VersionKey, " ^ node_id ^ ", ProcessedValue}\n" ^
-  "                                        end, DownstreamModules),\n" ^
-  "                                        %% Remove processed version from buffer and update state\n" ^
-  "                                        CleanBuffer = maps:remove(VersionKey, NewBuffer),\n" ^
-  "                                        " ^ actor_name ^ "(CleanBuffer, ProcessedValue, NextVer, DownstreamModules);\n" ^
-  "                                _ ->\n" ^
-  "                                        %% Not all inputs ready yet, wait for more\n" ^
-  "                                        " ^ actor_name ^ "(NewBuffer, State, NextVer, DownstreamModules)\n" ^
-  "                        end\n" ^
-  "        end.\n"
+  receive_clauses
 
 (* Generate spawn and register code for one instance *)
 let gen_spawn_instance party module_map inst_id module_name =
@@ -373,10 +420,10 @@ let gen_spawn_instance party module_map inst_id module_name =
   let downstream = get_downstream_modules party inst_id in
   let downstream_str = "[" ^ String.concat ", " downstream ^ "]" in
   
-  (* Spawn module actor with Ver_buffer, In_buffer, Party, P_ver, DownstreamModules *)
+  (* Spawn module actor with Ver_buffer, In_buffer, Party, P_ver, InstanceId, DownstreamModules *)
   let spawn_module = 
-    Printf.sprintf "    register(%s, spawn(fun() -> %s([], [], %s, 0, %s) end))"
-      instance_node_actor module_func (String.lowercase_ascii party_id) downstream_str
+    Printf.sprintf "    register(%s, spawn(fun() -> %s([], [], %s, 0, %s, %s) end))"
+      instance_node_actor module_func (String.lowercase_ascii party_id) inst_id downstream_str
   in
   
   (* Spawn input node actors for each extern_input *)
@@ -474,10 +521,10 @@ let gen_exports parties module_map =
     Printf.sprintf "-export([party_%s/1])." (String.lowercase_ascii party.party_id)
   ) parties in
   
-  (* Module actor exports - arity /5 (Ver_buffer, In_buffer, Party, P_ver, DownstreamModules) *)
+  (* Module actor exports - arity /6 (Ver_buffer, In_buffer, Party, P_ver, InstanceId, DownstreamModules) *)
   let module_exports = M.fold (fun module_name _ acc ->
     let func_name = module_actor_func_name module_name in
-    Printf.sprintf "-export([%s/5])." func_name :: acc
+    Printf.sprintf "-export([%s/6])." func_name :: acc
   ) module_map [] in
   
   (* Export input node actors (arity 0 for loop function) *)
