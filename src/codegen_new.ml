@@ -153,6 +153,11 @@ let qualified_id_to_actor_name party_id = function
   | QualifiedId (other_party_id, inst_id) -> 
       module_actor_name other_party_id inst_id
 
+(* Helper: Extract instance id from qualified_id *)
+let qualified_id_to_instance_id = function
+  | SimpleId id -> id
+  | QualifiedId (_, inst_id) -> inst_id
+
 (* Helper: Get downstream modules (dependencies) for an instance *)
 let get_downstream_modules party inst_id =
   (* Find the newnode definition for this instance *)
@@ -164,6 +169,45 @@ let get_downstream_modules party inst_id =
   in
   let inputs = find_in_instances party.instances in
   List.map (qualified_id_to_actor_name party.party_id) inputs
+
+(* Get downstream computation nodes for a specific node in an instance *)
+(* Returns list of (party_id, instance_id, node_id, input_name) *)
+let get_downstream_computation_nodes party module_map inst_id =
+  (* まず、このインスタンスの下流インスタンスを取得 *)
+  let rec find_in_instances = function
+    | [] -> []
+    | (outputs, module_name, inputs) :: rest ->
+        if List.mem inst_id outputs then 
+          (* inputsは[(module_name, instance_id)]のリスト *)
+          List.map (fun qual_id ->
+            let downstream_inst = qualified_id_to_instance_id qual_id in
+            let downstream_module = 
+              (* 下流インスタンスのモジュール名を検索 *)
+              let rec find_module = function
+                | [] -> failwith ("Cannot find module for instance " ^ downstream_inst)
+                | (outs, mname, _) :: rest ->
+                    if List.mem downstream_inst outs then mname
+                    else find_module rest
+              in
+              find_module party.instances
+            in
+            (downstream_module, downstream_inst)
+          ) inputs
+        else find_in_instances rest
+  in
+  let downstream_instances = find_in_instances party.instances in
+  
+  (* 各下流インスタンスの計算ノード（入力ノードを含む）を取得 *)
+  List.concat_map (fun (downstream_module, downstream_inst) ->
+    let module_info = M.find downstream_module module_map in
+    let input_names = module_info.Module.extern_input in
+    
+    (* 各入力ノードに対して、対応する計算ノードを返す *)
+    (* originalでは、入力ノード自体が計算ノードなので、入力名＝ノード名 *)
+    List.map (fun input_name ->
+      (party.party_id, downstream_inst, input_name, input_name)
+    ) input_names
+  ) downstream_instances
 
 (* Helper: Get all instances from a party block *)
 let get_all_instances party =
