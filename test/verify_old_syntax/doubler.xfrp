@@ -1,0 +1,8 @@
+module Doubler
+party p
+in
+  count{p} : Int
+out
+  doubled{p} : Int
+
+node doubled{p} : Int = count * 2

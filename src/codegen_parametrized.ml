@@ -193,22 +193,119 @@ let gen_computation_node_actor module_name node_id computation_expr downstream_m
 
 (* === Test: Generate simple example === *)
 
-let test_gen_input_node () =
-  gen_input_node_actor "Counter" "trigger" ["data"]
+(* === Test: Generate simple_verify case actors === *)
 
-let test_gen_module () =
-  gen_module_actor_in_buffer "Counter" ["trigger"]
+(* Test 1: doubler_2_count - Dummy input node actor *)
+let test_doubler_count () =
+  let party = "p" in
+  let instance_id = "doubler_2" in
+  let input_name = "count" in
+  let downstream_node = "doubler_2_doubled" in
+  
+  (* Generate: doubler_2_count() -> receive {{p,Ver},Val} -> doubler_2_doubled ! {{p,Ver},count,Val} *)
+  let actor_func = String.uncapitalize_ascii instance_id ^ "_" ^ input_name in
+  actor_func ^ "() ->\n"
+  ^ indent 1 "receive\n"
+  ^ indent 2 ("{{" ^ party ^ ", Ver}, Val} ->\n")
+  ^ indent 3 (downstream_node ^ " ! {{" ^ party ^ ", Ver}, " ^ input_name ^ ", Val};\n")
+  ^ indent 2 "_ ->\n"
+  ^ indent 3 "void\n"
+  ^ indent 1 "end,\n"
+  ^ indent 1 (actor_func ^ "().\n")
 
-let test_gen_computation_node () =
-  gen_computation_node_actor "Counter" "data" "State + 1" 
-    [("doubler", "count")] (* downstream module: doubler's count input *)
-    [] (* no intra-module nodes *)
+(* Test 2: counter_1_c - Computation node actor *)
+let test_counter_c () =
+  let party = "p" in
+  let instance_id = "counter_1" in
+  let node_id = "c" in
+  let computation_expr = "(LSc + 1)" in
+  let downstream_modules = [("doubler_2", "count")] in
+  let intra_module_nodes = [("counter_1_c", "c")] in
+  
+  let actor_func = instance_id ^ "_" ^ node_id in
+  let buffer_foldl = "lists:foldl(fun (E, {Buffer, NextVer, Processed, Deferred}) -> \n"
+    ^ indent 2 "case E of\n"
+    ^ indent 3 ("{ {" ^ party ^ ", Ver} = Version, #{{last, " ^ node_id ^ "} := LS" ^ node_id ^ "} = Map} ->\n")
+    ^ indent 4 ("case maps:get(" ^ party ^ ", NextVer) =:= Ver of\n")
+    ^ indent 5 "true ->\n"
+    ^ indent 6 ("Curr = " ^ computation_expr ^ ",\n")
+    ^ indent 6 ("io:format(\"ORIGINAL_DATA[~s_~s]=~p~n\", [\"" ^ instance_id ^ "\", \"" ^ node_id ^ "\", Curr]),\n")
+    ^ indent 6 ("out(" ^ actor_func ^ ", Curr),\n")
+    (* Send to downstream modules *)
+    ^ String.concat "" (List.map (fun (module_name, input_name) ->
+        indent 6 "lists:foreach(fun (V) -> \n"
+        ^ indent 7 (module_name ^ " ! {V, " ^ input_name ^ ", Curr}\n")
+        ^ indent 6 "end, [Version|Deferred]),\n"
+      ) downstream_modules)
+    (* Send to intra-module nodes (self) *)
+    ^ String.concat "" (List.map (fun (node_actor, output_name) ->
+        indent 6 "lists:foreach(fun (V) -> \n"
+        ^ indent 7 (node_actor ^ " ! {V, " ^ output_name ^ ", Curr}\n")
+        ^ indent 6 "end, [Version|Deferred]),\n"
+      ) intra_module_nodes)
+    ^ indent 6 ("{maps:remove(Version, Buffer), maps:update(" ^ party ^ ", Ver + 1, NextVer), maps:merge(Processed, Map), []};\n")
+    ^ indent 5 "false ->\n"
+    ^ indent 6 "{Buffer, NextVer, Processed, Deferred}\n"
+    ^ indent 4 "end;\n"
+    ^ indent 3 "_ -> {Buffer, NextVer, Processed, Deferred}\n"
+    ^ indent 2 "end\n"
+    ^ indent 1 "end, {Buffer0, NextVer0, Processed0, Deferred0}, HL)" in
+  
+  actor_func ^ "(Buffer0, NextVer0, Processed0, ReqBuffer0, Deferred0) ->\n"
+  ^ indent 1 "HL = lists:sort(?SORTBuffer, maps:to_list(Buffer0)),\n"
+  ^ indent 1 "Sorted_req_buf = lists:sort(?SORTVerBuffer, ReqBuffer0),\n"
+  ^ indent 1 ("{NBuffer, NextVerT, ProcessedT, DeferredT} = " ^ buffer_foldl ^ ",\n")
+  ^ indent 1 "[... ReqBuffer processing ...],\n"
+  ^ indent 1 "receive\n"
+  ^ indent 2 "{{_, _}, _, _} = Received ->\n"
+  ^ indent 3 (actor_func ^ "(buffer_update([], [" ^ node_id ^ "], Received, NBuffer), NNextVer, NProcessed, NReqBuffer, NDeferred);\n")
+  ^ indent 2 "{request, Ver} ->\n"
+  ^ indent 3 (actor_func ^ "(NBuffer, NNextVer, NProcessed, lists:reverse([Ver|NReqBuffer]), NDeferred)\n")
+  ^ indent 1 "end.\n"
+
+(* Test 3: doubler_2 - Module actor In_buffer processing *)
+let test_doubler_module () =
+  let party = "p" in
+  let instance_id = "doubler_2" in
+  let input_names = ["count"] in
+  
+  let actor_func = String.uncapitalize_ascii instance_id in
+  let in_foldl_body = "lists:foldl(fun (Msg, {Buf, P_verT}) ->\n"
+    ^ indent 2 "case Msg of\n"
+    ^ String.concat "" (List.map (fun input_name ->
+        let input_node = instance_id ^ "_" ^ input_name in
+        indent 3 ("{{" ^ party ^ ", Ver}, " ^ input_name ^ ", Val} when Ver > P_verT ->\n")
+        ^ indent 4 "{[Msg | Buf], P_verT};\n"
+        ^ indent 3 ("{{" ^ party ^ ", Ver}, " ^ input_name ^ ", Val} when Ver =:= P_verT ->\n")
+        ^ indent 4 (input_node ^ " ! {{" ^ party ^ ", Ver}, Val},\n")
+        ^ indent 4 "counter_1 ! {" ^ party ^ ", Ver},\n"
+        ^ indent 4 "{Buf, P_verT + 1};\n"
+        ^ indent 3 ("{{" ^ party ^ ", Ver}, " ^ input_name ^ ", Val} when Ver < P_verT ->\n")
+        ^ indent 4 (input_node ^ " ! {{" ^ party ^ ", Ver}, Val},\n")
+        ^ indent 4 "{Buf, P_verT};\n"
+      ) input_names)
+    ^ indent 3 "_ ->\n"
+    ^ indent 4 "{Buf, P_verT}\n"
+    ^ indent 2 "end\n"
+    ^ indent 1 "end, {[], P_ver0}, Sorted_in_buf)" in
+  
+  actor_func ^ "(Ver_buffer, In_buffer, " ^ party ^ ", P_ver) ->\n"
+  ^ indent 1 "Sorted_ver_buf = lists:sort(?SORTVerBuffer, Ver_buffer),\n"
+  ^ indent 1 "Sorted_in_buf = lists:sort(?SORTInBuffer, In_buffer),\n"
+  ^ indent 1 "{NBuffer, P_ver0} = [... Ver_buffer processing ...],\n"
+  ^ indent 1 ("{NInBuffer, P_verN} = " ^ in_foldl_body ^ ",\n")
+  ^ indent 1 "receive\n"
+  ^ indent 2 "{_, _} = Ver_msg ->\n"
+  ^ indent 3 (actor_func ^ "(lists:reverse([Ver_msg | NBuffer]), NInBuffer, " ^ party ^ ", P_verN);\n")
+  ^ indent 2 "{_, _, _} = In_msg ->\n"
+  ^ indent 3 (actor_func ^ "(NBuffer, lists:reverse([In_msg | NInBuffer]), " ^ party ^ ", P_verN)\n")
+  ^ indent 1 "end.\n"
 
 (* Print test output *)
 let () =
-  print_endline "=== Input Node Actor (Dummy) ===";
-  print_endline (test_gen_input_node ());
-  print_endline "\n=== Module Actor ===";
-  print_endline (test_gen_module ());
-  print_endline "\n=== Computation Node Actor ===";
-  print_endline (test_gen_computation_node ());
+  print_endline "=== TEST 1: doubler_2_count (Dummy Input Node Actor) ===";
+  print_endline (test_doubler_count ());
+  print_endline "\n=== TEST 2: counter_1_c (Computation Node Actor - Buffer foldl部分) ===";
+  print_endline (test_counter_c ());
+  print_endline "\n=== TEST 3: doubler_2 (Module Actor - In_buffer foldl部分) ===";
+  print_endline (test_doubler_module ());

@@ -1,0 +1,7 @@
+module Doubler
+in
+  count : Int
+out
+  doubled : Int
+
+node doubled : Int = count * 2

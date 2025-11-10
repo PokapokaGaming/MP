@@ -111,19 +111,9 @@ let compile inst_mod module_map =
       | Party.ReachableError (mod1, mod2, p) ->
           raise (CompileError(mod1 ^ " and " ^ mod2 ^ " must be connected via party " ^ p ^ "."))
 
-(* generate code from new inst_program structure *)
-let compile_new inst_prog module_map =
-  try
-    match !mode with
-    | Erlang ->
-        Codegen_new.gen_new_inst inst_prog module_map
-    | Dot ->
-        raise (CompileError("Dot mode not supported for new inst format yet"))
-  with
-  | Typing.TypeError s ->
-      raise (CompileError("Type error: " ^ s))
-  | UnknownId(id) ->
-      raise (CompileError("Not found id \"" ^ id ^ "\""))
+(* generate code from new inst_program structure - NOT IMPLEMENTED YET *)
+(* let compile_new inst_prog module_map =
+  raise (CompileError("party/party_template syntax not yet implemented. Use old module syntax.")) *)
 
 let () =
   Arg.parse speclist (fun s -> module_files := s :: !module_files) "Usage:";
@@ -168,7 +158,7 @@ let () =
                 let input = open_in instance_file in
                 let inst_prog = create_inst input in
                 close_in input;
-                compile_new inst_prog module_map
+                Codegen_new.gen_new_inst inst_prog module_map
           in
             if !mode = Dot then print_string result
             else if !stdout_flag then print_string result

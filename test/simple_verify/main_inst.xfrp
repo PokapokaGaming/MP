@@ -1,0 +1,5 @@
+party p
+leader = counter_1
+periodic(1000)
+newnode (counter_1) = Counter()
+newnode (doubler_2) = Doubler(counter_1)
