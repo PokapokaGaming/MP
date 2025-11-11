@@ -288,16 +288,20 @@ let gen_request_rel_code inst_party dep (inst_id, inst_info) env id expr =
   ^ indent 1 "{NNextVer, NProcessed, NReqBuffer, NDeferred} = lists:foldl(fun (E, {NextVer, Processed, ReqBuffer, Deferred}) -> \n"
   ^ indent 2 "case E of\n"
   ^ indent 3 "{" ^ inst_party ^ ", Ver} = Version ->\n"
+  ^ indent 4 ("io:format(\"[STATE_REQ] Actor: ~p, Ver: ~p, NextVer: ~p, Processed: ~p~n\", [" ^ (String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ ", Ver, maps:get(" ^ inst_party ^ ", NextVer), Processed]),\n")
   ^ indent 4 "case maps:get(" ^ inst_party ^ ", NextVer) =:= Ver of\n"
   ^ indent 5 "true ->\n"
   ^ indent 6 "case Processed of\n"
   ^ indent 7 (bind (extract_node dep.input_current, extract_node dep.input_last) ^ " ->\n")
+  ^ indent 8 ("io:format(\"[STATE_REQ] Actor: ~p, Ver: ~p, Inputs_Ready: true, Computing~n\", [" ^ (String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ ", Ver]),\n")
   ^ send_code 8 dep (inst_id, inst_info) env id expr true
   ^ indent 8 ("{maps:update(" ^ inst_party ^ ", Ver + 1, NextVer), Processed, ReqBuffer, []};\n")
   ^ indent 7 "_ ->\n"
+  ^ indent 8 ("io:format(\"[STATE_REQ] Actor: ~p, Ver: ~p, Inputs_Ready: false, Deferring~n\", [" ^ (String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ ", Ver]),\n")
   ^ indent 8 ("{maps:update(" ^ inst_party ^ ", Ver + 1, NextVer), Processed, ReqBuffer, [Version|Deferred]}\n")
   ^ indent 6 "end;\n"
   ^ indent 5 "false ->\n"
+  ^ indent 6 ("io:format(\"[STATE_REQ] Actor: ~p, Ver: ~p, Match: false, Buffering~n\", [" ^ (String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ ", Ver]),\n")
   ^ indent 6 ("{NextVer, Processed, [Version|ReqBuffer], Deferred}\n")
   ^ indent 4 "end\n"
   ^ indent 2 "end\n"
@@ -341,13 +345,16 @@ let def_node graph (inst_id, inst_info) env (id, p, init, expr) =
                 (sub (extract_node dep.input_current) currents, sub (extract_node dep.input_last) lasts)
               in
                 indent 3 "{ {" ^ inst_party ^ ", Ver} = Version, " ^ bind (currents, lasts) ^ " = Map} ->\n"
+                ^ indent 4 ("io:format(\"[STATE_BUF] Actor: ~p, Ver: ~p, NextVer: ~p, Map: ~p~n\", [" ^ (String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ ", Ver, maps:get(" ^ inst_party ^ ", NextVer), Map]),\n")
                 ^ match other_vars with
                   | ([],[]) ->
                     indent 4 "case maps:get(" ^ inst_party ^ ", NextVer) =:= Ver of\n"
                     ^ indent 5 "true ->\n"
+                    ^ indent 6 ("io:format(\"[STATE_BUF] Actor: ~p, Ver: ~p, Match: true, Computing~n\", [" ^ (String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ ", Ver]),\n")
                     ^ send_code 6 dep (inst_id, inst_info) env id expr (node_party = inst_party)
                     ^ indent 6 "{maps:remove(Version, Buffer), maps:update(" ^ inst_party ^ ", Ver + 1, NextVer), maps:merge(Processed, Map), []};\n"
                     ^ indent 5 "false ->\n"
+                    ^ indent 6 ("io:format(\"[STATE_BUF] Actor: ~p, Ver: ~p, Match: false, Skipping~n\", [" ^ (String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ ", Ver]),\n")
                     ^ indent 6 "{Buffer, NextVer, Processed, Deferred}\n"
                     ^ indent 4 "end;\n"
                   | others ->
@@ -355,22 +362,27 @@ let def_node graph (inst_id, inst_info) env (id, p, init, expr) =
                     ^ indent 5 "true ->\n"
                     ^ indent 6 "case Processed of\n"
                     ^ indent 7 (bind others) ^ " -> \n"
+                    ^ indent 8 ("io:format(\"[STATE_BUF] Actor: ~p, Ver: ~p, Match: true, Inputs_Ready: true, Computing~n\", [" ^ (String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ ", Ver]),\n")
                     ^ send_code 8 dep (inst_id, inst_info) env id expr (node_party = inst_party)
                     ^ indent 8 "{maps:remove(Version, Buffer), maps:update(" ^ inst_party ^ ", Ver + 1, NextVer), maps:merge(Processed, Map), []};\n"
-                    ^ indent 7 "_ -> {maps:remove(Version, Buffer), maps:update(" ^ inst_party ^ ", Ver + 1, NextVer), maps:merge(Processed, Map), [Version|Deferred]}\n"
+                    ^ indent 7 ("_ -> io:format(\"[STATE_BUF] Actor: ~p, Ver: ~p, Match: true, Inputs_Ready: false, Deferring~n\", [" ^ (String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ ", Ver]), {maps:remove(Version, Buffer), maps:update(" ^ inst_party ^ ", Ver + 1, NextVer), maps:merge(Processed, Map), [Version|Deferred]}\n")
                     ^ indent 6 "end;\n"
                     ^ indent 5 "false ->\n"
+                    ^ indent 6 ("io:format(\"[STATE_BUF] Actor: ~p, Ver: ~p, Match: false, Skipping~n\", [" ^ (String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ ", Ver]),\n")
                     ^ indent 6 "{Buffer, NextVer, Processed, Deferred}\n"
                     ^ indent 4 "end;\n")
           pcl_lst
     ^ (gen_request_rel_code node_party dep (inst_id, inst_info) env id expr)
+    ^ indent 1 ("io:format(\"[STATE_END] Actor: ~p, NextVer: ~p, BufferKeys: ~p, Processed: ~p, ReqBuf: ~p, Deferred: ~p~n\", [" ^ (String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ ", NNextVer, maps:keys(NBuffer), NProcessed, NReqBuffer, NDeferred]),\n")
     ^ indent 1 "receive\n"
     ^ indent 2 "{{_, _}, _, _} = Received ->\n"
+    ^ indent 3 ("io:format(\"[RECV] Actor: ~p, Msg: ~p~n\", [" ^ (String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ ", Received]),\n")
     ^ indent
         3
         ((String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ "(buffer_update([" ^ String.concat ", " (extract_node dep.input_current) ^"], [" ^ String.concat ", " (extract_node dep.input_last)
         ^ "], Received, NBuffer), NNextVer, NProcessed, NReqBuffer, NDeferred);\n")
     ^ indent 2 "{request, Ver} ->\n"
+    ^ indent 3 ("io:format(\"[RECV] Actor: ~p, Msg: ~p~n\", [" ^ (String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ ", {request, Ver}]),\n")
     ^ indent 3 ((String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ "(NBuffer, NNextVer, NProcessed, lists:reverse([Ver|NReqBuffer]), NDeferred)\n")
     ^ indent 1 "end."
 

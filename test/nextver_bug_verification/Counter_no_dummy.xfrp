@@ -1,0 +1,5 @@
+module Counter
+in
+out count : Int
+
+node init[0] count : Int = count@last + 1

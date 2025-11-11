@@ -1,0 +1,4 @@
+module main
+newnode (cnt1) = counter{p}()
+newnode (cnt2) = counter{p}()
+newnode (result) = adder{p}(cnt1, cnt2)

@@ -32,35 +32,35 @@ let load_file f =
   (s)
 
 (* parse a mpfrp module file *)
-let create_module in_c =
+let create_module in_c filename =
   let lexbuf = from_channel in_c in
     try
       let program = Parser.prog_module Lexer.read lexbuf in
         Module.of_program program
     with 
       | Lexer.Error msg ->
-          raise (CompileError("Lexing error: " ^ msg))
+          raise (CompileError(Printf.sprintf "[%s] Lexing error: %s" filename msg))
       | Syntax.InvalidId(id) ->
           let pos = lexbuf.lex_curr_p in
-            raise (CompileError(Printf.sprintf "Id \"%s\" is reserved at Line %d, Char %d." id pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)))
+            raise (CompileError(Printf.sprintf "[%s] Id \"%s\" is reserved at Line %d, Char %d." filename id pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)))
       | Parser.Error ->
           let pos = lexbuf.lex_curr_p in
-            raise (CompileError(Printf.sprintf "Syntax error at Line %d, Char %d." pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)))
+            raise (CompileError(Printf.sprintf "[%s] Syntax error at Line %d, Char %d." filename pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)))
 
 (* parse a mpfrp instance file *)
-let create_inst in_c =
+let create_inst in_c filename =
   let lexbuf = from_channel in_c in
     try
       Parser.prog_inst Lexer.read lexbuf
     with 
       | Lexer.Error msg ->
-          raise (CompileError("Lexing error: " ^ msg))
+          raise (CompileError(Printf.sprintf "[%s] Lexing error: %s" filename msg))
       | Syntax.InvalidId(id) ->
           let pos = lexbuf.lex_curr_p in
-            raise (CompileError(Printf.sprintf "Id \"%s\" is reserved at Line %d, Char %d." id pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)))
+            raise (CompileError(Printf.sprintf "[%s] Id \"%s\" is reserved at Line %d, Char %d." filename id pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)))
       | Parser.Error ->
           let pos = lexbuf.lex_curr_p in
-            raise (CompileError(Printf.sprintf "Syntax error at Line %d, Char %d." pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)))
+            raise (CompileError(Printf.sprintf "[%s] Syntax error at Line %d, Char %d." filename pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)))
 
 (* peek at first token to determine file type *)
 let peek_file_type filename =
@@ -138,7 +138,7 @@ let () =
           let module_map =
             List.fold_left (fun m program ->
                               let input = open_in program in
-                                let module_info = create_module input in
+                                let module_info = create_module input program in
                                   close_in input;
                                   M.add module_info.id module_info m)
                             M.empty
@@ -150,25 +150,27 @@ let () =
             | `Module ->
                 (* Old format: instance file is also a module *)
                 let input = open_in instance_file in
-                let inst_module = create_module input in
+                let inst_module = create_module input instance_file in
                 close_in input;
                 compile inst_module module_map
             | `Party | `PartyTemplate ->
                 (* New format: instance file with party/party_template blocks *)
                 let input = open_in instance_file in
-                let inst_prog = create_inst input in
+                let inst_prog = create_inst input instance_file in
                 close_in input;
                 Codegen_new.gen_new_inst inst_prog module_map
           in
             if !mode = Dot then print_string result
             else if !stdout_flag then print_string result
-            else
+            else begin
               let oc = open_out output_path in
                 output_string oc result;
                 close_out oc
+            end
       with
         | CommandError msg -> Printf.eprintf "Command Error: %s\n" msg;
         | CompileError msg -> Printf.eprintf "%s\n" msg;
+        | e -> Printf.eprintf "Unexpected error: %s\n" (Printexc.to_string e)
 
 (* only parsing *)
 (*

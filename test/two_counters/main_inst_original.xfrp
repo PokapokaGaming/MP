@@ -1,0 +1,1 @@
+newnode (c1, c2) = CounterPlusOne{p}()

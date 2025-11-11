@@ -1,0 +1,100 @@
+[STATE_END] Actor: c1_count, NextVer: #{p => 0}, BufferKeys: [], Processed: #{{last,
+                                                                               count} =>
+                                                                               0}, ReqBuf: [], Deferred: []
+[STATE_END] Actor: c2_count, NextVer: #{p => 0}, BufferKeys: [], Processed: #{{last,
+                                                                               count} =>
+                                                                               0}, ReqBuf: [], Deferred: []
+[STATE_END] Actor: a1_sum, NextVer: #{p => 0}, BufferKeys: [], Processed: #{}, ReqBuf: [], Deferred: []
+[PARTY] Sending sync_pulse ver=0
+[RECV] Actor: a1_sum, Msg: {request,{p,0}}
+[RECV] Actor: c1_count, Msg: {request,{p,0}}
+[RECV] Actor: c2_count, Msg: {request,{p,0}}
+[STATE_REQ] Actor: a1_sum, Ver: 0, NextVer: 0, Processed: #{}
+[STATE_REQ] Actor: c1_count, Ver: 0, NextVer: 0, Processed: #{{last,count} =>
+                                                                  0}
+[STATE_REQ] Actor: c2_count, Ver: 0, NextVer: 0, Processed: #{{last,count} =>
+                                                                  0}
+[STATE_END] Actor: a1_sum, NextVer: #{p => 0}, BufferKeys: [], Processed: #{}, ReqBuf: [], Deferred: [{p,
+                                                                                                       0}]
+[STATE_REQ] Actor: c1_count, Ver: 0, Inputs_Ready: true, Computing
+[STATE_REQ] Actor: c2_count, Ver: 0, Inputs_Ready: true, Computing
+DATA[c1_count]=1
+DATA[c2_count]=1
+[STATE_END] Actor: c1_count, NextVer: #{p => 1}, BufferKeys: [], Processed: #{{last,
+                                                                               count} =>
+                                                                               1}, ReqBuf: [], Deferred: []
+[RECV] Actor: a1_sum, Msg: {{p,0},count1,1}
+[STATE_END] Actor: c2_count, NextVer: #{p => 1}, BufferKeys: [], Processed: #{{last,
+                                                                               count} =>
+                                                                               1}, ReqBuf: [], Deferred: []
+[STATE_REQ] Actor: a1_sum, Ver: 0, NextVer: 0, Processed: #{}
+[STATE_END] Actor: a1_sum, NextVer: #{p => 0}, BufferKeys: [{p,0}], Processed: #{}, ReqBuf: [], Deferred: [{p,
+                                                                                                            0}]
+[RECV] Actor: a1_sum, Msg: {{p,0},count2,1}
+[STATE_BUF] Actor: a1_sum, Ver: 0, NextVer: 0, Map: #{count1 => 1,count2 => 1}
+[STATE_BUF] Actor: a1_sum, Ver: 0, Match: true, Computing
+DATA[a1_sum]=2
+[STATE_REQ] Actor: a1_sum, Ver: 0, NextVer: 1, Processed: #{count1 => 1,
+                                                            count2 => 1}
+[STATE_END] Actor: a1_sum, NextVer: #{p => 1}, BufferKeys: [], Processed: #{count1 =>
+                                                                                1,
+                                                                            count2 =>
+                                                                                1}, ReqBuf: [], Deferred: [{p,
+                                                                                                            0}]
+=INFO REPORT==== 11-Nov-2025::09:42:00.456782 ===
+SIGTERM received - shutting down
+
+[PARTY] Sending sync_pulse ver=1
+[RECV] Actor: a1_sum, Msg: {request,{p,1}}
+[RECV] Actor: c1_count, Msg: {request,{p,1}}
+[RECV] Actor: c2_count, Msg: {request,{p,1}}
+[STATE_REQ] Actor: a1_sum, Ver: 1, NextVer: 1, Processed: #{count1 => 1,
+                                                            count2 => 1}
+[STATE_REQ] Actor: c1_count, Ver: 1, NextVer: 1, Processed: #{{last,count} =>
+                                                                  1}
+[STATE_REQ] Actor: c2_count, Ver: 1, NextVer: 1, Processed: #{{last,count} =>
+                                                                  1}
+[STATE_END] Actor: a1_sum, NextVer: #{p => 1}, BufferKeys: [], Processed: #{count1 =>
+                                                                                1,
+                                                                            count2 =>
+                                                                                1}, ReqBuf: [], Deferred: [{p,
+                                                                                                            1},
+                                                                                                           {p,
+                                                                                                            0}]
+[STATE_REQ] Actor: c1_count, Ver: 1, Inputs_Ready: true, Computing
+[STATE_REQ] Actor: c2_count, Ver: 1, Inputs_Ready: true, Computing
+DATA[c1_count]=2
+DATA[c2_count]=2
+[STATE_END] Actor: c1_count, NextVer: #{p => 2}, BufferKeys: [], Processed: #{{last,
+                                                                               count} =>
+                                                                               2}, ReqBuf: [], Deferred: []
+[RECV] Actor: a1_sum, Msg: {{p,1},count1,2}
+[STATE_END] Actor: c2_count, NextVer: #{p => 2}, BufferKeys: [], Processed: #{{last,
+                                                                               count} =>
+                                                                               2}, ReqBuf: [], Deferred: []
+[STATE_REQ] Actor: a1_sum, Ver: 0, NextVer: 1, Processed: #{count1 => 1,
+                                                            count2 => 1}
+[STATE_REQ] Actor: a1_sum, Ver: 1, NextVer: 1, Processed: #{count1 => 1,
+                                                            count2 => 1}
+[STATE_END] Actor: a1_sum, NextVer: #{p => 1}, BufferKeys: [{p,1}], Processed: #{count1 =>
+                                                                                     1,
+                                                                                 count2 =>
+                                                                                     1}, ReqBuf: [], Deferred: [{p,
+                                                                                                                 1},
+                                                                                                                {p,
+                                                                                                                 0}]
+[RECV] Actor: a1_sum, Msg: {{p,1},count2,2}
+[STATE_BUF] Actor: a1_sum, Ver: 1, NextVer: 1, Map: #{count1 => 2,count2 => 2}
+[STATE_BUF] Actor: a1_sum, Ver: 1, Match: true, Computing
+DATA[a1_sum]=4
+[STATE_REQ] Actor: a1_sum, Ver: 0, NextVer: 2, Processed: #{count1 => 2,
+                                                            count2 => 2}
+[STATE_REQ] Actor: a1_sum, Ver: 1, NextVer: 2, Processed: #{count1 => 2,
+                                                            count2 => 2}
+[STATE_END] Actor: a1_sum, NextVer: #{p => 2}, BufferKeys: [], Processed: #{count1 =>
+                                                                                2,
+                                                                            count2 =>
+                                                                                2}, ReqBuf: [], Deferred: [{p,
+                                                                                                            1},
+                                                                                                           {p,
+                                                                                                            0}]

@@ -1,0 +1,7 @@
+module Counter
+party p
+in
+out c{p} : Int
+
+party p = periodic(1000)
+node init[0] c{p} : Int = c@last + 1

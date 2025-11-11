@@ -143,12 +143,21 @@ let rec expr_to_erlang = function
 (* === Dynamic Actor Generation === *)
 
 (* Generate simple input node actor (dummy forwarder) *)
-let gen_simple_input_actor party inst_id input_name =
+(* downstream_nodes: list of node_ids that consume this input *)
+let gen_simple_input_actor party inst_id input_name downstream_nodes =
   let actor_name = inst_id ^ "_" ^ input_name in
+  let send_statements = 
+    if downstream_nodes = [] then
+      indent 3 "void;\n"
+    else
+      String.concat ",\n" (List.map (fun dst_node ->
+        indent 3 ("list_to_atom(\"" ^ party ^ "_" ^ inst_id ^ "_" ^ dst_node ^ "\") ! {{" ^ party ^ ", Ver}, " ^ input_name ^ ", Val}")
+      ) downstream_nodes) ^ ";\n"
+  in
   actor_name ^ "() ->\n"
   ^ indent 1 "receive\n"
   ^ indent 2 ("{{" ^ party ^ ", Ver}, Val} ->\n")
-  ^ indent 3 ("list_to_atom(\"" ^ party ^ "_" ^ inst_id ^ "_" ^ input_name ^ "\") ! {{" ^ party ^ ", Ver}, " ^ input_name ^ ", Val};\n")
+  ^ send_statements
   ^ indent 2 "_ -> void\n"
   ^ indent 1 "end,\n"
   ^ indent 1 (actor_name ^ "().\n")
@@ -170,72 +179,133 @@ let string_replace pattern replacement str =
   in
   if pattern = "" then str else aux [] 0
 
-(* Generate simple computation node actor *)
-let gen_simple_computation_actor party inst_id node_id has_init init_val computation_code (module_def : module_def) output_connections =
+(* Generate computation node actor with full mpfrp-original logic *)
+(* This includes Buffer/NextVer/Processed/ReqBuffer/Deferred management *)
+let gen_computation_node_actor party inst_id node_id has_init init_val computation_code (module_def : module_def) output_connections intra_module_outputs =
   let actor_name = inst_id ^ "_" ^ node_id in
-  let params = if has_init then "(Buffer, P_ver, LastState)" else "(Buffer, P_ver)" in
-  let recursive_call = if has_init then
-      actor_name ^ "(NewBuffer, P_ver, Curr)"
+  
+  (* Extract input names *)
+  let input_current = module_def.extern_input in
+  let input_last = if has_init then [node_id] else [] in
+  
+  (* Generate bind pattern for current and last inputs *)
+  let bind_pattern inputs last_inputs =
+    if inputs = [] && last_inputs = [] then "#{}"
     else
-      actor_name ^ "(NewBuffer, P_ver)" in
-  
-  (* Check if this node is an output (in module_def.sink) *)
-  let is_output = List.mem node_id module_def.sink in
-  
-  (* Generate output sends if this is an output node *)
-  let output_sends = 
-    if is_output && output_connections <> [] then
-      (* mpfrp-original style: lists:foreach for each output connection *)
-      indent 3 "lists:foreach(fun (V) ->\n"
-      ^ (String.concat ",\n" (List.map (fun conn ->
-          indent 4 ("list_to_atom(\"" ^ party ^ "_" ^ conn.downstream_inst ^ "\") ! {V, " ^ conn.downstream_input ^ ", Curr}")
-        ) output_connections))
-      ^ "\n"
-      ^ indent 3 "end, [{" ^ party ^ ", Ver}]),\n"
-    else "" in
-  
-  (* Extract input variables from Buffer *)
-  let input_names = module_def.extern_input in
-  let input_extractions = 
-    List.map (fun iname ->
-      indent 3 ("S" ^ iname ^ " = maps:get(" ^ iname ^ ", NewBuffer, 0),\n")
-    ) input_names
-    |> String.concat "" in
-  
-  (* Replace LSid with LastState in computation code *)
-  let fixed_computation = 
-    if has_init then
-      string_replace ("LS" ^ node_id) "LastState" computation_code
-    else
-      computation_code in
-  
-  (* Request handler for nodes without inputs *)
-  let request_handler =
-    if input_names = [] && has_init then
-      indent 2 ("{request, {" ^ party ^ ", Ver}} ->\n")
-      ^ indent 3 ("Curr = " ^ fixed_computation ^ ",\n")
-      ^ indent 3 ("io:format(\"DATA[~s_~s]=~p~n\", [\"" ^ inst_id ^ "\", \"" ^ node_id ^ "\", Curr]),\n")
-      ^ output_sends
-      ^ indent 3 (actor_name ^ "(Buffer, P_ver, Curr);\n")
-    else
-      ""
+      "#{"
+      ^ (String.concat ", " (List.map (fun i -> i ^ " := S" ^ i) inputs))
+      ^ (if inputs <> [] && last_inputs <> [] then ", " else "")
+      ^ (String.concat ", " (List.map (fun i -> "{last, " ^ i ^ "} := LS" ^ i) last_inputs))
+      ^ "}"
   in
   
-  actor_name ^ params ^ " ->\n"
+  (* Replace variable names in computation code *)
+  let fixed_computation = 
+    if has_init then
+      string_replace ("LS" ^ node_id) ("LS" ^ node_id) computation_code
+    else
+      computation_code
+  in
+  
+  (* Generate send to downstream modules *)
+  let send_to_modules =
+    if output_connections = [] then ""
+    else
+      indent 6 "lists:foreach(fun (V) -> \n"
+      ^ String.concat ",\n" (List.map (fun conn ->
+          indent 7 ("list_to_atom(\"" ^ party ^ "_" ^ conn.downstream_inst ^ "\") ! {V, " ^ conn.downstream_input ^ ", Curr}")
+        ) output_connections)
+      ^ "\n"
+      ^ indent 6 "end, [Version|Deferred]),\n"
+  in
+  
+  (* Generate send to intra-module nodes *)
+  let send_to_intra_nodes =
+    if intra_module_outputs = [] then ""
+    else
+      indent 6 "lists:foreach(fun (V) -> \n"
+      ^ String.concat ",\n" (List.map (fun (target_node, output_name) ->
+          indent 7 ("list_to_atom(\"" ^ party ^ "_" ^ inst_id ^ "_" ^ target_node ^ "\") ! {V, " ^ output_name ^ ", Curr}")
+        ) intra_module_outputs)
+      ^ "\n"
+      ^ indent 6 "end, [Version|Deferred]),\n"
+  in
+  
+  (* First foldl: process Buffer *)
+  let buffer_foldl_body =
+    indent 3 ("{ {" ^ party ^ ", Ver} = Version, " ^ bind_pattern input_current input_last ^ " = Map} ->\n")
+    ^ indent 4 ("io:format(\"[STATE_BUF] Actor: ~p, Ver: ~p, NextVer: ~p, Map: ~p~n\", [" ^ actor_name ^ ", Ver, maps:get(" ^ party ^ ", NextVer), Map]),\n")
+    ^ indent 4 ("case maps:get(" ^ party ^ ", NextVer) =:= Ver of\n")
+    ^ indent 5 "true ->\n"
+    ^ indent 6 ("io:format(\"[STATE_BUF] Actor: ~p, Ver: ~p, Match: true, Computing~n\", [" ^ actor_name ^ ", Ver]),\n")
+    ^ indent 6 ("Curr = " ^ fixed_computation ^ ",\n")
+    ^ indent 6 ("io:format(\"DATA[~s_~s]=~p~n\", [\"" ^ inst_id ^ "\", \"" ^ node_id ^ "\", Curr]),\n")
+    ^ send_to_modules
+    ^ send_to_intra_nodes
+    ^ indent 6 ("{maps:remove(Version, Buffer), maps:update(" ^ party ^ ", Ver + 1, NextVer), maps:merge(Processed, Map), []};\n")
+    ^ indent 5 "false ->\n"
+    ^ indent 6 ("io:format(\"[STATE_BUF] Actor: ~p, Ver: ~p, Match: false, Skipping~n\", [" ^ actor_name ^ ", Ver]),\n")
+    ^ indent 6 "{Buffer, NextVer, Processed, Deferred}\n"
+    ^ indent 4 "end;\n"
+    ^ indent 3 "_ -> {Buffer, NextVer, Processed, Deferred}\n"
+  in
+  
+  (* Second foldl: process ReqBuffer *)
+  let req_foldl_body =
+    if has_init && input_current = [] then
+      (* @last node with no current inputs: can compute in ReqBuffer foldl *)
+      indent 3 ("{" ^ party ^ ", Ver} = Version ->\n")
+      ^ indent 4 ("io:format(\"[STATE_REQ] Actor: ~p, Ver: ~p, NextVer: ~p, Processed: ~p~n\", [" ^ actor_name ^ ", Ver, maps:get(" ^ party ^ ", NextVer), Processed]),\n")
+      ^ indent 4 ("case maps:get(" ^ party ^ ", NextVer) =:= Ver of\n")
+      ^ indent 5 "true ->\n"
+      ^ indent 6 "case Processed of\n"
+      ^ indent 7 (bind_pattern input_current input_last ^ " ->\n")
+      ^ indent 8 ("io:format(\"[STATE_REQ] Actor: ~p, Ver: ~p, Inputs_Ready: true, Computing~n\", [" ^ actor_name ^ ", Ver]),\n")
+      ^ indent 8 ("Curr = " ^ fixed_computation ^ ",\n")
+      ^ indent 8 ("io:format(\"DATA[~s_~s]=~p~n\", [\"" ^ inst_id ^ "\", \"" ^ node_id ^ "\", Curr]),\n")
+      ^ send_to_modules
+      ^ send_to_intra_nodes
+      ^ indent 8 ("UpdatedProcessed = maps:put({last, " ^ node_id ^ "}, Curr, Processed),\n")
+      ^ indent 8 ("{maps:update(" ^ party ^ ", Ver + 1, NextVer), UpdatedProcessed, ReqBuffer, []};\n")
+      ^ indent 7 "_ ->\n"
+      ^ indent 8 ("{NextVer, Processed, ReqBuffer, [Version|Deferred]}\n")
+      ^ indent 6 "end;\n"
+      ^ indent 5 "false ->\n"
+      ^ indent 6 ("{NextVer, Processed, [Version|ReqBuffer], Deferred}\n")
+      ^ indent 4 "end\n"
+    else
+      (* Node with current inputs: only process in Buffer foldl, just defer requests here *)
+      indent 3 ("{" ^ party ^ ", Ver} = Version ->\n")
+      ^ indent 4 ("io:format(\"[STATE_REQ] Actor: ~p, Ver: ~p, NextVer: ~p, Processed: ~p~n\", [" ^ actor_name ^ ", Ver, maps:get(" ^ party ^ ", NextVer), Processed]),\n")
+      ^ indent 4 ("{NextVer, Processed, ReqBuffer, [Version|Deferred]}\n")  (* Just defer all requests *)
+  in
+  
+  (* Complete computation node actor *)
+  actor_name ^ "(Buffer0, NextVer0, Processed0, ReqBuffer0, Deferred0) ->\n"
+  ^ indent 1 "HL = lists:sort(?SORTBuffer, maps:to_list(Buffer0)),\n"
+  ^ indent 1 "Sorted_req_buf = lists:sort(?SORTVerBuffer, ReqBuffer0),\n"
+  ^ indent 1 "{NBuffer, NextVerT, ProcessedT, DeferredT} = lists:foldl(fun (E, {Buffer, NextVer, Processed, Deferred}) -> \n"
+  ^ indent 2 "case E of\n"
+  ^ buffer_foldl_body
+  ^ indent 2 "end\n"
+  ^ indent 1 "end, {Buffer0, NextVer0, Processed0, Deferred0}, HL),\n"
+  ^ indent 1 "{NNextVer, NProcessed, NReqBuffer, NDeferred} = lists:foldl(fun (E, {NextVer, Processed, ReqBuffer, Deferred}) -> \n"
+  ^ indent 2 "case E of\n"
+  ^ req_foldl_body
+  ^ indent 2 "end\n"
+  ^ indent 1 "end, {NextVerT, ProcessedT, [], DeferredT}, Sorted_req_buf),\n"
+  ^ indent 1 "io:format(\"[STATE_END] Actor: ~p, NextVer: ~p, BufferKeys: ~p, Processed: ~p, ReqBuf: ~p, Deferred: ~p~n\", [" ^ actor_name ^ ", NNextVer, maps:keys(NBuffer), NProcessed, NReqBuffer, NDeferred]),\n"
   ^ indent 1 "receive\n"
-  ^ request_handler
-  ^ indent 2 ("{{" ^ party ^ ", Ver}, InputName, InputVal} ->\n")
-  ^ indent 3 ("NewBuffer = maps:put(InputName, InputVal, Buffer),\n")
-  ^ input_extractions
-  ^ indent 3 ("Curr = " ^ fixed_computation ^ ",\n")
-  ^ indent 3 ("io:format(\"DATA[~s_~s]=~p~n\", [\"" ^ inst_id ^ "\", \"" ^ node_id ^ "\", Curr]),\n")
-  ^ output_sends
-  ^ indent 3 (recursive_call ^ ";\n")
-  ^ indent 2 "_ -> void\n"
+  ^ indent 2 "{{_, _}, _, _} = Received ->\n"
+  ^ indent 3 "io:format(\"[RECV] Actor: ~p, Msg: ~p~n\", [" ^ actor_name ^ ", Received]),\n"
+  ^ indent 3 (actor_name ^ "(buffer_update([" ^ String.concat ", " input_current ^ "], [" ^ String.concat ", " input_last ^ "], Received, NBuffer), NNextVer, NProcessed, lists:reverse(NDeferred ++ NReqBuffer), []);\n")
+  ^ indent 2 "{request, Ver} ->\n"
+  ^ indent 3 "io:format(\"[RECV] Actor: ~p, Msg: ~p~n\", [" ^ actor_name ^ ", {request, Ver}]),\n"
+  ^ indent 3 (actor_name ^ "(NBuffer, NNextVer, NProcessed, lists:reverse([Ver|NReqBuffer]), NDeferred)\n")
   ^ indent 1 "end.\n"
 
-(* Generate simple module actor *)
-let gen_simple_module_actor party inst_id downstreams node_names =
+(* Generate simple module actor with separate upstreams and downstreams *)
+let gen_simple_module_actor party inst_id upstreams_for_sync downstreams_for_data node_names input_names =
   let actor_name = inst_id in
   
   (* Request node function - sends request to all nodes with dynamic naming *)
@@ -245,13 +315,13 @@ let gen_simple_module_actor party inst_id downstreams node_names =
       indent 1 ("list_to_atom(\"" ^ party ^ "_" ^ inst_id ^ "_" ^ node_name ^ "\") ! {request, {" ^ party ^ ", Ver}},")
     ) node_names) in
   
-  (* Ver_buffer processing - use dynamic naming for downstream sends *)
-  let downstream_sends = 
-    if downstreams <> [] then
-      String.concat "" (List.map (fun ds ->
+  (* Ver_buffer processing - send sync_pulse to upstreams (demand-driven) *)
+  let upstream_sends = 
+    if upstreams_for_sync <> [] then
+      String.concat "" (List.map (fun us ->
         (* Construct PartyId_InstanceName dynamically *)
-        indent 4 ("list_to_atom(\"" ^ party ^ "_" ^ ds ^ "\") ! {" ^ party ^ ", Ver},\n")
-      ) downstreams)
+        indent 4 ("list_to_atom(\"" ^ party ^ "_" ^ us ^ "\") ! {" ^ party ^ ", Ver},\n")
+      ) upstreams_for_sync)
     else "" in
   
   let ver_foldl = "lists:foldl(fun (Version, {Buf, P_verT}) ->\n"
@@ -259,28 +329,52 @@ let gen_simple_module_actor party inst_id downstreams node_names =
     ^ indent 3 ("{" ^ party ^ ", Ver} when Ver > P_verT ->\n")
     ^ indent 4 ("{[{" ^ party ^ ", Ver} | Buf], P_verT};\n")
     ^ indent 3 ("{" ^ party ^ ", Ver} when Ver =:= P_verT ->\n")
-    ^ downstream_sends
+    ^ upstream_sends
     ^ request_nodes ^ "\n"
     ^ indent 4 "{Buf, P_verT + 1};\n"
     ^ indent 3 "_ -> {Buf, P_verT}\n"
     ^ indent 2 "end\n"
     ^ indent 1 "end, {[], P_ver}, Sorted_ver_buf)" in
   
-  (* In_buffer processing - forward to all node actors *)
-  let forward_to_nodes = 
-    if node_names <> [] then
-      String.concat "\n" (List.map (fun node_name ->
-        indent 4 ("list_to_atom(\"" ^ party ^ "_" ^ inst_id ^ "_" ^ node_name ^ "\") ! {{" ^ party ^ ", Ver}, InputName, Val},")
-      ) node_names)
-    else "" in
+  (* In_buffer processing - forward to input actors (3-tier architecture) *)
+  (* Original: モジュールアクター → 入力アクター → 計算ノード *)
+  let in_foldl_cases = 
+    if input_names = [] then
+      (* No inputs: still need to send sync_pulse to downstreams when data arrives *)
+      indent 3 ("{{" ^ party ^ ", Ver}, _, _} when Ver > P_ver ->\n")
+      ^ indent 4 "{[Msg | Buf], P_ver};\n"
+      ^ indent 3 ("{{" ^ party ^ ", Ver}, _, _} when Ver =:= P_ver ->\n")
+      ^ (if downstreams_for_data <> [] then
+          String.concat "" (List.map (fun ds ->
+            indent 4 ("list_to_atom(\"" ^ party ^ "_" ^ ds ^ "\") ! {" ^ party ^ ", Ver},\n")
+          ) downstreams_for_data)
+        else "")
+      ^ indent 4 "{Buf, P_ver + 1};\n"
+    else
+      (* For each input, generate pattern matching and forward to input actor *)
+      String.concat "" (List.map (fun input_name ->
+        (* Ver > P_ver: buffer the message *)
+        indent 3 ("{{" ^ party ^ ", Ver}, " ^ input_name ^ ", Val} when Ver > P_ver ->\n")
+        ^ indent 4 "{[Msg | Buf], P_ver};\n"
+        (* Ver =:= P_ver: forward to input actor AND send sync_pulse to downstreams *)
+        ^ indent 3 ("{{" ^ party ^ ", Ver}, " ^ input_name ^ ", Val} when Ver =:= P_ver ->\n")
+        ^ indent 4 ("list_to_atom(\"" ^ party ^ "_" ^ inst_id ^ "_" ^ input_name ^ "\") ! {{" ^ party ^ ", Ver}, Val},\n")
+        ^ (if downstreams_for_data <> [] then
+            String.concat "" (List.map (fun ds ->
+              indent 4 ("list_to_atom(\"" ^ party ^ "_" ^ ds ^ "\") ! {" ^ party ^ ", Ver},\n")
+            ) downstreams_for_data)
+          else "")
+        ^ indent 4 "{Buf, P_ver + 1};\n"
+        (* Ver < P_ver: forward to input actor for delayed processing *)
+        ^ indent 3 ("{{" ^ party ^ ", Ver}, " ^ input_name ^ ", Val} when Ver < P_ver ->\n")
+        ^ indent 4 ("list_to_atom(\"" ^ party ^ "_" ^ inst_id ^ "_" ^ input_name ^ "\") ! {{" ^ party ^ ", Ver}, Val},\n")
+        ^ indent 4 "{Buf, P_ver};\n"
+      ) input_names)
+  in
   
   let in_foldl = "lists:foldl(fun (Msg, {Buf, P_ver}) ->\n"
     ^ indent 2 "case Msg of\n"
-    ^ indent 3 ("{{" ^ party ^ ", Ver}, _, _} when Ver > P_ver ->\n")
-    ^ indent 4 "{[Msg | Buf], P_ver};\n"
-    ^ indent 3 ("{{" ^ party ^ ", Ver}, InputName, Val} when Ver =:= P_ver ->\n")
-    ^ forward_to_nodes ^ "\n"
-    ^ indent 4 "{Buf, P_ver + 1};\n"
+    ^ in_foldl_cases
     ^ indent 3 "_ -> {Buf, P_ver}\n"
     ^ indent 2 "end\n"
     ^ indent 1 "end, {[], P_ver}, Sorted_in_buf)" in
@@ -293,6 +387,8 @@ let gen_simple_module_actor party inst_id downstreams node_names =
   ^ indent 1 "receive\n"
   ^ indent 2 "{sync_pulse, Ver} ->\n"
   ^ indent 3 (actor_name ^ "(lists:reverse([Ver | NBuffer]), NInBuffer, " ^ party ^ ", P_ver0);\n")
+  ^ indent 2 "{_, _} = Ver_msg ->\n"
+  ^ indent 3 (actor_name ^ "(lists:reverse([Ver_msg | NBuffer]), NInBuffer, " ^ party ^ ", P_ver0);\n")
   ^ indent 2 "{{_, _}, _, _} = Msg ->\n"
   ^ indent 3 (actor_name ^ "(NBuffer, lists:reverse([Msg | NInBuffer]), " ^ party ^ ", P_verN)\n")
   ^ indent 1 "end.\n"
@@ -329,16 +425,17 @@ let gen_create_instance_function module_name (module_def: module_def) party_id =
   
   let register_nodes =
     List.mapi (fun idx (nid, _, init_expr, _) ->
-      let has_init = init_expr <> None in
-      let init_val = if has_init then
-        match init_expr with Some e -> expr_to_erlang e | None -> "0"
-      else "0" in
       let actor_var = "NodeActor" ^ string_of_int idx in
       let node_func = indent 1 ("NodeFunc" ^ string_of_int idx ^ " = list_to_atom(InstanceName ++ \"_" ^ nid ^ "\"),\n") in
-      if has_init then
-        node_func ^ indent 1 ("register(" ^ actor_var ^ ", spawn(fun() -> apply(?MODULE, NodeFunc" ^ string_of_int idx ^ ", [#{}, 0, " ^ init_val ^ "]) end)),\n")
-      else
-        node_func ^ indent 1 ("register(" ^ actor_var ^ ", spawn(fun() -> apply(?MODULE, NodeFunc" ^ string_of_int idx ^ ", [#{}, 0]) end)),\n")
+      (* All computation nodes have 5 parameters with Deferred: Buffer0, NextVer0, Processed0, ReqBuffer0, Deferred0 *)
+      (* Initial values: empty map for Buffer, #{party => 0} for NextVer, Processed with init value if exists, empty list for ReqBuffer and Deferred *)
+      let processed_init = match init_expr with
+        | Some e -> 
+            let init_val = expr_to_erlang e in
+            "#{" ^ "{last, " ^ nid ^ "} => " ^ init_val ^ "}"
+        | None -> "#{}"
+      in
+      node_func ^ indent 1 ("register(" ^ actor_var ^ ", spawn(fun() -> apply(?MODULE, NodeFunc" ^ string_of_int idx ^ ", [#{}, #{" ^ party_id ^ " => 0}, " ^ processed_init ^ ", [], []]) end)),\n")
     ) module_def.node
     |> String.concat "" in
   
@@ -358,25 +455,59 @@ let gen_create_instance_function module_name (module_def: module_def) party_id =
   signature ^ module_actor_name ^ node_actor_names ^ input_actor_names 
   ^ register_module ^ register_nodes ^ register_inputs ^ return_val
 
+(* Find which nodes use a specific input *)
+let find_nodes_using_input input_name module_def =
+  (* Simple heuristic: check if input_name appears in node expression *)
+  (* For accurate analysis, we'd need full dependency graph from Dependency module *)
+  let rec expr_uses_id id = function
+    | EConst _ -> false
+    | EId eid -> eid = id
+    | EAnnot (eid, _) -> eid = id
+    | EApp (_, args) -> List.exists (expr_uses_id id) args
+    | EBin (_, e1, e2) -> expr_uses_id id e1 || expr_uses_id id e2
+    | EUni (_, e) -> expr_uses_id id e
+    | ELet (binders, e) -> 
+        List.exists (fun (_, bind_e, _) -> expr_uses_id id bind_e) binders || expr_uses_id id e
+    | EIf (c, a, b) -> expr_uses_id id c || expr_uses_id id a || expr_uses_id id b
+    | EList es | ETuple es -> List.exists (expr_uses_id id) es
+    | EFun (_, e) -> expr_uses_id id e
+    | ECase (e, cases) -> expr_uses_id id e || List.exists (fun (_, case_e) -> expr_uses_id id case_e) cases
+  in
+  List.filter_map (fun (node_id, _, _, body_expr) ->
+    if expr_uses_id input_name body_expr then Some node_id else None
+  ) module_def.node
+
 (* Generate all actors for a single instance *)
-let gen_actors_for_instance party instance_info module_def all_instances module_map =
+let gen_actors_for_instance party instance_info module_def all_instance_infos all_instances_raw module_map =
   let inst_id = instance_info.inst_id in
   
   (* Build output connections for this instance *)
-  let output_connections = build_output_connections inst_id instance_info.input_sources all_instances module_map in
+  let output_connections = build_output_connections inst_id instance_info.input_sources all_instances_raw module_map in
   
-  (* Extract downstream dependencies *)
-  let downstreams = 
+  (* Extract upstreams: instances that THIS instance depends on (for sync_pulse - demand-driven) *)
+  let upstreams_for_sync = 
     List.map get_instance_from_qualified instance_info.input_sources in
+  
+  (* Extract downstreams: instances that depend on THIS instance (for data flow notification) *)
+  (* Use dependency graph to find who reads data from this instance *)
+  let downstreams_for_data = 
+    (* For each instance_info, check if its input_sources includes inst_id *)
+    List.filter_map (fun other_info ->
+      let depends_on_us = List.exists (fun qid ->
+        get_instance_from_qualified qid = inst_id
+      ) other_info.input_sources in
+      if depends_on_us then Some other_info.inst_id else None
+    ) all_instance_infos in
   
   (* Generate input node actors (dummy actors for extern_input) *)
   let input_actors = 
     List.map (fun input_name ->
-      gen_simple_input_actor party inst_id input_name
+      let downstream_nodes = find_nodes_using_input input_name module_def in
+      gen_simple_input_actor party inst_id input_name downstream_nodes
     ) module_def.extern_input in
   
   (* Generate computation node actors *)
-  let node_actors=
+  let node_actors =
     List.map (fun (node_id, _party_annot, init_expr, body_expr) ->
       let has_init = (init_expr <> None) in
       let init_value = if has_init then
@@ -387,14 +518,17 @@ let gen_actors_for_instance party instance_info module_def all_instances module_
         "0"
       in
       let computation = expr_to_erlang body_expr in
-      gen_simple_computation_actor party inst_id node_id has_init init_value computation module_def output_connections
+      (* TODO: Analyze intra-module dependencies *)
+      let intra_module_outputs = [] in
+      gen_computation_node_actor party inst_id node_id has_init init_value computation module_def output_connections intra_module_outputs
     ) module_def.node in
   
   (* Extract node names *)
   let node_names = List.map (fun (nid, _, _, _) -> nid) module_def.node in
   
   (* Generate module actor *)
-  let module_actor = gen_simple_module_actor party inst_id downstreams node_names in
+  (* Pass both upstreams and downstreams (demand-driven + push notification) *)
+  let module_actor = gen_simple_module_actor party inst_id upstreams_for_sync downstreams_for_data node_names module_def.extern_input in
   
   (* Combine all actors *)
   String.concat "\n" (input_actors @ node_actors @ [module_actor])
@@ -694,10 +828,11 @@ let gen_new_inst_hardcoded inst_prog module_map =
     ^ indent 1 "ok.\n" in
   
   (* Combine all *)
-  module_header ^ exports ^ macros ^ helpers ^ party_actor ^ request_nodes
+  let result = module_header ^ exports ^ macros ^ helpers ^ party_actor ^ request_nodes
   ^ counter_1_module ^ "\n" ^ counter_1_c ^ "\n"
   ^ doubler_2_module ^ "\n" ^ doubler_2_count ^ "\n" ^ doubler_2_doubled ^ "\n"
-  ^ start_func
+  ^ start_func in
+  result
 
 (* === Generalized Implementation === *)
 
@@ -719,21 +854,22 @@ let gen_new_inst inst_prog module_map =
       
       (* TEMPORARY: Force generalized version for testing *)
       (* Use generalized version by default *)
-      let use_generalized = true in  (* Set to true to test generalized version *)
+      let use_generalized = true in  (* Always use generalized version *)
       
       (* For simple_verify, use hardcoded version (already verified) *)
       if (not use_generalized) &&
          List.length instance_infos = 2 && 
          List.exists (fun info -> info.inst_id = "counter_1") instance_infos &&
-         List.exists (fun info -> info.inst_id = "doubler_2") instance_infos then
+         List.exists (fun info -> info.inst_id = "doubler_2") instance_infos then begin
         gen_new_inst_hardcoded inst_prog module_map
+      end
       else begin
         (* Generalized version *)
         
         (* Module header *)
         let module_header = "-module(main).\n" in
         
-        (* Collect unique module types *)
+        (* Collect unique modules *)
         let unique_modules = 
           List.fold_left (fun acc info ->
             if List.mem info.module_name acc then acc
@@ -742,12 +878,12 @@ let gen_new_inst inst_prog module_map =
           |> List.rev in
         
         (* Generate exports *)
-        let instance_exports = 
+        let instance_exports =
           List.map (fun info ->
-            let module_def : t = get_module_def info.module_name module_map in
-            let node_exports = List.map (fun (nid, _, init_expr, _) -> 
-              let arity = if init_expr <> None then "3" else "2" in
-              info.inst_id ^ "_" ^ nid ^ "/" ^ arity
+            let module_def = get_module_def info.module_name module_map in
+            let node_exports = List.map (fun (nid, _, _, _) -> 
+              (* All computation nodes have 5 parameters with Deferred implementation *)
+              info.inst_id ^ "_" ^ nid ^ "/5"
             ) module_def.node in
             let input_exports = List.map (fun iname ->
               info.inst_id ^ "_" ^ iname ^ "/0"
@@ -772,11 +908,19 @@ let gen_new_inst inst_prog module_map =
         
         (* Macros *)
         let macros = "-define(SORTVerBuffer, fun (A, B) -> A < B end).\n"
-          ^ "-define(SORTInBuffer, fun (A, B) -> A < B end).\n" in
+          ^ "-define(SORTInBuffer, fun ({{P1, V1}, _, _}, {{P2, V2}, _, _}) -> if P1 == P2 -> V1 < V2; true -> P1 < P2 end end).\n"
+          ^ "-define(SORTBuffer, fun ({{P1, V1}, _}, {{P2, V2}, _}) -> if P1 == P2 -> V1 < V2; true -> P1 < P2 end end).\n" in
         
-        (* Helper functions *)
-        let helpers = "buffer_update(Keys, Vals, {Party_ver, InId, InVal}, Buffer) ->\n"
-          ^ indent 1 "maps:put(InId, InVal, Buffer).\n\n"
+        (* Helper functions - mpfrp-original compliant *)
+        let helpers = "buffer_update(Current, Last, {{RVId, RVersion}, Id, RValue}, Buffer) ->\n"
+          ^ indent 1 "H1 = case lists:member(Id, Current) of\n"
+          ^ indent 2 "true  -> maps:update_with({RVId, RVersion}, fun(M) -> M#{ Id => RValue } end, #{ Id => RValue }, Buffer);\n"
+          ^ indent 2 "false -> Buffer\n"
+          ^ indent 1 "end,\n"
+          ^ indent 1 "case lists:member(Id, Last) of\n"
+          ^ indent 2 "true  -> maps:update_with({RVId, RVersion + 1}, fun(M) -> M#{ {last, Id} => RValue } end, #{ {last, Id} => RValue }, H1);\n"
+          ^ indent 2 "false -> H1\n"
+          ^ indent 1 "end.\n\n"
           ^ "out(Target, Value) ->\n"
           ^ indent 1 "case whereis(Target) of\n"
           ^ indent 2 "undefined -> void;\n"
@@ -809,7 +953,7 @@ let gen_new_inst inst_prog module_map =
         let all_actors = 
           List.map (fun info ->
             let module_def = get_module_def info.module_name module_map in
-            gen_actors_for_instance party_id info module_def instances module_map
+            gen_actors_for_instance party_id info module_def instance_infos instances module_map
           ) instance_infos in
         
         (* Start function - use create_instance calls *)

@@ -1,0 +1,4 @@
+party p
+leader = counter_plus_one_1
+periodic(1000)
+newnode (counter_plus_one_1) = CounterPlusOne()
