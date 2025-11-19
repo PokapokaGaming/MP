@@ -140,12 +140,10 @@ let () =
                               let input = open_in program in
                                 let module_info = create_module input program in
                                   close_in input;
-                                  Printf.eprintf "Loaded module: %s from %s\n" module_info.id program;
                                   M.add module_info.id module_info m)
                             M.empty
                             !module_files
           in
-          Printf.eprintf "module_map keys: %s\n" (String.concat ", " (List.map fst (M.bindings module_map)));
           (* Determine instance file type and parse accordingly *)
           let result = 
             match peek_file_type instance_file with

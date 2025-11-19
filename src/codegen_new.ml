@@ -34,21 +34,60 @@ let gen_new_inst inst_prog module_map =
         List.fold_left (fun acc' output -> M.add output party_block.party_id acc') acc outputs
       ) M.empty newnode in
       
+      (* Find the leader module *)
+      let leader_module_id = 
+        let rec find_leader = function
+          | [] -> failwith ("Leader instance not found: " ^ party_block.leader)
+          | (outputs, module_id, _, _) :: rest ->
+              if List.mem party_block.leader outputs then module_id
+              else find_leader rest
+        in find_leader newnode
+      in
+      
       (* Enrich module_map with party information *)
-      (* For each module used in newnode, assign party to all its nodes and add party to module.party *)
+      (* Strategy: Add dummy party info to modules, then override with actual party from instance file *)
       let enriched_module_map = List.fold_left (fun acc_map (_, module_id, _, _) ->
         let mod_info = try M.find module_id acc_map with Not_found -> failwith ("Module not found: " ^ module_id) in
-        (* Assign party_id to all nodes (source + sink + node names) in this module *)
-        let all_node_names = mod_info.source @ mod_info.sink @ (List.map (fun (id, _, _, _) -> id) mod_info.node) in
-        (* Filter out empty strings *)
-        let all_node_names = List.filter (fun s -> s <> "") all_node_names in
-        let enriched_id2party = List.fold_left (fun m node_id ->
-          M.add node_id party_block.party_id m
-        ) mod_info.id2party all_node_names in
-        (* Add party_id to module.party list if not already present *)
-        let enriched_party = if List.mem party_block.party_id mod_info.party then mod_info.party else party_block.party_id :: mod_info.party in
-        let enriched_mod = { mod_info with id2party = enriched_id2party; party = enriched_party } in
-        M.add module_id enriched_mod acc_map
+        
+        (* If module already has party info (from original syntax), keep it *)
+        if mod_info.party <> [] && not (M.is_empty mod_info.id2party) then
+          (* Module already has party annotations - override them with instance party *)
+          let enriched_id2party = M.map (fun _ -> party_block.party_id) mod_info.id2party in
+          let enriched_nodes = List.map (fun (id, _, init, expr) ->
+            (id, party_block.party_id, init, expr)
+          ) mod_info.node in
+          let enriched_mod = { mod_info with 
+            id2party = enriched_id2party; 
+            party = [party_block.party_id];
+            node = enriched_nodes
+          } in
+          M.add module_id enriched_mod acc_map
+        else
+          (* Module has no party info - add dummy party to all nodes *)
+          let all_node_names = mod_info.source @ mod_info.sink @ (List.map (fun (id, _, _, _) -> id) mod_info.node) in
+          let all_node_names = List.filter (fun s -> s <> "") all_node_names in
+          let enriched_id2party = List.fold_left (fun m node_id ->
+            M.add node_id party_block.party_id m
+          ) M.empty all_node_names in
+          (* Also update node definitions to include party *)
+          let enriched_nodes = List.map (fun (id, p, init, expr) ->
+            let new_p = if p = "" then party_block.party_id else p in
+            (id, new_p, init, expr)
+          ) mod_info.node in
+          (* Add leader info if this is the leader module *)
+          let enriched_leader = 
+            if module_id = leader_module_id then
+              [(party_block.party_id, "periodic", [EConst(CInt(party_block.periodic_ms))])]
+            else
+              mod_info.leader
+          in
+          let enriched_mod = { mod_info with 
+            id2party = enriched_id2party; 
+            party = [party_block.party_id];
+            node = enriched_nodes;
+            leader = enriched_leader
+          } in
+          M.add module_id enriched_mod acc_map
       ) module_map newnode in
       
       (* Create pseudo-module for gen_inst *)
@@ -69,17 +108,4 @@ let gen_new_inst inst_prog module_map =
       } in
       
       (* Delegate to existing Codegen.gen_inst with enriched module_map *)
-      Printf.eprintf "Calling Codegen.gen_inst...\n";
-      try
-        let result = Codegen.gen_inst inst_module enriched_module_map in
-        Printf.eprintf "Result length: %d bytes\n" (String.length result);
-        result
-      with
-      | Util.UnknownId(id) ->
-          Printf.eprintf "ERROR in Codegen.gen_inst: UnknownId(\"%s\")\n" id;
-          Printf.eprintf "Backtrace:\n%s\n" (Printexc.get_backtrace ());
-          raise (Util.UnknownId(id))
-      | e ->
-          Printf.eprintf "ERROR in Codegen.gen_inst: %s\n" (Printexc.to_string e);
-          Printf.eprintf "Backtrace:\n%s\n" (Printexc.get_backtrace ());
-          raise e
+      Codegen.gen_inst inst_module enriched_module_map
