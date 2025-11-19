@@ -1,0 +1,7 @@
+party g
+leader = combined
+periodic(2000)
+newnode (combined) = agg(data_1, data_2, data_3)
+newnode (data_1) = sensor()
+newnode (data_2) = sensor()
+newnode (data_3) = sensor()

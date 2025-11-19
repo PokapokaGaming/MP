@@ -1,0 +1,3 @@
+module sensor
+out data: Int
+node data: Int = 42

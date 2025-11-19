@@ -140,10 +140,12 @@ let () =
                               let input = open_in program in
                                 let module_info = create_module input program in
                                   close_in input;
+                                  Printf.eprintf "Loaded module: %s from %s\n" module_info.id program;
                                   M.add module_info.id module_info m)
                             M.empty
                             !module_files
           in
+          Printf.eprintf "module_map keys: %s\n" (String.concat ", " (List.map fst (M.bindings module_map)));
           (* Determine instance file type and parse accordingly *)
           let result = 
             match peek_file_type instance_file with
@@ -170,7 +172,10 @@ let () =
       with
         | CommandError msg -> Printf.eprintf "Command Error: %s\n" msg;
         | CompileError msg -> Printf.eprintf "%s\n" msg;
-        | e -> Printf.eprintf "Unexpected error: %s\n" (Printexc.to_string e)
+        | e -> 
+            Printf.eprintf "Unexpected error: %s\n" (Printexc.to_string e);
+            Printexc.print_backtrace stderr;
+            flush stderr
 
 (* only parsing *)
 (*
