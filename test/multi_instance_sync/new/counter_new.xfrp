@@ -1,5 +1,0 @@
-module Counter
-in dummy: Int
-out c : Int
-
-node init[0] c : Int = c@last + 1

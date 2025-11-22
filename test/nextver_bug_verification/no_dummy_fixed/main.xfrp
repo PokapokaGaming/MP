@@ -1,6 +1,0 @@
-party p
-leader = a1
-periodic(1000)
-newnode (c1) = Counter()
-newnode (c2) = Counter()
-newnode (a1) = Adder(c1, c2)

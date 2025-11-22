@@ -1,4 +1,0 @@
-module Main
-newnode (sum) = Adder{p}(c1, c2)
-newnode (c1) = Counter{p}(sum)
-newnode (c2) = Counter{p}(sum)

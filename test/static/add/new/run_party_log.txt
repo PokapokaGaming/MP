@@ -1,0 +1,47 @@
+[DEBUG] Agg request_targets: []
+[STATE_END] Actor: g_agg1_combined, NextVer: #{g => 0}, BufferKeys: [], Processed: #{}, ReqBuf: [], Deferred: []
+[STATE_END] Actor: g_sensor1_data, NextVer: #{g => 0}, BufferKeys: [], Processed: #{}, ReqBuf: [], Deferred: []
+[STATE_END] Actor: g_sensor2_data, NextVer: #{g => 0}, BufferKeys: [], Processed: #{}, ReqBuf: [], Deferred: []
+[STATE_END] Actor: g_sensor3_data, NextVer: #{g => 0}, BufferKeys: [], Processed: #{}, ReqBuf: [], Deferred: []
+[g_sensor1_data] メッセージ受信: タイマーからリクエスト (Ver {0}) を受信しました。
+[g_sensor2_data] メッセージ受信: タイマーからリクエスト (Ver {0}) を受信しました。
+[g_sensor3_data] メッセージ受信: タイマーからリクエスト (Ver {0}) を受信しました。
+[g_sensor1_data] Ver {g,0}:
+  理由: タイマーリクエストを受信。
+  状態: 必要な入力がProcessedに揃っていました。
+  結果: 計算を実行します。
+[g_sensor2_data] Ver {g,0}:
+  理由: タイマーリクエストを受信。
+  状態: 必要な入力がProcessedに揃っていました。
+  結果: 計算を実行します。
+[g_sensor3_data] Ver {g,0}:
+  理由: タイマーリクエストを受信。
+  状態: 必要な入力がProcessedに揃っていました。
+  結果: 計算を実行します。
+ORIGINAL_DATA[g_sensor1_data]=42
+ORIGINAL_DATA[g_sensor2_data]=42
+ORIGINAL_DATA[g_sensor3_data]=42
+[STATE_END] Actor: g_sensor1_data, NextVer: #{g => 1}, BufferKeys: [], Processed: #{}, ReqBuf: [], Deferred: []
+[g_agg1_combined] メッセージ受信: ノード's1'から値'42' (Ver {g,0}) を受信しました。
+[STATE_END] Actor: g_sensor2_data, NextVer: #{g => 1}, BufferKeys: [], Processed: #{}, ReqBuf: [], Deferred: []
+[STATE_END] Actor: g_sensor3_data, NextVer: #{g => 1}, BufferKeys: [], Processed: #{}, ReqBuf: [], Deferred: []
+[BUFFER_CHECK] Actor: g_agg1_combined, Ver: {g,0}, AllPresent: false
+[STATE_END] Actor: g_agg1_combined, NextVer: #{g => 0}, BufferKeys: [{g,0}], Processed: #{}, ReqBuf: [], Deferred: []
+[g_agg1_combined] メッセージ受信: ノード's2'から値'42' (Ver {g,0}) を受信しました。
+[BUFFER_CHECK] Actor: g_agg1_combined, Ver: {g,0}, AllPresent: false
+[STATE_END] Actor: g_agg1_combined, NextVer: #{g => 0}, BufferKeys: [{g,0}], Processed: #{}, ReqBuf: [], Deferred: []
+[g_agg1_combined] メッセージ受信: ノード's3'から値'42' (Ver {g,0}) を受信しました。
+[BUFFER_CHECK] Actor: g_agg1_combined, Ver: {g,0}, AllPresent: true
+[CHECK] Actor: g_agg1_combined, Ver: {g,0}, CurrentNextVer: 0
+[g_agg1_combined] Ver {g,0}:
+  理由: Bufferに新しい入力が揃いました。
+  状態: バージョンがNextVerと一致したため、計算ロジックに該当します。
+  結果: 計算を実行します。
+ORIGINAL_DATA[g_agg1_combined]=126
+Output from agg1.combined: 126
+[STATE_END] Actor: g_agg1_combined, NextVer: #{g => 1}, BufferKeys: [], Processed: #{s1 =>
+                                                                                         42,
+                                                                                     s2 =>
+                                                                                         42,
+                                                                                     s3 =>
+                                                                                         42}, ReqBuf: [], Deferred: []

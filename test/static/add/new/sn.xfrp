@@ -1,0 +1,7 @@
+party g
+leader = cmb
+periodic(2000)
+newnode (cmb) = agg(sens1, sens2, sens3)
+newnode (sens1) = sensor()
+newnode (sens2) = sensor()
+newnode (sens3) = sensor()

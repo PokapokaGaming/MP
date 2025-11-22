@@ -1,6 +1,0 @@
-module Adder
-in count1: Int, count2: Int
-out sum: Int
-
-node sum: Int = count1 + count2
-

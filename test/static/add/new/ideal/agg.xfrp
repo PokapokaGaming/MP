@@ -1,0 +1,6 @@
+module agg
+in s1: Int,
+   s2: Int,
+   s3: Int
+out combined: Int
+node combined: Int = s1 + s2 + s3

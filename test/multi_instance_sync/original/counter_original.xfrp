@@ -1,5 +1,0 @@
-module counter
-party p
-in
-out c{p} : Int
-node init[0] c{p} : Int = c@last + 1

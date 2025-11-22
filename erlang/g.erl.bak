@@ -1,0 +1,352 @@
+-module(g).
+
+-export([start/0, out/2, run_party/2, get_request_nodes/3]).
+-export([run_agg/6, run_sensor/6]).
+-export([run_sensor_data/3, run_agg_combined/3]).
+
+
+
+-define(SORTBuffer, fun ({{K1, V1}, _}, {{K2, V2}, _}) ->
+    if V1 == V2 -> K1 < K2; true -> V1 < V2 end
+end).
+
+-define(SORTVerBuffer, fun ({P1, V1}, {P2, V2}) ->
+    if P1 == P2 -> V1 < V2; true -> P1 < P2 end
+end).
+
+-define(SORTInBuffer, fun ({{P1, V1}, _, _}, {{P2, V2}, _, _}) ->
+    if P1 == P2 -> V1 < V2; true -> P1 < P2 end
+end).
+
+buffer_update(Current, Last, {{RVId, RVersion}, Id, RValue}, Buffer) ->
+    H1 = case lists:member(Id, Current) of
+        true  -> maps:update_with({RVId, RVersion},
+                    fun(M) -> M#{Id => RValue} end,
+                    #{Id => RValue}, Buffer);
+        false -> Buffer
+    end,
+    case lists:member(Id, Last) of
+        true  -> maps:update_with({RVId, RVersion + 1},
+                    fun(M) -> M#{{last, Id} => RValue} end,
+                    #{{last, Id} => RValue}, H1);
+        false -> H1
+    end.
+
+periodic(Interval) ->
+    timer:sleep(Interval).
+
+
+
+get_request_nodes(NodeSpecs, ModuleNodes, ModuleParty) ->
+    lists:filter(fun(NodeName) ->
+        case maps:get(NodeName, NodeSpecs, undefined) of
+            undefined -> false;
+            #{party := NodeParty, module := NodeModule, dependencies := Dependencies} ->
+                case NodeParty of
+                    ModuleParty ->
+                        lists:all(fun(DepName) ->
+                            case maps:get(DepName, NodeSpecs, undefined) of
+                                undefined -> false;
+                                #{module := DepModule} -> DepModule =:= NodeModule
+                            end
+                        end, Dependencies);
+                    _ -> false
+                end
+        end
+    end, ModuleNodes).
+
+
+
+run_party(Config, Ver) ->
+    #{party := Party, leader := Leader, mode := Mode, subscribers := Subscribers} = Config,
+    case Mode of
+        periodic ->
+            #{interval := Interval} = Config,
+            Leader ! {Party, Ver},
+            lists:foreach(fun(Subscriber) ->
+                Subscriber ! {Party, Ver}
+            end, Subscribers),
+            timer:sleep(Interval),
+            run_party(Config, Ver + 1);
+        any_party ->
+            #{dependencies := Dependencies} = Config,
+            receive
+                {DepParty, _DepVer} ->
+                    case lists:member(DepParty, Dependencies) of
+                        true ->
+                            Leader ! {Party, Ver},
+                            lists:foreach(fun(Subscriber) ->
+                                Subscriber ! {Party, Ver}
+                            end, Subscribers),
+                            run_party(Config, Ver + 1);
+                        false ->
+                            run_party(Config, Ver)
+                    end
+            end
+    end.
+
+
+
+run_agg(Ver_buffer, In_buffer, Party, Party_ver, Config, SyncDownstreams) ->
+    #{nodes := Nodes, request_targets := RequestTargets} = Config,
+    
+    %% Process version buffer (sync pulses)
+    Sorted_ver_buf = lists:sort(?SORTVerBuffer, Ver_buffer),
+    {NBuffer, Party_ver1} = lists:foldl(fun(Version, {Buf, Party_verT}) ->
+        case Version of
+            {P, Ver} when P =:= Party andalso Ver > Party_verT ->
+                {[{P, Ver} | Buf], Party_verT};
+            {P, Ver} when P =:= Party andalso Ver =:= Party_verT ->
+                %% Forward sync pulse to downstream modules
+                lists:foreach(fun(ModulePid) ->
+                    ModulePid ! {Party, Ver}
+                end, SyncDownstreams),
+                
+                %% Forward request only to target node actors
+                lists:foreach(fun(NodeName) ->
+                    NodeName ! {request, {Party, Ver}}
+                end, RequestTargets),
+                
+                {Buf, Party_verT + 1};
+            {P, Ver} when P =:= Party andalso Ver < Party_verT ->
+                {Buf, Party_verT};
+            _ ->
+                {Buf, Party_verT}
+        end
+    end, {[], Party_ver}, Sorted_ver_buf),
+    
+    %% Process input buffer (data messages)
+    Sorted_in_buf = lists:sort(?SORTInBuffer, In_buffer),
+    {NInBuffer, Party_verN} = lists:foldl(fun(Msg, {Buf, Party_verT}) ->
+        case Msg of
+            {{P, _Ver}, _InputName, _Value} when P =:= Party ->
+                %% Forward data to all managed node actors
+                lists:foreach(fun(NodeName) ->
+                    NodeName ! Msg
+                end, Nodes),
+                {Buf, Party_verT};
+            _ ->
+                {Buf, Party_verT}
+        end
+    end, {[], Party_ver1}, Sorted_in_buf),
+    
+    receive
+        {update_sync_downstreams, NewSyncDownstreams} ->
+            run_agg(NBuffer, NInBuffer, Party, Party_verN, Config, NewSyncDownstreams);
+        {_, _} = Ver_msg ->
+            run_agg(lists:reverse([Ver_msg | NBuffer]), NInBuffer, Party, Party_verN, Config, SyncDownstreams);
+        {_, _, _} = In_msg ->
+            run_agg(NBuffer, lists:reverse([In_msg | NInBuffer]), Party, Party_verN, Config, SyncDownstreams)
+    end.
+
+run_agg_combined(Config, Connections, NodeState) ->
+    #{dependencies := Deps, register_name := RegName, compute := ComputeFn} = Config,
+    #{downstreams := Downstreams} = Connections,
+    #{buffer := Buffer0, next_ver := NextVer0, processed := Processed0, req_buffer := ReqBuffer0, deferred := Deferred0} = NodeState,
+    
+    %% Process Buffer: Check if any complete sets of inputs are ready
+    HL = lists:sort(?SORTBuffer, maps:to_list(Buffer0)),
+    {NBuffer, NextVerT, ProcessedT, DeferredT} = lists:foldl(fun(E, {Buffer, NextVer, Processed, Deferred}) ->
+        case E of
+            {{Party, Ver} = Version, InputMap} ->
+                %% Check if all dependencies are present
+                AllPresent = lists:all(fun(DepName) ->
+                    maps:is_key(DepName, InputMap)
+                end, Deps),
+                case AllPresent of
+                    true ->
+                        %% Check sequential constraint
+                        CurrentNextVer = maps:get(Party, NextVer, 0),
+                        case CurrentNextVer =:= Ver of
+                            true ->
+                                %% Compute result using injected function
+                                Result = ComputeFn(InputMap),
+                                out(RegName, Result),
+                                
+                                %% Send to downstreams
+                                lists:foreach(fun(DownstreamName) ->
+                                    DownstreamName ! {{Party, Ver}, RegName, Result}
+                                end, Downstreams),
+                                
+                                {maps:remove(Version, Buffer), maps:update(Party, Ver + 1, NextVer), Processed, []};
+                            false ->
+                                {Buffer, NextVer, Processed, Deferred}
+                        end;
+                    false ->
+                        {Buffer, NextVer, Processed, Deferred}
+                end;
+            _ ->
+                {Buffer, NextVer, Processed, Deferred}
+        end
+    end, {Buffer0, NextVer0, Processed0, Deferred0}, HL),
+    
+    %% Process Request Buffer
+    Sorted_req_buf = lists:sort(?SORTVerBuffer, ReqBuffer0),
+    {NNextVer, NProcessed, NReqBuffer, NDeferred} = lists:foldl(fun(E, {NextVer, Processed, ReqBuffer, Deferred}) ->
+        case E of
+            {Party, Ver} = Version ->
+                CurrentNextVer = maps:get(Party, NextVer, 0),
+                case CurrentNextVer =:= Ver of
+                    true -> {NextVer, Processed, ReqBuffer, [Version | Deferred]};
+                    false -> {NextVer, Processed, [Version | ReqBuffer], Deferred}
+                end;
+            _ -> {NextVer, Processed, ReqBuffer, Deferred}
+        end
+    end, {NextVerT, ProcessedT, [], DeferredT}, Sorted_req_buf),
+    
+    receive
+        {request, {Party, Ver}} ->
+            run_agg_combined(Config, Connections,
+                NodeState#{buffer := NBuffer, next_ver := NNextVer, processed := NProcessed,
+                          req_buffer := lists:reverse([{Party, Ver} | NReqBuffer]), deferred := NDeferred});
+        {{Party, Ver}, InputName, Value} ->
+            UpdatedBuffer = buffer_update(Deps, [], {{Party, Ver}, InputName, Value}, NBuffer),
+            run_agg_combined(Config, Connections,
+                NodeState#{buffer := UpdatedBuffer, next_ver := NNextVer, processed := NProcessed,
+                          req_buffer := NReqBuffer, deferred := NDeferred})
+    end.
+
+run_sensor(Ver_buffer, In_buffer, Party, Party_ver, Config, SyncDownstreams) ->
+    #{nodes := Nodes, request_targets := RequestTargets} = Config,
+    
+    %% Process version buffer (sync pulses)
+    Sorted_ver_buf = lists:sort(?SORTVerBuffer, Ver_buffer),
+    {NBuffer, Party_ver1} = lists:foldl(fun(Version, {Buf, Party_verT}) ->
+        case Version of
+            {P, Ver} when P =:= Party andalso Ver > Party_verT ->
+                {[{P, Ver} | Buf], Party_verT};
+            {P, Ver} when P =:= Party andalso Ver =:= Party_verT ->
+                %% Forward sync pulse to downstream modules
+                lists:foreach(fun(ModulePid) ->
+                    ModulePid ! {Party, Ver}
+                end, SyncDownstreams),
+                
+                %% Forward request only to target node actors
+                lists:foreach(fun(NodeName) ->
+                    NodeName ! {request, {Party, Ver}}
+                end, RequestTargets),
+                
+                {Buf, Party_verT + 1};
+            {P, Ver} when P =:= Party andalso Ver < Party_verT ->
+                {Buf, Party_verT};
+            _ ->
+                {Buf, Party_verT}
+        end
+    end, {[], Party_ver}, Sorted_ver_buf),
+    
+    %% Process input buffer (data messages)
+    Sorted_in_buf = lists:sort(?SORTInBuffer, In_buffer),
+    {NInBuffer, Party_verN} = lists:foldl(fun(Msg, {Buf, Party_verT}) ->
+        case Msg of
+            {{P, _Ver}, _InputName, _Value} when P =:= Party ->
+                %% Forward data to all managed node actors
+                lists:foreach(fun(NodeName) ->
+                    NodeName ! Msg
+                end, Nodes),
+                {Buf, Party_verT};
+            _ ->
+                {Buf, Party_verT}
+        end
+    end, {[], Party_ver1}, Sorted_in_buf),
+    
+    receive
+        {update_sync_downstreams, NewSyncDownstreams} ->
+            run_sensor(NBuffer, NInBuffer, Party, Party_verN, Config, NewSyncDownstreams);
+        {_, _} = Ver_msg ->
+            run_sensor(lists:reverse([Ver_msg | NBuffer]), NInBuffer, Party, Party_verN, Config, SyncDownstreams);
+        {_, _, _} = In_msg ->
+            run_sensor(NBuffer, lists:reverse([In_msg | NInBuffer]), Party, Party_verN, Config, SyncDownstreams)
+    end.
+
+run_sensor_data(Config, Connections, NodeState) ->
+    #{register_name := RegName, compute := ComputeFn} = Config,
+    #{downstreams := Downstreams} = Connections,
+    #{buffer := Buffer0, next_ver := NextVer0, processed := Processed0, req_buffer := ReqBuffer0, deferred := Deferred0} = NodeState,
+    
+    %% Process Buffer (source nodes have no inputs)
+    HL = lists:sort(?SORTBuffer, maps:to_list(Buffer0)),
+    {NBuffer, NextVerT, ProcessedT, DeferredT} = lists:foldl(fun(_E, {Buffer, NextVer, Processed, Deferred}) ->
+        {Buffer, NextVer, Processed, Deferred}
+    end, {Buffer0, NextVer0, Processed0, Deferred0}, HL),
+    
+    %% Process Request Buffer
+    Sorted_req_buf = lists:sort(?SORTVerBuffer, ReqBuffer0),
+    {NNextVer, NProcessed, NReqBuffer, NDeferred} = lists:foldl(fun(E, {NextVer, Processed, ReqBuffer, Deferred}) ->
+        case E of
+            {Party, Ver} = Version ->
+                CurrentNextVer = maps:get(Party, NextVer, 0),
+                case CurrentNextVer =:= Ver of
+                    true ->
+                        %% Source node: compute value using injected function
+                        Result = ComputeFn(#{}),
+                        out(RegName, Result),
+                        
+                        %% Send to downstreams
+                        lists:foreach(fun({DownstreamName, PortTag}) ->
+                            DownstreamName ! {{Party, Ver}, PortTag, Result}
+                        end, Downstreams),
+                        
+                        {maps:update(Party, Ver + 1, NextVer), Processed, ReqBuffer, []};
+                    false ->
+                        {NextVer, Processed, [Version | ReqBuffer], Deferred}
+                end;
+            _ ->
+                {NextVer, Processed, ReqBuffer, Deferred}
+        end
+    end, {NextVerT, ProcessedT, [], DeferredT}, Sorted_req_buf),
+    
+    receive
+        {request, {Party, Ver}} ->
+            run_sensor_data(Config, Connections,
+                NodeState#{buffer := NBuffer, next_ver := NNextVer, processed := NProcessed,
+                          req_buffer := lists:reverse([{Party, Ver} | NReqBuffer]), deferred := NDeferred})
+    end.
+
+
+
+start() ->
+    NodeSpecs = #{
+        g_cmb_combined => #{party => g, module => agg, dependencies => [g_sens1_data, g_sens2_data, g_sens3_data]},
+        g_sens1_data => #{party => g, module => sensor, dependencies => []},
+        g_sens2_data => #{party => g, module => sensor, dependencies => []},
+        g_sens3_data => #{party => g, module => sensor, dependencies => []}
+    },
+
+    %% Spawn module actors and node actors
+    PID_g_cmb = spawn(?MODULE, run_agg, [[], [], g, 0, #{nodes => [g_cmb_combined], request_targets => get_request_nodes(NodeSpecs, [g_cmb_combined], g)}, []]),
+    register(g_cmb, PID_g_cmb),
+    PID_g_cmb_combined = spawn(?MODULE, run_agg_combined, [#{register_name => g_cmb_combined, dependencies => [s1, s2, s3], compute => fun(Inputs) -> ((maps:get(s1, Inputs, 0) + maps:get(s2, Inputs, 0)) + maps:get(s3, Inputs, 0)) end}, #{downstreams => []}, #{buffer => #{}, next_ver => #{g => 0}, processed => #{}, req_buffer => [], deferred => []}]),
+    register(g_cmb_combined, PID_g_cmb_combined),
+    PID_g_sens1 = spawn(?MODULE, run_sensor, [[], [], g, 0, #{nodes => [g_sens1_data], request_targets => get_request_nodes(NodeSpecs, [g_sens1_data], g)}, []]),
+    register(g_sens1, PID_g_sens1),
+    PID_g_sens1_data = spawn(?MODULE, run_sensor_data, [#{register_name => g_sens1_data, dependencies => [], compute => fun(Inputs) -> 42 end}, #{downstreams => [{g_cmb_combined, s1}]}, #{buffer => #{}, next_ver => #{g => 0}, processed => #{}, req_buffer => [], deferred => []}]),
+    register(g_sens1_data, PID_g_sens1_data),
+    PID_g_sens2 = spawn(?MODULE, run_sensor, [[], [], g, 0, #{nodes => [g_sens2_data], request_targets => get_request_nodes(NodeSpecs, [g_sens2_data], g)}, []]),
+    register(g_sens2, PID_g_sens2),
+    PID_g_sens2_data = spawn(?MODULE, run_sensor_data, [#{register_name => g_sens2_data, dependencies => [], compute => fun(Inputs) -> 42 end}, #{downstreams => [{g_cmb_combined, s2}]}, #{buffer => #{}, next_ver => #{g => 0}, processed => #{}, req_buffer => [], deferred => []}]),
+    register(g_sens2_data, PID_g_sens2_data),
+    PID_g_sens3 = spawn(?MODULE, run_sensor, [[], [], g, 0, #{nodes => [g_sens3_data], request_targets => get_request_nodes(NodeSpecs, [g_sens3_data], g)}, []]),
+    register(g_sens3, PID_g_sens3),
+    PID_g_sens3_data = spawn(?MODULE, run_sensor_data, [#{register_name => g_sens3_data, dependencies => [], compute => fun(Inputs) -> 42 end}, #{downstreams => [{g_cmb_combined, s3}]}, #{buffer => #{}, next_ver => #{g => 0}, processed => #{}, req_buffer => [], deferred => []}]),
+    register(g_sens3_data, PID_g_sens3_data)
+,
+
+    %% Spawn party actor
+    PartyConfig = #{
+        party => g,
+        leader => g_cmb,
+        mode => periodic,
+        interval => 2000,
+        subscribers => []
+    },
+    PID_party = spawn(?MODULE, run_party, [PartyConfig, 0]),
+    register(party_g, PID_party),
+    void.
+
+
+
+out(g_sens3_data, Value) -> io:format("Output from g_sens3_data: ~p~n", [Value]), void;
+out(g_sens2_data, Value) -> io:format("Output from g_sens2_data: ~p~n", [Value]), void;
+out(g_sens1_data, Value) -> io:format("Output from g_sens1_data: ~p~n", [Value]), void;
+out(g_cmb_combined, Value) -> io:format("Output from g_cmb_combined: ~p~n", [Value]), void;
+out(_, _) -> erlang:error(badarg).

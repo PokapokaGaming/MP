@@ -1,2 +1,0 @@
-newnode (c) = Counter{p}()
-newnode (doubled) = Doubler{p}(c)

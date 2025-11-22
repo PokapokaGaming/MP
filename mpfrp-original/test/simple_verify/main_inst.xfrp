@@ -1,3 +1,0 @@
-module Main
-newnode (c1) = Counter{p}()
-newnode (d1) = Doubler{p}(c1)

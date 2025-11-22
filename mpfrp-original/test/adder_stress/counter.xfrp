@@ -1,5 +1,0 @@
-module Counter
-party p
-in dummy{p}: Int
-out a{p}: Int
-node init[0] a{p}: Int = a@last + 1

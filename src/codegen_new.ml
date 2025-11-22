@@ -3,109 +3,588 @@ open Util
 open Module
 
 module M = Map.Make(String)
+module StringSet = Set.Make(String)
 
-(* === Party Syntax to Old Newnode Format Converter === *)
+(* ============================================================================
+   New Architecture Code Generator
+   Based on g_ideal.erl prototype with topology injection pattern
+   
+   Key Design Principles:
+   1. Generate module-level generic actor functions (not per-instance)
+   2. Inject computation logic as anonymous functions in Config
+   3. Do NOT generate actors for source nodes (input ports)
+   4. NodeSpecs contains only actual compute nodes and their dependencies
+   ============================================================================ *)
 
-(* Extract instance name from qualified_id *)
-let get_instance_name = function
-  | SimpleId id -> id
-  | QualifiedId (_, id) -> id
+(* === Helper Functions === *)
 
-(* Convert party_block to newnode format *)
-let convert_party_to_newnode party_block =
-  (* newnode format: (outputs, module_id, parties, inputs) *)
+let get_instance_name qid = match qid with
+  | Syntax.SimpleId id -> id
+  | Syntax.QualifiedId (_, id) -> id
+
+(* Extract unique module IDs from inst_prog *)
+let get_unique_modules inst_prog =
+  let modules = ref StringSet.empty in
+  List.iter (fun party_block ->
+    List.iter (fun (_, module_id, _) ->
+      modules := StringSet.add module_id !modules
+    ) party_block.Syntax.instances
+  ) inst_prog.Syntax.parties;
+  StringSet.elements !modules
+
+(* Convert expression to Erlang code string *)
+let rec expr_to_erlang = function
+  | Syntax.EConst Syntax.CUnit -> "void"
+  | Syntax.EConst (Syntax.CBool b) -> string_of_bool b
+  | Syntax.EConst (Syntax.CInt i) -> string_of_int i
+  | Syntax.EConst (Syntax.CFloat f) -> Printf.sprintf "%f" f
+  | Syntax.EConst (Syntax.CChar c) -> string_of_int (int_of_char c)
+  | Syntax.EId v -> "maps:get(" ^ v ^ ", Inputs, 0)"
+  | Syntax.EAnnot (v, _) -> "maps:get(" ^ v ^ ", Inputs, 0)"
+  | Syntax.EBin (Syntax.BAdd, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " + " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BSub, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " - " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BMul, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " * " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BDiv, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " / " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BMod, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " rem " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BLt, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " < " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BLte, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " =< " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BGt, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " > " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BGte, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " >= " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BEq, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " =:= " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BNe, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " =/= " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BAnd, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " band " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BOr, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " bor " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BLAnd, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " andalso " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EBin (Syntax.BLOr, e1, e2) -> "(" ^ expr_to_erlang e1 ^ " orelse " ^ expr_to_erlang e2 ^ ")"
+  | Syntax.EUni (Syntax.UNot, e) -> "(not " ^ expr_to_erlang e ^ ")"
+  | Syntax.EUni (Syntax.UNeg, e) -> "(-" ^ expr_to_erlang e ^ ")"
+  | Syntax.EIf (e1, e2, e3) -> 
+      "(case " ^ expr_to_erlang e1 ^ " of true -> " ^ expr_to_erlang e2 ^ "; false -> " ^ expr_to_erlang e3 ^ " end)"
+  | _ -> "0"
+
+(* === Code Generation Functions === *)
+
+(* Generate helper macros and functions *)
+let gen_helpers () =
+  String.concat "\n" [
+    "-define(SORTBuffer, fun ({{K1, V1}, _}, {{K2, V2}, _}) ->";
+    "    if V1 == V2 -> K1 < K2; true -> V1 < V2 end";
+    "end).";
+    "";
+    "-define(SORTVerBuffer, fun ({P1, V1}, {P2, V2}) ->";
+    "    if P1 == P2 -> V1 < V2; true -> P1 < P2 end";
+    "end).";
+    "";
+    "-define(SORTInBuffer, fun ({{P1, V1}, _, _}, {{P2, V2}, _, _}) ->";
+    "    if P1 == P2 -> V1 < V2; true -> P1 < P2 end";
+    "end).";
+    "";
+    "buffer_update(Current, Last, {{RVId, RVersion}, Id, RValue}, Buffer) ->";
+    "    H1 = case lists:member(Id, Current) of";
+    "        true  -> maps:update_with({RVId, RVersion},";
+    "                    fun(M) -> M#{Id => RValue} end,";
+    "                    #{Id => RValue}, Buffer);";
+    "        false -> Buffer";
+    "    end,";
+    "    case lists:member(Id, Last) of";
+    "        true  -> maps:update_with({RVId, RVersion + 1},";
+    "                    fun(M) -> M#{{last, Id} => RValue} end,";
+    "                    #{{last, Id} => RValue}, H1);";
+    "        false -> H1";
+    "    end.";
+    "";
+    "periodic(Interval) ->";
+    "    timer:sleep(Interval).";
+  ]
+
+(* Generate get_request_nodes/3 function *)
+let gen_get_request_nodes () =
+  String.concat "\n" [
+    "get_request_nodes(NodeSpecs, ModuleNodes, ModuleParty) ->";
+    "    lists:filter(fun(NodeName) ->";
+    "        case maps:get(NodeName, NodeSpecs, undefined) of";
+    "            undefined -> false;";
+    "            #{party := NodeParty, module := NodeModule, dependencies := Dependencies} ->";
+    "                case NodeParty of";
+    "                    ModuleParty ->";
+    "                        lists:all(fun(DepName) ->";
+    "                            case maps:get(DepName, NodeSpecs, undefined) of";
+    "                                undefined -> false;";
+    "                                #{module := DepModule} -> DepModule =:= NodeModule";
+    "                            end";
+    "                        end, Dependencies);";
+    "                    _ -> false";
+    "                end";
+    "        end";
+    "    end, ModuleNodes).";
+  ]
+
+(* Generate run_party/2 function *)
+let gen_run_party () =
+  String.concat "\n" [
+    "run_party(Config, Ver) ->";
+    "    #{party := Party, leader := Leader, mode := Mode, subscribers := Subscribers} = Config,";
+    "    case Mode of";
+    "        periodic ->";
+    "            #{interval := Interval} = Config,";
+    "            Leader ! {Party, Ver},";
+    "            lists:foreach(fun(Subscriber) ->";
+    "                Subscriber ! {Party, Ver}";
+    "            end, Subscribers),";
+    "            timer:sleep(Interval),";
+    "            run_party(Config, Ver + 1);";
+    "        any_party ->";
+    "            #{dependencies := Dependencies} = Config,";
+    "            receive";
+    "                {DepParty, _DepVer} ->";
+    "                    case lists:member(DepParty, Dependencies) of";
+    "                        true ->";
+    "                            Leader ! {Party, Ver},";
+    "                            lists:foreach(fun(Subscriber) ->";
+    "                                Subscriber ! {Party, Ver}";
+    "                            end, Subscribers),";
+    "                            run_party(Config, Ver + 1);";
+    "                        false ->";
+    "                            run_party(Config, Ver)";
+    "                    end";
+    "            end";
+    "    end.";
+  ]
+
+(* Generate generic module actor function for a module *)
+let gen_module_actor module_id =
+  let func_name = "run_" ^ module_id in
+  String.concat "\n" [
+    func_name ^ "(Ver_buffer, In_buffer, Party, Party_ver, Config, SyncDownstreams) ->";
+    "    #{nodes := Nodes, request_targets := RequestTargets} = Config,";
+    "    ";
+    "    %% Process version buffer (sync pulses)";
+    "    Sorted_ver_buf = lists:sort(?SORTVerBuffer, Ver_buffer),";
+    "    {NBuffer, Party_ver1} = lists:foldl(fun(Version, {Buf, Party_verT}) ->";
+    "        case Version of";
+    "            {P, Ver} when P =:= Party andalso Ver > Party_verT ->";
+    "                {[{P, Ver} | Buf], Party_verT};";
+    "            {P, Ver} when P =:= Party andalso Ver =:= Party_verT ->";
+    "                %% Forward sync pulse to downstream modules";
+    "                lists:foreach(fun(ModulePid) ->";
+    "                    ModulePid ! {Party, Ver}";
+    "                end, SyncDownstreams),";
+    "                ";
+    "                %% Forward request only to target node actors";
+    "                lists:foreach(fun(NodeName) ->";
+    "                    NodeName ! {request, {Party, Ver}}";
+    "                end, RequestTargets),";
+    "                ";
+    "                {Buf, Party_verT + 1};";
+    "            {P, Ver} when P =:= Party andalso Ver < Party_verT ->";
+    "                {Buf, Party_verT};";
+    "            _ ->";
+    "                {Buf, Party_verT}";
+    "        end";
+    "    end, {[], Party_ver}, Sorted_ver_buf),";
+    "    ";
+    "    %% Process input buffer (data messages)";
+    "    Sorted_in_buf = lists:sort(?SORTInBuffer, In_buffer),";
+    "    {NInBuffer, Party_verN} = lists:foldl(fun(Msg, {Buf, Party_verT}) ->";
+    "        case Msg of";
+    "            {{P, _Ver}, _InputName, _Value} when P =:= Party ->";
+    "                %% Forward data to all managed node actors";
+    "                lists:foreach(fun(NodeName) ->";
+    "                    NodeName ! Msg";
+    "                end, Nodes),";
+    "                {Buf, Party_verT};";
+    "            _ ->";
+    "                {Buf, Party_verT}";
+    "        end";
+    "    end, {[], Party_ver1}, Sorted_in_buf),";
+    "    ";
+    "    receive";
+    "        {update_sync_downstreams, NewSyncDownstreams} ->";
+    "            " ^ func_name ^ "(NBuffer, NInBuffer, Party, Party_verN, Config, NewSyncDownstreams);";
+    "        {_, _} = Ver_msg ->";
+    "            " ^ func_name ^ "(lists:reverse([Ver_msg | NBuffer]), NInBuffer, Party, Party_verN, Config, SyncDownstreams);";
+    "        {_, _, _} = In_msg ->";
+    "            " ^ func_name ^ "(NBuffer, lists:reverse([In_msg | NInBuffer]), Party, Party_verN, Config, SyncDownstreams)";
+    "    end.";
+  ]
+
+(* Generate generic node actor function for a module's node *)
+let gen_node_actor module_id node_id has_deps =
+  let func_name = "run_" ^ module_id ^ "_" ^ node_id in
+  
+  if has_deps then
+    (* Compute node with dependencies *)
+    String.concat "\n" [
+      func_name ^ "(Config, Connections, NodeState) ->";
+      "    #{dependencies := Deps, register_name := RegName, compute := ComputeFn} = Config,";
+      "    #{downstreams := Downstreams} = Connections,";
+      "    #{buffer := Buffer0, next_ver := NextVer0, processed := Processed0, req_buffer := ReqBuffer0, deferred := Deferred0} = NodeState,";
+      "    ";
+      "    %% Process Buffer: Check if any complete sets of inputs are ready";
+      "    HL = lists:sort(?SORTBuffer, maps:to_list(Buffer0)),";
+      "    {NBuffer, NextVerT, ProcessedT, DeferredT} = lists:foldl(fun(E, {Buffer, NextVer, Processed, Deferred}) ->";
+      "        case E of";
+      "            {{Party, Ver} = Version, InputMap} ->";
+      "                %% Check if all dependencies are present";
+      "                AllPresent = lists:all(fun(DepName) ->";
+      "                    maps:is_key(DepName, InputMap)";
+      "                end, Deps),";
+      "                case AllPresent of";
+      "                    true ->";
+      "                        %% Check sequential constraint";
+      "                        CurrentNextVer = maps:get(Party, NextVer, 0),";
+      "                        case CurrentNextVer =:= Ver of";
+      "                            true ->";
+      "                                %% Compute result using injected function";
+      "                                Result = ComputeFn(InputMap),";
+      "                                out(RegName, Result),";
+      "                                ";
+      "                                %% Send to downstreams";
+      "                                lists:foreach(fun(DownstreamName) ->";
+      "                                    DownstreamName ! {{Party, Ver}, RegName, Result}";
+      "                                end, Downstreams),";
+      "                                ";
+      "                                {maps:remove(Version, Buffer), maps:update(Party, Ver + 1, NextVer), Processed, []};";
+      "                            false ->";
+      "                                {Buffer, NextVer, Processed, Deferred}";
+      "                        end;";
+      "                    false ->";
+      "                        {Buffer, NextVer, Processed, Deferred}";
+      "                end;";
+      "            _ ->";
+      "                {Buffer, NextVer, Processed, Deferred}";
+      "        end";
+      "    end, {Buffer0, NextVer0, Processed0, Deferred0}, HL),";
+      "    ";
+      "    %% Process Request Buffer";
+      "    Sorted_req_buf = lists:sort(?SORTVerBuffer, ReqBuffer0),";
+      "    {NNextVer, NProcessed, NReqBuffer, NDeferred} = lists:foldl(fun(E, {NextVer, Processed, ReqBuffer, Deferred}) ->";
+      "        case E of";
+      "            {Party, Ver} = Version ->";
+      "                CurrentNextVer = maps:get(Party, NextVer, 0),";
+      "                case CurrentNextVer =:= Ver of";
+      "                    true -> {NextVer, Processed, ReqBuffer, [Version | Deferred]};";
+      "                    false -> {NextVer, Processed, [Version | ReqBuffer], Deferred}";
+      "                end;";
+      "            _ -> {NextVer, Processed, ReqBuffer, Deferred}";
+      "        end";
+      "    end, {NextVerT, ProcessedT, [], DeferredT}, Sorted_req_buf),";
+      "    ";
+      "    receive";
+      "        {request, {Party, Ver}} ->";
+      "            " ^ func_name ^ "(Config, Connections,";
+      "                NodeState#{buffer := NBuffer, next_ver := NNextVer, processed := NProcessed,";
+      "                          req_buffer := lists:reverse([{Party, Ver} | NReqBuffer]), deferred := NDeferred});";
+      "        {{Party, Ver}, InputName, Value} ->";
+      "            UpdatedBuffer = buffer_update(Deps, [], {{Party, Ver}, InputName, Value}, NBuffer),";
+      "            " ^ func_name ^ "(Config, Connections,";
+      "                NodeState#{buffer := UpdatedBuffer, next_ver := NNextVer, processed := NProcessed,";
+      "                          req_buffer := NReqBuffer, deferred := NDeferred})";
+      "    end.";
+    ]
+  else
+    (* Source node (no dependencies) *)
+    String.concat "\n" [
+      func_name ^ "(Config, Connections, NodeState) ->";
+      "    #{register_name := RegName, compute := ComputeFn} = Config,";
+      "    #{downstreams := Downstreams} = Connections,";
+      "    #{buffer := Buffer0, next_ver := NextVer0, processed := Processed0, req_buffer := ReqBuffer0, deferred := Deferred0} = NodeState,";
+      "    ";
+      "    %% Process Buffer (source nodes have no inputs)";
+      "    HL = lists:sort(?SORTBuffer, maps:to_list(Buffer0)),";
+      "    {NBuffer, NextVerT, ProcessedT, DeferredT} = lists:foldl(fun(_E, {Buffer, NextVer, Processed, Deferred}) ->";
+      "        {Buffer, NextVer, Processed, Deferred}";
+      "    end, {Buffer0, NextVer0, Processed0, Deferred0}, HL),";
+      "    ";
+      "    %% Process Request Buffer";
+      "    Sorted_req_buf = lists:sort(?SORTVerBuffer, ReqBuffer0),";
+      "    {NNextVer, NProcessed, NReqBuffer, NDeferred} = lists:foldl(fun(E, {NextVer, Processed, ReqBuffer, Deferred}) ->";
+      "        case E of";
+      "            {Party, Ver} = Version ->";
+      "                CurrentNextVer = maps:get(Party, NextVer, 0),";
+      "                case CurrentNextVer =:= Ver of";
+      "                    true ->";
+      "                        %% Source node: compute value using injected function";
+      "                        Result = ComputeFn(#{}),";
+      "                        out(RegName, Result),";
+      "                        ";
+      "                        %% Send to downstreams";
+      "                        lists:foreach(fun({DownstreamName, PortTag}) ->";
+      "                            DownstreamName ! {{Party, Ver}, PortTag, Result}";
+      "                        end, Downstreams),";
+      "                        ";
+      "                        {maps:update(Party, Ver + 1, NextVer), Processed, ReqBuffer, []};";
+      "                    false ->";
+      "                        {NextVer, Processed, [Version | ReqBuffer], Deferred}";
+      "                end;";
+      "            _ ->";
+      "                {NextVer, Processed, ReqBuffer, Deferred}";
+      "        end";
+      "    end, {NextVerT, ProcessedT, [], DeferredT}, Sorted_req_buf),";
+      "    ";
+      "    receive";
+      "        {request, {Party, Ver}} ->";
+      "            " ^ func_name ^ "(Config, Connections,";
+      "                NodeState#{buffer := NBuffer, next_ver := NNextVer, processed := NProcessed,";
+      "                          req_buffer := lists:reverse([{Party, Ver} | NReqBuffer]), deferred := NDeferred})";
+      "    end.";
+    ]
+
+(* Generate all module and node actors for unique modules *)
+let gen_all_actors inst_prog module_map =
+  let unique_modules = get_unique_modules inst_prog in
+  let actors = ref [] in
+  
+  List.iter (fun module_id ->
+    let mod_info = try M.find module_id module_map with Not_found ->
+      failwith ("Module not found: " ^ module_id) in
+    
+    (* Generate module actor *)
+    actors := gen_module_actor module_id :: !actors;
+    
+    (* Generate node actors only for compute nodes (mod_info.node), NOT for source nodes *)
+    List.iter (fun (node_id, _, _, _) ->
+      (* Check if this node has dependencies *)
+      let has_deps = List.length mod_info.source > 0 in
+      actors := gen_node_actor module_id node_id has_deps :: !actors
+    ) mod_info.node
+  ) unique_modules;
+  
+  String.concat "\n\n" (List.rev !actors)
+
+(* Build NodeSpecs map - only for actual compute nodes *)
+let gen_node_specs inst_prog module_map =
+  let specs = ref [] in
+  
+  List.iter (fun party_block ->
+    let party_id = party_block.Syntax.party_id in
+    
+    List.iter (fun (outputs, module_id, inputs) ->
+      let inst_name = List.hd outputs in
+      
+      let mod_info = try M.find module_id module_map with Not_found ->
+        failwith ("Module not found: " ^ module_id) in
+      
+      (* Generate specs only for compute nodes (mod_info.node) *)
+      List.iter (fun (node_id, _, _, _) ->
+        let qualified_name = party_id ^ "_" ^ inst_name ^ "_" ^ node_id in
+        
+        (* Build dependency list from inputs - get the actual output node names of upstream instances *)
+        let input_names = List.map get_instance_name inputs in
+        let deps = List.filter_map (fun input_name ->
+          (* Find the upstream instance in party_block.instances *)
+          try
+            let (upstream_outputs, upstream_module_id, _) = 
+              List.find (fun (outs, _, _) -> List.mem input_name outs) party_block.Syntax.instances in
+            let upstream_inst_name = List.hd upstream_outputs in
+            let upstream_mod_info = M.find upstream_module_id module_map in
+            (* Get the first output node of the upstream module *)
+            match upstream_mod_info.node with
+            | (first_node_id, _, _, _) :: _ ->
+                Some (party_id ^ "_" ^ upstream_inst_name ^ "_" ^ first_node_id)
+            | [] -> None
+          with Not_found -> None
+        ) input_names in
+        let deps_str = "[" ^ String.concat ", " deps ^ "]" in
+        
+        let spec = Printf.sprintf "        %s => #{party => %s, module => %s, dependencies => %s}"
+          qualified_name party_id module_id deps_str in
+        specs := spec :: !specs
+      ) mod_info.node
+    ) party_block.Syntax.instances
+  ) inst_prog.Syntax.parties;
+  
+  "    NodeSpecs = #{\n" ^ String.concat ",\n" (List.rev !specs) ^ "\n    }"
+
+(* Generate start/0 function with actor spawning *)
+let gen_start inst_prog module_map =
+  let party_block = List.hd inst_prog.parties in
   let party_id = party_block.party_id in
-  List.map (fun (outputs, module_id, inputs) ->
-    let input_names = List.map get_instance_name inputs in
-    (* Assign party_id to all instances in this party *)
-    (outputs, module_id, [party_id], input_names)
-  ) party_block.instances
-
-(* Main entry point: convert party syntax and call existing gen_inst *)
-let gen_new_inst inst_prog module_map =
-  match inst_prog.parties with
-  | [] -> failwith "No party blocks found in instance file"
-  | party_block :: _ ->
-      (* Convert to newnode format *)
-      let newnode = convert_party_to_newnode party_block in
+  let leader = party_block.leader in
+  let interval = party_block.periodic_ms in
+  let all_instances = party_block.instances in
+  
+  let spawn_code = ref [] in
+  
+  (* Generate spawn code for each instance *)
+  List.iter (fun (outputs, module_id, inputs) ->
+    let inst_name = List.hd outputs in
+    let mod_info = try M.find module_id module_map with Not_found ->
+      failwith ("Module not found: " ^ module_id) in
+    
+    (* Calculate node names for this module (only compute nodes) *)
+    let node_names = List.map (fun (node_id, _, _, _) ->
+      party_id ^ "_" ^ inst_name ^ "_" ^ node_id
+    ) mod_info.node in
+    let nodes_str = "[" ^ String.concat ", " node_names ^ "]" in
+    
+    (* Calculate SyncDownstreams: upstream instances that this instance depends on *)
+    (* This follows codegen.ml's inputs_module logic: send sync pulse to data sources *)
+    let upstream_instances = List.filter_map (fun input_qid ->
+      let upstream_inst = get_instance_name input_qid in
+      (* Only include if upstream is in same party *)
+      let upstream_exists = List.exists (fun (out, _, _) -> List.hd out = upstream_inst) all_instances in
+      if upstream_exists && upstream_inst <> inst_name then
+        Some (party_id ^ "_" ^ upstream_inst)
+      else
+        None
+    ) inputs in
+    let sync_downstreams = "[" ^ String.concat ", " upstream_instances ^ "]" in
+    
+    (* Spawn module actor *)
+    let module_spawn = Printf.sprintf
+      "    PID_%s_%s = spawn(?MODULE, run_%s, [[], [], %s, 0, #{nodes => %s, request_targets => get_request_nodes(NodeSpecs, %s, %s)}, %s]),\n    register(%s_%s, PID_%s_%s)"
+      party_id inst_name module_id party_id nodes_str nodes_str party_id sync_downstreams party_id inst_name party_id inst_name in
+    spawn_code := module_spawn :: !spawn_code;
+    
+    (* Spawn node actors (only for compute nodes, NOT source nodes) *)
+    List.iter (fun (node_id, _, _, expr) ->
+      let qualified = party_id ^ "_" ^ inst_name ^ "_" ^ node_id in
       
-      (* Build id2party map: map each instance output to its party *)
-      let id2party = List.fold_left (fun acc (outputs, _, _, _) ->
-        List.fold_left (fun acc' output -> M.add output party_block.party_id acc') acc outputs
-      ) M.empty newnode in
+      (* Generate compute function *)
+      let compute_fn = "fun(Inputs) -> " ^ expr_to_erlang expr ^ " end" in
       
-      (* Find the leader module *)
-      let leader_module_id = 
-        let rec find_leader = function
-          | [] -> failwith ("Leader instance not found: " ^ party_block.leader)
-          | (outputs, module_id, _, _) :: rest ->
-              if List.mem party_block.leader outputs then module_id
-              else find_leader rest
-        in find_leader newnode
+      (* Build dependency list for Config *)
+      let input_names = List.map get_instance_name inputs in
+      let deps = List.mapi (fun i _ ->
+        List.nth mod_info.source i
+      ) input_names in
+      let deps_str = "[" ^ String.concat ", " deps ^ "]" in
+      
+      (* Build downstreams list: find all instances that use this node as input *)
+      let downstream_list = ref [] in
+      List.iter (fun (outputs_dst, module_id_dst, inputs_dst) ->
+        let inst_name_dst = List.hd outputs_dst in
+        List.iteri (fun i input_qid ->
+          let input_inst = get_instance_name input_qid in
+          if input_inst = inst_name then
+            let dst_mod = M.find module_id_dst module_map in
+            let dst_port = List.nth dst_mod.source i in
+            (* Get first compute node of destination module *)
+            let dst_node_id = match dst_mod.node with
+              | (first_node_id, _, _, _) :: _ -> first_node_id
+              | [] -> failwith ("No compute nodes in module: " ^ module_id_dst)
+            in
+            let dst_qualified = party_id ^ "_" ^ inst_name_dst ^ "_" ^ dst_node_id in
+            downstream_list := (party_id ^ "_" ^ inst_name_dst, dst_port, dst_qualified) :: !downstream_list
+        ) inputs_dst
+      ) all_instances;
+      let downstreams = if !downstream_list = [] then "[]" else
+        "[" ^ String.concat ", " (List.map (fun (_mod_name, port, node_name) ->
+          Printf.sprintf "{%s, %s}" node_name port
+        ) !downstream_list) ^ "]"
       in
       
-      (* Enrich module_map with party information *)
-      (* Strategy: Add dummy party info to modules, then override with actual party from instance file *)
-      let enriched_module_map = List.fold_left (fun acc_map (_, module_id, _, _) ->
-        let mod_info = try M.find module_id acc_map with Not_found -> failwith ("Module not found: " ^ module_id) in
+      let node_spawn = Printf.sprintf
+        "    PID_%s = spawn(?MODULE, run_%s_%s, [#{register_name => %s, dependencies => %s, compute => %s}, #{downstreams => %s}, #{buffer => #{}, next_ver => #{%s => 0}, processed => #{}, req_buffer => [], deferred => []}]),\n    register(%s, PID_%s)"
+        qualified module_id node_id qualified deps_str compute_fn downstreams party_id qualified qualified in
+      spawn_code := node_spawn :: !spawn_code
+    ) mod_info.node
+  ) all_instances;
+  
+  let spawn_lines = List.rev !spawn_code in
+  let spawn_with_commas = match spawn_lines with
+    | [] -> []
+    | _ -> 
+        let rec add_commas = function
+          | [] -> []
+          | [last] -> [last]
+          | x :: xs -> (x ^ ",") :: add_commas xs
+        in add_commas spawn_lines
+  in
+  
+  String.concat "\n" ([
+    "start() ->";
+    gen_node_specs inst_prog module_map ^ ",";
+    "";
+    "    %% Spawn module actors and node actors";
+  ] @ spawn_with_commas @ [
+    ",";
+    "";
+    "    %% Spawn party actor";
+    "    PartyConfig = #{";
+    "        party => " ^ party_id ^ ",";
+    "        leader => " ^ party_id ^ "_" ^ leader ^ ",";
+    "        mode => periodic,";
+    "        interval => " ^ string_of_int interval ^ ",";
+    "        subscribers => []";
+    "    },";
+    "    PID_party = spawn(?MODULE, run_party, [PartyConfig, 0]),";
+    "    register(party_" ^ party_id ^ ", PID_party),";
+    "    void.";
+  ])
+
+(* Generate output handler *)
+let gen_out inst_prog module_map =
+  let entries = ref [] in
+  
+  List.iter (fun party_block ->
+    let party_id = party_block.Syntax.party_id in
+    
+    List.iter (fun (outputs, module_id, _) ->
+      let inst_name = List.hd outputs in
+      
+      let mod_info = try M.find module_id module_map with Not_found ->
+        failwith ("Module not found: " ^ module_id) in
+      
+      (* Generate output handler for each compute node *)
+      List.iter (fun (node_id, _, _, _) ->
+        let qualified = party_id ^ "_" ^ inst_name ^ "_" ^ node_id in
         
-        (* If module already has party info (from original syntax), keep it *)
-        if mod_info.party <> [] && not (M.is_empty mod_info.id2party) then
-          (* Module already has party annotations - override them with instance party *)
-          let enriched_id2party = M.map (fun _ -> party_block.party_id) mod_info.id2party in
-          let enriched_nodes = List.map (fun (id, _, init, expr) ->
-            (id, party_block.party_id, init, expr)
-          ) mod_info.node in
-          let enriched_mod = { mod_info with 
-            id2party = enriched_id2party; 
-            party = [party_block.party_id];
-            node = enriched_nodes
-          } in
-          M.add module_id enriched_mod acc_map
+        (* Check if this is a sink node *)
+        if List.mem node_id mod_info.sink then
+          entries := (Printf.sprintf "out(%s, Value) -> io:format(\"Output from %s: ~p~n\", [Value]), void;"
+            qualified qualified) :: !entries
         else
-          (* Module has no party info - add dummy party to all nodes *)
-          let all_node_names = mod_info.source @ mod_info.sink @ (List.map (fun (id, _, _, _) -> id) mod_info.node) in
-          let all_node_names = List.filter (fun s -> s <> "") all_node_names in
-          let enriched_id2party = List.fold_left (fun m node_id ->
-            M.add node_id party_block.party_id m
-          ) M.empty all_node_names in
-          (* Also update node definitions to include party *)
-          let enriched_nodes = List.map (fun (id, p, init, expr) ->
-            let new_p = if p = "" then party_block.party_id else p in
-            (id, new_p, init, expr)
-          ) mod_info.node in
-          (* Add leader info if this is the leader module *)
-          let enriched_leader = 
-            if module_id = leader_module_id then
-              [(party_block.party_id, "periodic", [EConst(CInt(party_block.periodic_ms))])]
-            else
-              mod_info.leader
-          in
-          let enriched_mod = { mod_info with 
-            id2party = enriched_id2party; 
-            party = [party_block.party_id];
-            node = enriched_nodes;
-            leader = enriched_leader
-          } in
-          M.add module_id enriched_mod acc_map
-      ) module_map newnode in
-      
-      (* Create pseudo-module for gen_inst *)
-      let inst_module = {
-        id = party_block.party_id;
-        party = [party_block.party_id];
-        source = [];
-        extern_input = [];
-        sink = [];
-        const = [];
-        func = [];
-        node = [];
-        newnode = newnode;
-        (* leader format: (party_id, leader_instance_id, [periodic_expr]) *)
-        leader = [(party_block.party_id, party_block.leader, [EConst(CInt(party_block.periodic_ms))])];
-        typeinfo = M.empty;
-        id2party = id2party;
-      } in
-      
-      (* Delegate to existing Codegen.gen_inst with enriched module_map *)
-      Codegen.gen_inst inst_module enriched_module_map
+          entries := (Printf.sprintf "out(%s, _) -> void;" qualified) :: !entries
+      ) mod_info.node
+    ) party_block.Syntax.instances
+  ) inst_prog.Syntax.parties;
+  
+  String.concat "\n" (!entries @ ["out(_, _) -> erlang:error(badarg)."])
+
+(* Generate export declarations *)
+let gen_exports inst_prog module_map =
+  let unique_modules = get_unique_modules inst_prog in
+  let exports = ref ["-export([start/0, out/2, run_party/2, get_request_nodes/3])."] in
+  
+  (* Export module actors *)
+  let module_exports = List.map (fun m -> "run_" ^ m ^ "/6") unique_modules in
+  if List.length module_exports > 0 then
+    exports := ("-export([" ^ String.concat ", " module_exports ^ "]).") :: !exports;
+  
+  (* Export node actors *)
+  let node_exports = ref [] in
+  List.iter (fun module_id ->
+    let mod_info = try M.find module_id module_map with Not_found ->
+      failwith ("Module not found: " ^ module_id) in
+    List.iter (fun (node_id, _, _, _) ->
+      node_exports := ("run_" ^ module_id ^ "_" ^ node_id ^ "/3") :: !node_exports
+    ) mod_info.node
+  ) unique_modules;
+  if List.length !node_exports > 0 then
+    exports := ("-export([" ^ String.concat ", " !node_exports ^ "]).") :: !exports;
+  
+  String.concat "\n" (List.rev !exports)
+
+(* Main entry point *)
+let gen_new_inst inst_prog module_map =
+  let party_block = List.hd inst_prog.Syntax.parties in
+  let module_name = party_block.Syntax.party_id in
+  
+  String.concat "\n\n" [
+    "-module(" ^ module_name ^ ").";
+    gen_exports inst_prog module_map;
+    "";
+    gen_helpers ();
+    "";
+    gen_get_request_nodes ();
+    "";
+    gen_run_party ();
+    "";
+    gen_all_actors inst_prog module_map;
+    "";
+    gen_start inst_prog module_map;
+    "";
+    gen_out inst_prog module_map;
+  ]
