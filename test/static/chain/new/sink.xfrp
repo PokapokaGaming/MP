@@ -1,0 +1,4 @@
+module sink
+in r_val: Int
+out k_val: Int
+node k_val: Int = r_val * 10

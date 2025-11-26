@@ -1,0 +1,5 @@
+module main
+newnode (jin) = join{p}(fst, slw)
+newnode (fst) = pass{p}(src)
+newnode (slw) = pass{p}(src)
+newnode (src) = source{p}(jin)

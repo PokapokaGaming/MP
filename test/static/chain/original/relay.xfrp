@@ -1,0 +1,5 @@
+module relay
+party g
+in s_val{g}: Int
+out r_val{g}: Int
+node r_val{g}: Int = s_val + 1

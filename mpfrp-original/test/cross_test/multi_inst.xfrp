@@ -1,0 +1,2 @@
+module Multi_inst
+newnode (join) = MultiSrc{p1, p2}()

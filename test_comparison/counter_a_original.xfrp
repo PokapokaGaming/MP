@@ -1,7 +1,0 @@
-module CounterA
-party p
-in dummy_a{p}: Int
-out a{p}: Int
-
-party p = periodic(100)
-node init[1] a{p}: Int = a@last + 1

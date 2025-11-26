@@ -1,0 +1,8 @@
+module agg
+party p
+in s1{p}: Int,
+   s2{p}: Int,
+   s3{p}: Int
+out combined{p}: Int
+party p = periodic(2000)
+node combined{p}: Int = s1 + s2 + s3

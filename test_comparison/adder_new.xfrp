@@ -1,5 +1,0 @@
-module Adder
-in a: Int, b: Int
-out c: Int
-
-node c: Int = a + b

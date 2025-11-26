@@ -1,0 +1,13 @@
+# 実験1b: 内部ソースをoutとして公開
+# srcをoutとして公開した場合、リクエストが送られるか確認
+module InternalSrcOut
+party p
+in
+out
+  src{p}: Int,
+  o{p}: Int
+
+party p = periodic(1000)
+
+node src{p}: Int = 100
+node o{p}: Int = src

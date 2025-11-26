@@ -1,4 +1,4 @@
 module source
 in
 out val: Int
-node val: Int = 1
+node val: Int = 42

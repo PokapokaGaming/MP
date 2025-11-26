@@ -1,0 +1,4 @@
+module pass
+in i: Int
+out o: Int
+node o: Int = i

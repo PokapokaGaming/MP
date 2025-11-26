@@ -1,0 +1,4 @@
+module sink
+in local: Int, remote: Int
+out result: Int
+node result: Int = local + remote

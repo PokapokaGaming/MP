@@ -1,0 +1,3 @@
+module ProducerConsumer_inst
+newnode (val) = Producer{p}()
+newnode (o) = Consumer{p}(val)

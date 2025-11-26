@@ -1,4 +1,0 @@
-module CounterA
-party p
-out a{p}: Int
-node init[1] a{p}: Int = a@last + 1

@@ -1,0 +1,25 @@
+# Multi-source cross-party test
+# join{p1} depends on src1{p1}, src2{p1}, src3{p2}, src4{p2}
+# Question: Are src3 and src4 (both p2) synchronized?
+
+module MultiSrc
+party p1, p2
+in
+out
+  join{p1} : Int
+
+party p1 = periodic(500)
+party p2 = periodic(1000)
+
+native fun get_value(): Int
+
+# Sources in p1
+node src1{p1}: Int = get_value()
+node src2{p1}: Int = get_value()
+
+# Sources in p2
+node src3{p2}: Int = get_value()
+node src4{p2}: Int = get_value()
+
+# Join in p1 - depends on all 4 sources
+node join{p1}: Int = src1 + src2 + src3 + src4

@@ -1,0 +1,7 @@
+module join
+party p
+in fast{p}: Int,
+	slow{p}: Int
+out diff{p}: Int
+party p = periodic(1000)
+node diff{p}: Int = fast - slow

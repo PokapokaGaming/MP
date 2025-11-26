@@ -1,0 +1,2 @@
+module UsedIn_inst
+newnode (o) = UsedIn{p}(o)

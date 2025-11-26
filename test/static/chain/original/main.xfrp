@@ -1,0 +1,4 @@
+module main
+newnode (k) = sink{p}(r)
+newnode (r) = relay{p}(s)
+newnode (s) = source{p}()

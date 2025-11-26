@@ -1,0 +1,6 @@
+module sink
+party g
+in r_val{g}: Int
+out k_val{g}: Int
+party g = periodic(1000)
+node k_val{g}: Int = r_val * 10

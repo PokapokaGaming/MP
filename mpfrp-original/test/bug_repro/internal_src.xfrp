@@ -1,0 +1,11 @@
+# 実験1: 内部定義ソース（Internal Source）
+# 入力ポート（in）を持たず、内部で定義された定数ノードがリクエスト対象になるか確認
+module InternalSrc
+party p
+in
+out o{p}: Int
+
+party p = periodic(1000)
+
+node src{p}: Int = 100
+node o{p}: Int = src

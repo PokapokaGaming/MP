@@ -1,0 +1,4 @@
+module relay
+in s_val: Int
+out r_val: Int
+node r_val: Int = s_val + 1

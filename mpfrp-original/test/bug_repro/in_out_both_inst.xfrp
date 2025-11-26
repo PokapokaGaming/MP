@@ -1,0 +1,2 @@
+module InOutBoth_inst
+newnode (o) = InOutBoth{p}(o)

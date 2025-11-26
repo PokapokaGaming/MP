@@ -1,0 +1,5 @@
+module sensor
+party p
+in
+out data{p}: Int
+node data{p}: Int = 42

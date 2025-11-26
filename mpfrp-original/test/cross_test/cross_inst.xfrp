@@ -1,0 +1,2 @@
+module Cross_inst
+newnode (result) = Cross{p1, p2}()

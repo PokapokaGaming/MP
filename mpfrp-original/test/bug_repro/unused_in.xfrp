@@ -1,0 +1,14 @@
+# 実験: inが存在するが参照されない場合
+# in dummy は誰にも使われない
+# src は内部定義のソース
+module UnusedIn
+party p
+in
+  dummy{p}: Int
+out
+  o{p}: Int
+
+party p = periodic(1000)
+
+node src{p}: Int = 100
+node o{p}: Int = src

@@ -1,0 +1,13 @@
+# 実験: in が使われ、かつ内部ソースも存在
+# in: input（o で使われる）
+# 内部ソース: src（o で使われる）
+# out: o = input + src
+module InUsedPlusSrc
+party p
+in
+  input{p}: Int
+out
+  o{p}: Int
+
+node src{p}: Int = 100
+node o{p}: Int = input + src

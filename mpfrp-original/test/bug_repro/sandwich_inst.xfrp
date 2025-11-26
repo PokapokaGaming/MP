@@ -1,0 +1,2 @@
+module Sandwich_inst
+newnode (o) = Sandwich{p1, p2}()

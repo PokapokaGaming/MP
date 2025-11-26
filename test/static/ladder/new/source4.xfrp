@@ -1,0 +1,2 @@
+module source4
+node val: Int = 4

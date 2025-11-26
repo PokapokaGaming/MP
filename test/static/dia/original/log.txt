@@ -1,0 +1,294 @@
+main_clean:start().
+[DEBUG] Node:join_1_diff ===== START PROCESSING =====
+[TRACE] Node:source_4_val Ver:{p,0} Event:Request Payload:none
+true
+[DEBUG] Node:join_1_diff Buffer contents (sorted): [{{p,0},#{}}]
+[TRACE] Node:source_4_val Ver:0 Event:Compute Payload:42
+[DEBUG] Node:join_1_diff NextVer: #{p => 0}, Processed: #{}, Deferred: []
+[TRACE] Node:pass_3_o Ver:0 Event:Receive Payload:{i,42}
+[TRACE] Node:pass_2_o Ver:0 Event:Receive Payload:{i,42}
+[DEBUG] Node:join_1_diff Required dependencies: [fast,slow]
+[TRACE] Node:pass_3_o Ver:0 Event:Compute Payload:42
+[TRACE] Node:pass_2_o Ver:0 Event:Compute Payload:42
+[DEBUG] Node:join_1_diff ===== END PROCESSING =====
+[DELAY] Node:pass_3_o Ver:0 injecting 500ms delay before send
+[DEBUG] Node:join_1_diff Final buffer: [{{p,0},#{}}]
+[DEBUG] Node:join_1_diff Waiting for message, current buffer: [{{p,0},#{}}]
+[DEBUG] Node:join_1_diff Ver:0 Before buffer_update: Buffer=[{{p,0},#{}}]
+[TRACE] Node:join_1_diff Ver:0 Event:Receive Payload:{fast,42}
+[DEBUG] Node:join_1_diff Ver:0 After buffer_update: Buffer=[{{p,0},
+                                                             #{fast => 42}}]
+[DEBUG] Node:join_1_diff ===== START PROCESSING =====
+[DEBUG] Node:join_1_diff Buffer contents (sorted): [{{p,0},#{fast => 42}}]
+[DEBUG] Node:join_1_diff NextVer: #{p => 0}, Processed: #{}, Deferred: []
+[DEBUG] Node:join_1_diff Required dependencies: [fast,slow]
+[DEBUG] Node:join_1_diff ===== END PROCESSING =====
+[DEBUG] Node:join_1_diff Final buffer: [{{p,0},#{fast => 42}}]
+[DEBUG] Node:join_1_diff Waiting for message, current buffer: [{{p,0},
+                                                                #{fast =>
+                                                                      42}}]
+[TRACE] Node:source_4_val Ver:{p,1} Event:Request Payload:none
+[TRACE] Node:source_4_val Ver:1 Event:Compute Payload:42
+[TRACE] Node:pass_2_o Ver:1 Event:Receive Payload:{i,42}
+[TRACE] Node:pass_2_o Ver:1 Event:Compute Payload:42
+[DEBUG] Node:join_1_diff Ver:1 Before buffer_update: Buffer=[{{p,0},
+                                                              #{fast => 42}}]
+[TRACE] Node:join_1_diff Ver:1 Event:Receive Payload:{fast,42}
+[DEBUG] Node:join_1_diff Ver:1 After buffer_update: Buffer=[{{p,0},
+                                                             #{fast => 42}},
+                                                            {{p,1},
+                                                             #{fast => 42}}]
+[DEBUG] Node:join_1_diff ===== START PROCESSING =====
+[DEBUG] Node:join_1_diff Buffer contents (sorted): [{{p,0},#{fast => 42}},
+                                                    {{p,1},#{fast => 42}}]
+[DEBUG] Node:join_1_diff NextVer: #{p => 0}, Processed: #{}, Deferred: []
+[DEBUG] Node:join_1_diff Required dependencies: [fast,slow]
+[DEBUG] Node:join_1_diff ===== END PROCESSING =====
+[DEBUG] Node:join_1_diff Final buffer: [{{p,0},#{fast => 42}},
+                                        {{p,1},#{fast => 42}}]
+[DEBUG] Node:join_1_diff Waiting for message, current buffer: [{{p,0},
+                                                                #{fast => 42}},
+                                                               {{p,1},
+                                                                #{fast =>
+                                                                      42}}]
+[TRACE] Node:source_4_val Ver:{p,2} Event:Request Payload:none
+[TRACE] Node:source_4_val Ver:2 Event:Compute Payload:42
+[TRACE] Node:pass_2_o Ver:2 Event:Receive Payload:{i,42}
+[TRACE] Node:pass_2_o Ver:2 Event:Compute Payload:42
+[DEBUG] Node:join_1_diff Ver:2 Before buffer_update: Buffer=[{{p,0},
+                                                              #{fast => 42}},
+                                                             {{p,1},
+                                                              #{fast => 42}}]
+[TRACE] Node:join_1_diff Ver:2 Event:Receive Payload:{fast,42}
+[DEBUG] Node:join_1_diff Ver:2 After buffer_update: Buffer=[{{p,0},
+                                                             #{fast => 42}},
+                                                            {{p,1},
+                                                             #{fast => 42}},
+                                                            {{p,2},
+                                                             #{fast => 42}}]
+[DEBUG] Node:join_1_diff ===== START PROCESSING =====
+[DEBUG] Node:join_1_diff Buffer contents (sorted): [{{p,0},#{fast => 42}},
+                                                    {{p,1},#{fast => 42}},
+                                                    {{p,2},#{fast => 42}}]
+[DEBUG] Node:join_1_diff NextVer: #{p => 0}, Processed: #{}, Deferred: []
+[DEBUG] Node:join_1_diff Required dependencies: [fast,slow]
+[DEBUG] Node:join_1_diff ===== END PROCESSING =====
+[DEBUG] Node:join_1_diff Final buffer: [{{p,0},#{fast => 42}},
+                                        {{p,1},#{fast => 42}},
+                                        {{p,2},#{fast => 42}}]
+[DEBUG] Node:join_1_diff Waiting for message, current buffer: [{{p,0},
+                                                                #{fast => 42}},
+                                                               {{p,1},
+                                                                #{fast => 42}},
+                                                               {{p,2},
+                                                                #{fast =>
+                                                                      42}}]
+[TRACE] Node:source_4_val Ver:{p,3} Event:Request Payload:none
+[TRACE] Node:source_4_val Ver:3 Event:Compute Payload:42
+[TRACE] Node:pass_2_o Ver:3 Event:Receive Payload:{i,42}
+[TRACE] Node:pass_2_o Ver:3 Event:Compute Payload:42
+[DEBUG] Node:join_1_diff Ver:3 Before buffer_update: Buffer=[{{p,0},
+                                                              #{fast => 42}},
+                                                             {{p,1},
+                                                              #{fast => 42}},
+                                                             {{p,2},
+                                                              #{fast => 42}}]
+[TRACE] Node:join_1_diff Ver:3 Event:Receive Payload:{fast,42}
+[DEBUG] Node:join_1_diff Ver:3 After buffer_update: Buffer=[{{p,0},
+                                                             #{fast => 42}},
+                                                            {{p,1},
+                                                             #{fast => 42}},
+                                                            {{p,2},
+                                                             #{fast => 42}},
+                                                            {{p,3},
+                                                             #{fast => 42}}]
+[DEBUG] Node:join_1_diff ===== START PROCESSING =====
+[DEBUG] Node:join_1_diff Buffer contents (sorted): [{{p,0},#{fast => 42}},
+                                                    {{p,1},#{fast => 42}},
+                                                    {{p,2},#{fast => 42}},
+                                                    {{p,3},#{fast => 42}}]
+[DEBUG] Node:join_1_diff NextVer: #{p => 0}, Processed: #{}, Deferred: []
+[DEBUG] Node:join_1_diff Required dependencies: [fast,slow]
+[DEBUG] Node:join_1_diff ===== END PROCESSING =====
+[DEBUG] Node:join_1_diff Final buffer: [{{p,0},#{fast => 42}},
+                                        {{p,1},#{fast => 42}},
+                                        {{p,2},#{fast => 42}},
+                                        {{p,3},#{fast => 42}}]
+[DEBUG] Node:join_1_diff Waiting for message, current buffer: [{{p,0},
+                                                                #{fast => 42}},
+                                                               {{p,1},
+                                                                #{fast => 42}},
+                                                               {{p,2},
+                                                                #{fast => 42}},
+                                                               {{p,3},
+                                                                #{fast =>
+                                                                      42}}]
+[TRACE] Node:source_4_val Ver:{p,4} Event:Request Payload:none
+[TRACE] Node:source_4_val Ver:4 Event:Compute Payload:42
+[TRACE] Node:pass_2_o Ver:4 Event:Receive Payload:{i,42}
+[TRACE] Node:pass_2_o Ver:4 Event:Compute Payload:42
+[DEBUG] Node:join_1_diff Ver:4 Before buffer_update: Buffer=[{{p,0},
+                                                              #{fast => 42}},
+                                                             {{p,1},
+                                                              #{fast => 42}},
+                                                             {{p,2},
+                                                              #{fast => 42}},
+                                                             {{p,3},
+                                                              #{fast => 42}}]
+[TRACE] Node:join_1_diff Ver:4 Event:Receive Payload:{fast,42}
+[DEBUG] Node:join_1_diff Ver:4 After buffer_update: Buffer=[{{p,0},
+                                                             #{fast => 42}},
+                                                            {{p,1},
+                                                             #{fast => 42}},
+                                                            {{p,2},
+                                                             #{fast => 42}},
+                                                            {{p,3},
+                                                             #{fast => 42}},
+                                                            {{p,4},
+                                                             #{fast => 42}}]
+[DEBUG] Node:join_1_diff ===== START PROCESSING =====
+[DEBUG] Node:join_1_diff Buffer contents (sorted): [{{p,0},#{fast => 42}},
+                                                    {{p,1},#{fast => 42}},
+                                                    {{p,2},#{fast => 42}},
+                                                    {{p,3},#{fast => 42}},
+                                                    {{p,4},#{fast => 42}}]
+[DEBUG] Node:join_1_diff NextVer: #{p => 0}, Processed: #{}, Deferred: []
+[DEBUG] Node:join_1_diff Required dependencies: [fast,slow]
+[DEBUG] Node:join_1_diff ===== END PROCESSING =====
+[DEBUG] Node:join_1_diff Final buffer: [{{p,0},#{fast => 42}},
+                                        {{p,1},#{fast => 42}},
+                                        {{p,2},#{fast => 42}},
+                                        {{p,3},#{fast => 42}},
+                                        {{p,4},#{fast => 42}}]
+[DEBUG] Node:join_1_diff Waiting for message, current buffer: [{{p,0},
+                                                                #{fast => 42}},
+                                                               {{p,1},
+                                                                #{fast => 42}},
+                                                               {{p,2},
+                                                                #{fast => 42}},
+                                                               {{p,3},
+                                                                #{fast => 42}},
+                                                               {{p,4},
+                                                                #{fast =>
+                                                                      42}}]
+[TRACE] Node:source_4_val Ver:{p,5} Event:Request Payload:none
+[TRACE] Node:source_4_val Ver:5 Event:Compute Payload:42
+[TRACE] Node:pass_2_o Ver:5 Event:Receive Payload:{i,42}
+[TRACE] Node:pass_2_o Ver:5 Event:Compute Payload:42
+[DEBUG] Node:join_1_diff Ver:5 Before buffer_update: Buffer=[{{p,0},
+                                                              #{fast => 42}},
+                                                             {{p,1},
+                                                              #{fast => 42}},
+                                                             {{p,2},
+                                                              #{fast => 42}},
+                                                             {{p,3},
+                                                              #{fast => 42}},
+                                                             {{p,4},
+                                                              #{fast => 42}}]
+[TRACE] Node:join_1_diff Ver:5 Event:Receive Payload:{fast,42}
+[DEBUG] Node:join_1_diff Ver:5 After buffer_update: Buffer=[{{p,0},
+                                                             #{fast => 42}},
+                                                            {{p,1},
+                                                             #{fast => 42}},
+                                                            {{p,2},
+                                                             #{fast => 42}},
+                                                            {{p,3},
+                                                             #{fast => 42}},
+                                                            {{p,4},
+                                                             #{fast => 42}},
+                                                            {{p,5},
+                                                             #{fast => 42}}]
+[DEBUG] Node:join_1_diff ===== START PROCESSING =====
+[DEBUG] Node:join_1_diff Buffer contents (sorted): [{{p,0},#{fast => 42}},
+                                                    {{p,1},#{fast => 42}},
+                                                    {{p,2},#{fast => 42}},
+                                                    {{p,3},#{fast => 42}},
+                                                    {{p,4},#{fast => 42}},
+                                                    {{p,5},#{fast => 42}}]
+[DEBUG] Node:join_1_diff NextVer: #{p => 0}, Processed: #{}, Deferred: []
+[DEBUG] Node:join_1_diff Required dependencies: [fast,slow]
+[DEBUG] Node:join_1_diff ===== END PROCESSING =====
+[DEBUG] Node:join_1_diff Final buffer: [{{p,0},#{fast => 42}},
+                                        {{p,1},#{fast => 42}},
+                                        {{p,2},#{fast => 42}},
+                                        {{p,3},#{fast => 42}},
+                                        {{p,4},#{fast => 42}},
+                                        {{p,5},#{fast => 42}}]
+[DEBUG] Node:join_1_diff Waiting for message, current buffer: [{{p,0},
+                                                                #{fast => 42}},
+                                                               {{p,1},
+                                                                #{fast => 42}},
+                                                               {{p,2},
+                                                                #{fast => 42}},
+                                                               {{p,3},
+                                                                #{fast => 42}},
+                                                               {{p,4},
+                                                                #{fast => 42}},
+                                                               {{p,5},
+                                                                #{fast =>
+                                                                      42}}]
+[DELAY] Node:pass_3_o Ver:0 sending after delay
+[TRACE] Node:pass_3_o Ver:1 Event:Receive Payload:{i,42}
+[DEBUG] Node:join_1_diff Ver:0 Before buffer_update: Buffer=[{{p,0},
+                                                              #{fast => 42}},
+                                                             {{p,1},
+                                                              #{fast => 42}},
+                                                             {{p,2},
+                                                              #{fast => 42}},
+                                                             {{p,3},
+                                                              #{fast => 42}},
+                                                             {{p,4},
+                                                              #{fast => 42}},
+                                                             {{p,5},
+                                                              #{fast => 42}}]
+[TRACE] Node:pass_3_o Ver:1 Event:Compute Payload:42
+[TRACE] Node:join_1_diff Ver:0 Event:Receive Payload:{slow,42}
+[DELAY] Node:pass_3_o Ver:1 injecting 500ms delay before send
+[DEBUG] Node:join_1_diff Ver:0 After buffer_update: Buffer=[{{p,0},
+                                                             #{fast => 42,
+                                                               slow => 42}},
+                                                            {{p,1},
+                                                             #{fast => 42}},
+                                                            {{p,2},
+                                                             #{fast => 42}},
+                                                            {{p,3},
+                                                             #{fast => 42}},
+                                                            {{p,4},
+                                                             #{fast => 42}},
+                                                            {{p,5},
+                                                             #{fast => 42}}]
+[DEBUG] Node:join_1_diff ===== START PROCESSING =====
+[DEBUG] Node:join_1_diff Buffer contents (sorted): [{{p,0},
+                                                     #{fast => 42,slow => 42}},
+                                                    {{p,1},#{fast => 42}},
+                                                    {{p,2},#{fast => 42}},
+                                                    {{p,3},#{fast => 42}},
+                                                    {{p,4},#{fast => 42}},
+                                                    {{p,5},#{fast => 42}}]
+[DEBUG] Node:join_1_diff NextVer: #{p => 0}, Processed: #{}, Deferred: []
+[DEBUG] Node:join_1_diff Required dependencies: [fast,slow]
+[DEBUG] Node:join_1_diff Ver:0 ----- Processing buffer entry -----
+[DEBUG] Node:join_1_diff Ver:0   InputMap=#{fast => 42,slow => 42}
+[DEBUG] Node:join_1_diff Ver:0   AllDepsPresent: true
+[DEBUG] Node:join_1_diff Ver:0   Sequential check: CurrentNextVer=0, Ver=0, Match=true
+[DEBUG] Node:join_1_diff Ver:0   READY TO COMPUTE! InputMap=#{fast => 42,
+                                                              slow => 42}
+[TRACE] Node:join_1_diff Ver:0 Event:Compute Payload:0
+[DEBUG] Node:join_1_diff Ver:0   Action: Removing from buffer, updating NextVer to 1
+[DEBUG] Node:join_1_diff ===== END PROCESSING =====
+[DEBUG] Node:join_1_diff Final buffer: [{{p,1},#{fast => 42}},
+                                        {{p,2},#{fast => 42}},
+                                        {{p,3},#{fast => 42}},
+                                        {{p,4},#{fast => 42}},
+                                        {{p,5},#{fast => 42}}]
+[DEBUG] Node:join_1_diff Waiting for message, current buffer: [{{p,1},
+                                                                #{fast => 42}},
+                                                               {{p,2},
+                                                                #{fast => 42}},
+                                                               {{p,3},
+                                                                #{fast => 42}},
+                                                               {{p,4},
+                                                                #{fast => 42}},
+                                                               {{p,5},
+                                                                #{fast =>
+                                                                      42}}]

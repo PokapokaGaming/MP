@@ -214,6 +214,7 @@ let bind (cs, ls) = "#{" ^ String.concat ", " (
 
 let same_party_code n dep (inst_id, inst_info) env id expr output_lst =
   indent n "Curr = " ^ erlang_of_expr env expr ^ ",\n"
+  ^ indent n "io:format(\"[TRACE] Node:~p Ver:~p Event:Compute Payload:~p~n\", [" ^ String.uncapitalize_ascii inst_id ^ "_" ^ id ^ ", Ver, Curr]),\n"
   ^ (if dep.is_output then
       indent n ("out(" ^ String.uncapitalize_ascii inst_id ^ "_" ^ id ^ ", Curr),\n")
       ^ let target_module_lst = try_find (try_find id inst_info.out_nns) inst_info.inst_in_map in
@@ -247,6 +248,7 @@ let other_party_code n dep (inst_id, inst_info) env id expr output_lst =
   ^ indent (n + 2) "void;\n"
   ^ indent (n + 1) "_ ->\n"
   ^ indent (n + 2) "Curr = " ^ erlang_of_expr env expr ^ ",\n"
+  ^ indent (n + 2) "io:format(\"[TRACE] Node:~p Ver:~p Event:Compute Payload:~p~n\", [" ^ String.uncapitalize_ascii inst_id ^ "_" ^ id ^ ", Ver, Curr]),\n"
   ^ (if dep.is_output then
       indent (n + 2) ("out(" ^ String.uncapitalize_ascii inst_id ^ "_" ^ id ^ ", Curr),\n")
       ^ let target_module_lst = try_find (try_find id inst_info.out_nns) inst_info.inst_in_map in
@@ -363,12 +365,14 @@ let def_node graph (inst_id, inst_info) env (id, p, init, expr) =
           pcl_lst
     ^ (gen_request_rel_code node_party dep (inst_id, inst_info) env id expr)
     ^ indent 1 "receive\n"
-    ^ indent 2 "{{_, _}, _, _} = Received ->\n"
+    ^ indent 2 "{{_, Ver}, InputName, Value} = Received ->\n"
+    ^ indent 3 "io:format(\"[TRACE] Node:~p Ver:~p Event:Receive Payload:{~p,~p}~n\", [" ^ String.uncapitalize_ascii inst_id ^ "_" ^ id ^ ", Ver, InputName, Value]),\n"
     ^ indent
         3
-        ((String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ "(buffer_update([" ^ String.concat ", " (extract_node dep.input_current) ^"], [" ^ String.concat ", " (extract_node dep.input_last)
+        ((String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ "(buffer_update([" ^ String.concat ", " (extract_node dep.input_current) ^"],[" ^ String.concat ", " (extract_node dep.input_last)
         ^ "], Received, NBuffer), NNextVer, NProcessed, NReqBuffer, NDeferred);\n")
     ^ indent 2 "{request, Ver} ->\n"
+    ^ indent 3 "io:format(\"[TRACE] Node:~p Ver:~p Event:Request Payload:none~n\", [" ^ String.uncapitalize_ascii inst_id ^ "_" ^ id ^ ", Ver]),\n"
     ^ indent 3 ((String.uncapitalize_ascii inst_id) ^ "_" ^ id ^ "(NBuffer, NNextVer, NProcessed, lists:reverse([Ver|NReqBuffer]), NDeferred)\n")
     ^ indent 1 "end."
 

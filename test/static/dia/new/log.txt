@@ -1,0 +1,632 @@
+main:start().
+[DEBUG] Node:j_diff ===== START PROCESSING =====
+[TRACE] Node:src_val Ver:0 Event:Request Payload:none
+void
+[DEBUG] Node:j_diff Buffer contents (sorted): []
+[TRACE] Node:src_val Ver:0 Event:Compute Payload:42
+[DEBUG] Node:j_diff NextVer: #{main => 0}, Processed: #{}, Deferred: []
+Output from main_src_val: 42
+[DEBUG] Node:j_diff Required dependencies: [fast,slow]
+[TRACE] Node:slow_o Ver:0 Event:Receive Payload:{i,42}
+[TRACE] Node:fast_o Ver:0 Event:Receive Payload:{i,42}
+[DEBUG] Node:j_diff ===== END PROCESSING =====
+[TRACE] Node:slow_o Ver:0 Event:Compute Payload:42
+[TRACE] Node:fast_o Ver:0 Event:Compute Payload:42
+[DEBUG] Node:j_diff Final buffer: []
+Output from main_slow_o: 42
+Output from main_fast_o: 42
+[DEBUG] Node:j_diff Waiting for message, current buffer: []
+[DELAY] Node:slow_o Ver:0 injecting 500ms delay before send
+[TRACE] Node:j_diff Ver:0 Event:Receive Payload:{fast,42}
+[DEBUG] Node:j_diff Ver:0 Before buffer_update: Buffer=[]
+[DEBUG] Node:j_diff Ver:0 After buffer_update: Buffer=[{{main,0},
+                                                        #{fast => 42}}]
+[DEBUG] Node:j_diff ===== START PROCESSING =====
+[DEBUG] Node:j_diff Buffer contents (sorted): [{{main,0},#{fast => 42}}]
+[DEBUG] Node:j_diff NextVer: #{main => 0}, Processed: #{}, Deferred: []
+[DEBUG] Node:j_diff Required dependencies: [fast,slow]
+[DEBUG] Node:j_diff Ver:0 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:0   Version={main,0}
+[DEBUG] Node:j_diff Ver:0   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:0   Dependency fast: true
+[DEBUG] Node:j_diff Ver:0   Dependency slow: false
+[DEBUG] Node:j_diff Ver:0   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:0   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff ===== END PROCESSING =====
+[DEBUG] Node:j_diff Final buffer: [{{main,0},#{fast => 42}}]
+[DEBUG] Node:j_diff Waiting for message, current buffer: [{{main,0},
+                                                           #{fast => 42}}]
+[TRACE] Node:src_val Ver:1 Event:Request Payload:none
+[TRACE] Node:src_val Ver:1 Event:Compute Payload:42
+Output from main_src_val: 42
+[TRACE] Node:fast_o Ver:1 Event:Receive Payload:{i,42}
+[TRACE] Node:fast_o Ver:1 Event:Compute Payload:42
+Output from main_fast_o: 42
+[TRACE] Node:j_diff Ver:1 Event:Receive Payload:{fast,42}
+[DEBUG] Node:j_diff Ver:1 Before buffer_update: Buffer=[{{main,0},
+                                                         #{fast => 42}}]
+[DEBUG] Node:j_diff Ver:1 After buffer_update: Buffer=[{{main,0},
+                                                        #{fast => 42}},
+                                                       {{main,1},
+                                                        #{fast => 42}}]
+[DEBUG] Node:j_diff ===== START PROCESSING =====
+[DEBUG] Node:j_diff Buffer contents (sorted): [{{main,0},#{fast => 42}},
+                                               {{main,1},#{fast => 42}}]
+[DEBUG] Node:j_diff NextVer: #{main => 0}, Processed: #{}, Deferred: []
+[DEBUG] Node:j_diff Required dependencies: [fast,slow]
+[DEBUG] Node:j_diff Ver:0 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:0   Version={main,0}
+[DEBUG] Node:j_diff Ver:0   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:0   Dependency fast: true
+[DEBUG] Node:j_diff Ver:0   Dependency slow: false
+[DEBUG] Node:j_diff Ver:0   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:0   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:1 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:1   Version={main,1}
+[DEBUG] Node:j_diff Ver:1   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:1   Dependency fast: true
+[DEBUG] Node:j_diff Ver:1   Dependency slow: false
+[DEBUG] Node:j_diff Ver:1   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:1   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff ===== END PROCESSING =====
+[DEBUG] Node:j_diff Final buffer: [{{main,0},#{fast => 42}},
+                                   {{main,1},#{fast => 42}}]
+[DEBUG] Node:j_diff Waiting for message, current buffer: [{{main,0},
+                                                           #{fast => 42}},
+                                                          {{main,1},
+                                                           #{fast => 42}}]
+[TRACE] Node:src_val Ver:2 Event:Request Payload:none
+[TRACE] Node:src_val Ver:2 Event:Compute Payload:42
+Output from main_src_val: 42
+[TRACE] Node:fast_o Ver:2 Event:Receive Payload:{i,42}
+[TRACE] Node:fast_o Ver:2 Event:Compute Payload:42
+Output from main_fast_o: 42
+[TRACE] Node:j_diff Ver:2 Event:Receive Payload:{fast,42}
+[DEBUG] Node:j_diff Ver:2 Before buffer_update: Buffer=[{{main,0},
+                                                         #{fast => 42}},
+                                                        {{main,1},
+                                                         #{fast => 42}}]
+[DEBUG] Node:j_diff Ver:2 After buffer_update: Buffer=[{{main,0},
+                                                        #{fast => 42}},
+                                                       {{main,1},
+                                                        #{fast => 42}},
+                                                       {{main,2},
+                                                        #{fast => 42}}]
+[DEBUG] Node:j_diff ===== START PROCESSING =====
+[DEBUG] Node:j_diff Buffer contents (sorted): [{{main,0},#{fast => 42}},
+                                               {{main,1},#{fast => 42}},
+                                               {{main,2},#{fast => 42}}]
+[DEBUG] Node:j_diff NextVer: #{main => 0}, Processed: #{}, Deferred: []
+[DEBUG] Node:j_diff Required dependencies: [fast,slow]
+[DEBUG] Node:j_diff Ver:0 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:0   Version={main,0}
+[DEBUG] Node:j_diff Ver:0   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:0   Dependency fast: true
+[DEBUG] Node:j_diff Ver:0   Dependency slow: false
+[DEBUG] Node:j_diff Ver:0   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:0   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:1 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:1   Version={main,1}
+[DEBUG] Node:j_diff Ver:1   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:1   Dependency fast: true
+[DEBUG] Node:j_diff Ver:1   Dependency slow: false
+[DEBUG] Node:j_diff Ver:1   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:1   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:2 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:2   Version={main,2}
+[DEBUG] Node:j_diff Ver:2   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:2   Dependency fast: true
+[DEBUG] Node:j_diff Ver:2   Dependency slow: false
+[DEBUG] Node:j_diff Ver:2   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:2   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff ===== END PROCESSING =====
+[DEBUG] Node:j_diff Final buffer: [{{main,0},#{fast => 42}},
+                                   {{main,1},#{fast => 42}},
+                                   {{main,2},#{fast => 42}}]
+[DEBUG] Node:j_diff Waiting for message, current buffer: [{{main,0},
+                                                           #{fast => 42}},
+                                                          {{main,1},
+                                                           #{fast => 42}},
+                                                          {{main,2},
+                                                           #{fast => 42}}]
+[DELAY] Node:slow_o Ver:0 sending after delay
+[TRACE] Node:slow_o Ver:1 Event:Receive Payload:{i,42}
+[TRACE] Node:j_diff Ver:0 Event:Receive Payload:{slow,42}
+[TRACE] Node:slow_o Ver:1 Event:Compute Payload:42
+[DEBUG] Node:j_diff Ver:0 Before buffer_update: Buffer=[{{main,0},
+                                                         #{fast => 42}},
+                                                        {{main,1},
+                                                         #{fast => 42}},
+                                                        {{main,2},
+                                                         #{fast => 42}}]
+Output from main_slow_o: 42
+[DEBUG] Node:j_diff Ver:0 After buffer_update: Buffer=[{{main,0},
+                                                        #{fast => 42,
+                                                          slow => 42}},
+                                                       {{main,1},
+                                                        #{fast => 42}},
+                                                       {{main,2},
+                                                        #{fast => 42}}]
+[DELAY] Node:slow_o Ver:1 injecting 500ms delay before send
+[DEBUG] Node:j_diff ===== START PROCESSING =====
+[DEBUG] Node:j_diff Buffer contents (sorted): [{{main,0},
+                                                #{fast => 42,slow => 42}},
+                                               {{main,1},#{fast => 42}},
+                                               {{main,2},#{fast => 42}}]
+[DEBUG] Node:j_diff NextVer: #{main => 0}, Processed: #{}, Deferred: []
+[DEBUG] Node:j_diff Required dependencies: [fast,slow]
+[DEBUG] Node:j_diff Ver:0 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:0   Version={main,0}
+[DEBUG] Node:j_diff Ver:0   InputMap=#{fast => 42,slow => 42}
+[DEBUG] Node:j_diff Ver:0   Dependency fast: true
+[DEBUG] Node:j_diff Ver:0   Dependency slow: true
+[DEBUG] Node:j_diff Ver:0   AllDepsPresent: true
+[DEBUG] Node:j_diff Ver:0   Sequential check: CurrentNextVer=0, Ver=0, Match=true
+[DEBUG] Node:j_diff Ver:0   READY TO COMPUTE! InputMap=#{fast => 42,
+                                                         slow => 42}
+[TRACE] Node:j_diff Ver:0 Event:Compute Payload:0 (from #{fast => 42,
+                                                          slow => 42})
+Output from main_j_diff: 0
+[DEBUG] Node:j_diff Ver:0   Action: Removing from buffer, updating NextVer to 1
+[DEBUG] Node:j_diff Ver:1 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:1   Version={main,1}
+[DEBUG] Node:j_diff Ver:1   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:1   Dependency fast: true
+[DEBUG] Node:j_diff Ver:1   Dependency slow: false
+[DEBUG] Node:j_diff Ver:1   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:1   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:2 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:2   Version={main,2}
+[DEBUG] Node:j_diff Ver:2   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:2   Dependency fast: true
+[DEBUG] Node:j_diff Ver:2   Dependency slow: false
+[DEBUG] Node:j_diff Ver:2   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:2   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff ===== END PROCESSING =====
+[DEBUG] Node:j_diff Final buffer: [{{main,1},#{fast => 42}},
+                                   {{main,2},#{fast => 42}}]
+[DEBUG] Node:j_diff Waiting for message, current buffer: [{{main,1},
+                                                           #{fast => 42}},
+                                                          {{main,2},
+                                                           #{fast => 42}}]
+[TRACE] Node:src_val Ver:3 Event:Request Payload:none
+[TRACE] Node:src_val Ver:3 Event:Compute Payload:42
+Output from main_src_val: 42
+[TRACE] Node:fast_o Ver:3 Event:Receive Payload:{i,42}
+[TRACE] Node:fast_o Ver:3 Event:Compute Payload:42
+Output from main_fast_o: 42
+[TRACE] Node:j_diff Ver:3 Event:Receive Payload:{fast,42}
+[DEBUG] Node:j_diff Ver:3 Before buffer_update: Buffer=[{{main,1},
+                                                         #{fast => 42}},
+                                                        {{main,2},
+                                                         #{fast => 42}}]
+[DEBUG] Node:j_diff Ver:3 After buffer_update: Buffer=[{{main,1},
+                                                        #{fast => 42}},
+                                                       {{main,2},
+                                                        #{fast => 42}},
+                                                       {{main,3},
+                                                        #{fast => 42}}]
+[DEBUG] Node:j_diff ===== START PROCESSING =====
+[DEBUG] Node:j_diff Buffer contents (sorted): [{{main,1},#{fast => 42}},
+                                               {{main,2},#{fast => 42}},
+                                               {{main,3},#{fast => 42}}]
+[DEBUG] Node:j_diff NextVer: #{main => 1}, Processed: #{}, Deferred: []
+[DEBUG] Node:j_diff Required dependencies: [fast,slow]
+[DEBUG] Node:j_diff Ver:1 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:1   Version={main,1}
+[DEBUG] Node:j_diff Ver:1   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:1   Dependency fast: true
+[DEBUG] Node:j_diff Ver:1   Dependency slow: false
+[DEBUG] Node:j_diff Ver:1   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:1   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:2 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:2   Version={main,2}
+[DEBUG] Node:j_diff Ver:2   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:2   Dependency fast: true
+[DEBUG] Node:j_diff Ver:2   Dependency slow: false
+[DEBUG] Node:j_diff Ver:2   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:2   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:3 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:3   Version={main,3}
+[DEBUG] Node:j_diff Ver:3   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:3   Dependency fast: true
+[DEBUG] Node:j_diff Ver:3   Dependency slow: false
+[DEBUG] Node:j_diff Ver:3   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:3   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff ===== END PROCESSING =====
+[DEBUG] Node:j_diff Final buffer: [{{main,1},#{fast => 42}},
+                                   {{main,2},#{fast => 42}},
+                                   {{main,3},#{fast => 42}}]
+[DEBUG] Node:j_diff Waiting for message, current buffer: [{{main,1},
+                                                           #{fast => 42}},
+                                                          {{main,2},
+                                                           #{fast => 42}},
+                                                          {{main,3},
+                                                           #{fast => 42}}]
+[TRACE] Node:src_val Ver:4 Event:Request Payload:none
+[TRACE] Node:src_val Ver:4 Event:Compute Payload:42
+Output from main_src_val: 42
+[TRACE] Node:fast_o Ver:4 Event:Receive Payload:{i,42}
+[TRACE] Node:fast_o Ver:4 Event:Compute Payload:42
+Output from main_fast_o: 42
+[TRACE] Node:j_diff Ver:4 Event:Receive Payload:{fast,42}
+[DEBUG] Node:j_diff Ver:4 Before buffer_update: Buffer=[{{main,1},
+                                                         #{fast => 42}},
+                                                        {{main,2},
+                                                         #{fast => 42}},
+                                                        {{main,3},
+                                                         #{fast => 42}}]
+[DEBUG] Node:j_diff Ver:4 After buffer_update: Buffer=[{{main,1},
+                                                        #{fast => 42}},
+                                                       {{main,2},
+                                                        #{fast => 42}},
+                                                       {{main,3},
+                                                        #{fast => 42}},
+                                                       {{main,4},
+                                                        #{fast => 42}}]
+[DEBUG] Node:j_diff ===== START PROCESSING =====
+[DEBUG] Node:j_diff Buffer contents (sorted): [{{main,1},#{fast => 42}},
+                                               {{main,2},#{fast => 42}},
+                                               {{main,3},#{fast => 42}},
+                                               {{main,4},#{fast => 42}}]
+[DEBUG] Node:j_diff NextVer: #{main => 1}, Processed: #{}, Deferred: []
+[DEBUG] Node:j_diff Required dependencies: [fast,slow]
+[DEBUG] Node:j_diff Ver:1 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:1   Version={main,1}
+[DEBUG] Node:j_diff Ver:1   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:1   Dependency fast: true
+[DEBUG] Node:j_diff Ver:1   Dependency slow: false
+[DEBUG] Node:j_diff Ver:1   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:1   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:2 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:2   Version={main,2}
+[DEBUG] Node:j_diff Ver:2   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:2   Dependency fast: true
+[DEBUG] Node:j_diff Ver:2   Dependency slow: false
+[DEBUG] Node:j_diff Ver:2   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:2   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:3 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:3   Version={main,3}
+[DEBUG] Node:j_diff Ver:3   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:3   Dependency fast: true
+[DEBUG] Node:j_diff Ver:3   Dependency slow: false
+[DEBUG] Node:j_diff Ver:3   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:3   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:4 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:4   Version={main,4}
+[DEBUG] Node:j_diff Ver:4   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:4   Dependency fast: true
+[DEBUG] Node:j_diff Ver:4   Dependency slow: false
+[DEBUG] Node:j_diff Ver:4   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:4   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff ===== END PROCESSING =====
+[DEBUG] Node:j_diff Final buffer: [{{main,1},#{fast => 42}},
+                                   {{main,2},#{fast => 42}},
+                                   {{main,3},#{fast => 42}},
+                                   {{main,4},#{fast => 42}}]
+[DEBUG] Node:j_diff Waiting for message, current buffer: [{{main,1},
+                                                           #{fast => 42}},
+                                                          {{main,2},
+                                                           #{fast => 42}},
+                                                          {{main,3},
+                                                           #{fast => 42}},
+                                                          {{main,4},
+                                                           #{fast => 42}}]
+[DELAY] Node:slow_o Ver:1 sending after delay
+[TRACE] Node:slow_o Ver:2 Event:Receive Payload:{i,42}
+[TRACE] Node:j_diff Ver:1 Event:Receive Payload:{slow,42}
+[TRACE] Node:slow_o Ver:2 Event:Compute Payload:42
+[DEBUG] Node:j_diff Ver:1 Before buffer_update: Buffer=[{{main,1},
+                                                         #{fast => 42}},
+                                                        {{main,2},
+                                                         #{fast => 42}},
+                                                        {{main,3},
+                                                         #{fast => 42}},
+                                                        {{main,4},
+                                                         #{fast => 42}}]
+Output from main_slow_o: 42
+[DEBUG] Node:j_diff Ver:1 After buffer_update: Buffer=[{{main,1},
+                                                        #{fast => 42,
+                                                          slow => 42}},
+                                                       {{main,2},
+                                                        #{fast => 42}},
+                                                       {{main,3},
+                                                        #{fast => 42}},
+                                                       {{main,4},
+                                                        #{fast => 42}}]
+[DELAY] Node:slow_o Ver:2 injecting 500ms delay before send
+[DEBUG] Node:j_diff ===== START PROCESSING =====
+[DEBUG] Node:j_diff Buffer contents (sorted): [{{main,1},
+                                                #{fast => 42,slow => 42}},
+                                               {{main,2},#{fast => 42}},
+                                               {{main,3},#{fast => 42}},
+                                               {{main,4},#{fast => 42}}]
+[DEBUG] Node:j_diff NextVer: #{main => 1}, Processed: #{}, Deferred: []
+[DEBUG] Node:j_diff Required dependencies: [fast,slow]
+[DEBUG] Node:j_diff Ver:1 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:1   Version={main,1}
+[DEBUG] Node:j_diff Ver:1   InputMap=#{fast => 42,slow => 42}
+[DEBUG] Node:j_diff Ver:1   Dependency fast: true
+[DEBUG] Node:j_diff Ver:1   Dependency slow: true
+[DEBUG] Node:j_diff Ver:1   AllDepsPresent: true
+[DEBUG] Node:j_diff Ver:1   Sequential check: CurrentNextVer=1, Ver=1, Match=true
+[DEBUG] Node:j_diff Ver:1   READY TO COMPUTE! InputMap=#{fast => 42,
+                                                         slow => 42}
+[TRACE] Node:j_diff Ver:1 Event:Compute Payload:0 (from #{fast => 42,
+                                                          slow => 42})
+Output from main_j_diff: 0
+[DEBUG] Node:j_diff Ver:1   Action: Removing from buffer, updating NextVer to 2
+[DEBUG] Node:j_diff Ver:2 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:2   Version={main,2}
+[DEBUG] Node:j_diff Ver:2   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:2   Dependency fast: true
+[DEBUG] Node:j_diff Ver:2   Dependency slow: false
+[DEBUG] Node:j_diff Ver:2   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:2   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:3 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:3   Version={main,3}
+[DEBUG] Node:j_diff Ver:3   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:3   Dependency fast: true
+[DEBUG] Node:j_diff Ver:3   Dependency slow: false
+[DEBUG] Node:j_diff Ver:3   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:3   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:4 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:4   Version={main,4}
+[DEBUG] Node:j_diff Ver:4   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:4   Dependency fast: true
+[DEBUG] Node:j_diff Ver:4   Dependency slow: false
+[DEBUG] Node:j_diff Ver:4   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:4   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff ===== END PROCESSING =====
+[DEBUG] Node:j_diff Final buffer: [{{main,2},#{fast => 42}},
+                                   {{main,3},#{fast => 42}},
+                                   {{main,4},#{fast => 42}}]
+[DEBUG] Node:j_diff Waiting for message, current buffer: [{{main,2},
+                                                           #{fast => 42}},
+                                                          {{main,3},
+                                                           #{fast => 42}},
+                                                          {{main,4},
+                                                           #{fast => 42}}]
+[TRACE] Node:src_val Ver:5 Event:Request Payload:none
+[TRACE] Node:src_val Ver:5 Event:Compute Payload:42
+Output from main_src_val: 42
+[TRACE] Node:fast_o Ver:5 Event:Receive Payload:{i,42}
+[TRACE] Node:fast_o Ver:5 Event:Compute Payload:42
+Output from main_fast_o: 42
+[TRACE] Node:j_diff Ver:5 Event:Receive Payload:{fast,42}
+[DEBUG] Node:j_diff Ver:5 Before buffer_update: Buffer=[{{main,2},
+                                                         #{fast => 42}},
+                                                        {{main,3},
+                                                         #{fast => 42}},
+                                                        {{main,4},
+                                                         #{fast => 42}}]
+[DEBUG] Node:j_diff Ver:5 After buffer_update: Buffer=[{{main,2},
+                                                        #{fast => 42}},
+                                                       {{main,3},
+                                                        #{fast => 42}},
+                                                       {{main,4},
+                                                        #{fast => 42}},
+                                                       {{main,5},
+                                                        #{fast => 42}}]
+[DEBUG] Node:j_diff ===== START PROCESSING =====
+[DEBUG] Node:j_diff Buffer contents (sorted): [{{main,2},#{fast => 42}},
+                                               {{main,3},#{fast => 42}},
+                                               {{main,4},#{fast => 42}},
+                                               {{main,5},#{fast => 42}}]
+[DEBUG] Node:j_diff NextVer: #{main => 2}, Processed: #{}, Deferred: []
+[DEBUG] Node:j_diff Required dependencies: [fast,slow]
+[DEBUG] Node:j_diff Ver:2 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:2   Version={main,2}
+[DEBUG] Node:j_diff Ver:2   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:2   Dependency fast: true
+[DEBUG] Node:j_diff Ver:2   Dependency slow: false
+[DEBUG] Node:j_diff Ver:2   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:2   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:3 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:3   Version={main,3}
+[DEBUG] Node:j_diff Ver:3   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:3   Dependency fast: true
+[DEBUG] Node:j_diff Ver:3   Dependency slow: false
+[DEBUG] Node:j_diff Ver:3   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:3   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:4 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:4   Version={main,4}
+[DEBUG] Node:j_diff Ver:4   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:4   Dependency fast: true
+[DEBUG] Node:j_diff Ver:4   Dependency slow: false
+[DEBUG] Node:j_diff Ver:4   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:4   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:5 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:5   Version={main,5}
+[DEBUG] Node:j_diff Ver:5   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:5   Dependency fast: true
+[DEBUG] Node:j_diff Ver:5   Dependency slow: false
+[DEBUG] Node:j_diff Ver:5   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:5   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff ===== END PROCESSING =====
+[DEBUG] Node:j_diff Final buffer: [{{main,2},#{fast => 42}},
+                                   {{main,3},#{fast => 42}},
+                                   {{main,4},#{fast => 42}},
+                                   {{main,5},#{fast => 42}}]
+[DEBUG] Node:j_diff Waiting for message, current buffer: [{{main,2},
+                                                           #{fast => 42}},
+                                                          {{main,3},
+                                                           #{fast => 42}},
+                                                          {{main,4},
+                                                           #{fast => 42}},
+                                                          {{main,5},
+                                                           #{fast => 42}}]
+[TRACE] Node:src_val Ver:6 Event:Request Payload:none
+[TRACE] Node:src_val Ver:6 Event:Compute Payload:42
+Output from main_src_val: 42
+[TRACE] Node:fast_o Ver:6 Event:Receive Payload:{i,42}
+[TRACE] Node:fast_o Ver:6 Event:Compute Payload:42
+Output from main_fast_o: 42
+[TRACE] Node:j_diff Ver:6 Event:Receive Payload:{fast,42}
+[DEBUG] Node:j_diff Ver:6 Before buffer_update: Buffer=[{{main,2},
+                                                         #{fast => 42}},
+                                                        {{main,3},
+                                                         #{fast => 42}},
+                                                        {{main,4},
+                                                         #{fast => 42}},
+                                                        {{main,5},
+                                                         #{fast => 42}}]
+[DEBUG] Node:j_diff Ver:6 After buffer_update: Buffer=[{{main,2},
+                                                        #{fast => 42}},
+                                                       {{main,3},
+                                                        #{fast => 42}},
+                                                       {{main,4},
+                                                        #{fast => 42}},
+                                                       {{main,5},
+                                                        #{fast => 42}},
+                                                       {{main,6},
+                                                        #{fast => 42}}]
+[DEBUG] Node:j_diff ===== START PROCESSING =====
+[DEBUG] Node:j_diff Buffer contents (sorted): [{{main,2},#{fast => 42}},
+                                               {{main,3},#{fast => 42}},
+                                               {{main,4},#{fast => 42}},
+                                               {{main,5},#{fast => 42}},
+                                               {{main,6},#{fast => 42}}]
+[DEBUG] Node:j_diff NextVer: #{main => 2}, Processed: #{}, Deferred: []
+[DEBUG] Node:j_diff Required dependencies: [fast,slow]
+[DEBUG] Node:j_diff Ver:2 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:2   Version={main,2}
+[DEBUG] Node:j_diff Ver:2   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:2   Dependency fast: true
+[DEBUG] Node:j_diff Ver:2   Dependency slow: false
+[DEBUG] Node:j_diff Ver:2   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:2   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:3 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:3   Version={main,3}
+[DEBUG] Node:j_diff Ver:3   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:3   Dependency fast: true
+[DEBUG] Node:j_diff Ver:3   Dependency slow: false
+[DEBUG] Node:j_diff Ver:3   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:3   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:4 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:4   Version={main,4}
+[DEBUG] Node:j_diff Ver:4   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:4   Dependency fast: true
+[DEBUG] Node:j_diff Ver:4   Dependency slow: false
+[DEBUG] Node:j_diff Ver:4   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:4   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:5 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:5   Version={main,5}
+[DEBUG] Node:j_diff Ver:5   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:5   Dependency fast: true
+[DEBUG] Node:j_diff Ver:5   Dependency slow: false
+[DEBUG] Node:j_diff Ver:5   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:5   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:6 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:6   Version={main,6}
+[DEBUG] Node:j_diff Ver:6   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:6   Dependency fast: true
+[DEBUG] Node:j_diff Ver:6   Dependency slow: false
+[DEBUG] Node:j_diff Ver:6   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:6   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff ===== END PROCESSING =====
+[DEBUG] Node:j_diff Final buffer: [{{main,2},#{fast => 42}},
+                                   {{main,3},#{fast => 42}},
+                                   {{main,4},#{fast => 42}},
+                                   {{main,5},#{fast => 42}},
+                                   {{main,6},#{fast => 42}}]
+[DEBUG] Node:j_diff Waiting for message, current buffer: [{{main,2},
+                                                           #{fast => 42}},
+                                                          {{main,3},
+                                                           #{fast => 42}},
+                                                          {{main,4},
+                                                           #{fast => 42}},
+                                                          {{main,5},
+                                                           #{fast => 42}},
+                                                          {{main,6},
+                                                           #{fast => 42}}]
+[DELAY] Node:slow_o Ver:2 sending after delay
+[TRACE] Node:slow_o Ver:3 Event:Receive Payload:{i,42}
+[TRACE] Node:j_diff Ver:2 Event:Receive Payload:{slow,42}
+[TRACE] Node:slow_o Ver:3 Event:Compute Payload:42
+[DEBUG] Node:j_diff Ver:2 Before buffer_update: Buffer=[{{main,2},
+                                                         #{fast => 42}},
+                                                        {{main,3},
+                                                         #{fast => 42}},
+                                                        {{main,4},
+                                                         #{fast => 42}},
+                                                        {{main,5},
+                                                         #{fast => 42}},
+                                                        {{main,6},
+                                                         #{fast => 42}}]
+Output from main_slow_o: 42
+[DEBUG] Node:j_diff Ver:2 After buffer_update: Buffer=[{{main,2},
+                                                        #{fast => 42,
+                                                          slow => 42}},
+                                                       {{main,3},
+                                                        #{fast => 42}},
+                                                       {{main,4},
+                                                        #{fast => 42}},
+                                                       {{main,5},
+                                                        #{fast => 42}},
+                                                       {{main,6},
+                                                        #{fast => 42}}]
+[DELAY] Node:slow_o Ver:3 injecting 500ms delay before send
+[DEBUG] Node:j_diff ===== START PROCESSING =====
+[DEBUG] Node:j_diff Buffer contents (sorted): [{{main,2},
+                                                #{fast => 42,slow => 42}},
+                                               {{main,3},#{fast => 42}},
+                                               {{main,4},#{fast => 42}},
+                                               {{main,5},#{fast => 42}},
+                                               {{main,6},#{fast => 42}}]
+[DEBUG] Node:j_diff NextVer: #{main => 2}, Processed: #{}, Deferred: []
+[DEBUG] Node:j_diff Required dependencies: [fast,slow]
+[DEBUG] Node:j_diff Ver:2 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:2   Version={main,2}
+[DEBUG] Node:j_diff Ver:2   InputMap=#{fast => 42,slow => 42}
+[DEBUG] Node:j_diff Ver:2   Dependency fast: true
+[DEBUG] Node:j_diff Ver:2   Dependency slow: true
+[DEBUG] Node:j_diff Ver:2   AllDepsPresent: true
+[DEBUG] Node:j_diff Ver:2   Sequential check: CurrentNextVer=2, Ver=2, Match=true
+[DEBUG] Node:j_diff Ver:2   READY TO COMPUTE! InputMap=#{fast => 42,
+                                                         slow => 42}
+[TRACE] Node:j_diff Ver:2 Event:Compute Payload:0 (from #{fast => 42,
+                                                          slow => 42})
+Output from main_j_diff: 0
+[DEBUG] Node:j_diff Ver:2   Action: Removing from buffer, updating NextVer to 3
+[DEBUG] Node:j_diff Ver:3 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:3   Version={main,3}
+[DEBUG] Node:j_diff Ver:3   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:3   Dependency fast: true
+[DEBUG] Node:j_diff Ver:3   Dependency slow: false
+[DEBUG] Node:j_diff Ver:3   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:3   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:4 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:4   Version={main,4}
+[DEBUG] Node:j_diff Ver:4   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:4   Dependency fast: true
+[DEBUG] Node:j_diff Ver:4   Dependency slow: false
+[DEBUG] Node:j_diff Ver:4   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:4   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:5 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:5   Version={main,5}
+[DEBUG] Node:j_diff Ver:5   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:5   Dependency fast: true
+[DEBUG] Node:j_diff Ver:5   Dependency slow: false
+[DEBUG] Node:j_diff Ver:5   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:5   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff Ver:6 ----- Processing buffer entry -----
+[DEBUG] Node:j_diff Ver:6   Version={main,6}
+[DEBUG] Node:j_diff Ver:6   InputMap=#{fast => 42}
+[DEBUG] Node:j_diff Ver:6   Dependency fast: true
+[DEBUG] Node:j_diff Ver:6   Dependency slow: false
+[DEBUG] Node:j_diff Ver:6   AllDepsPresent: false
+[DEBUG] Node:j_diff Ver:6   Action: Not all deps present, keeping in buffer
+[DEBUG] Node:j_diff ===== END PROCESSING =====
+[DEBUG] Node:j_diff Final buffer: [{{main,3},#{fast => 42}},
+                                   {{main,4},#{fast => 42}},
+                                   {{main,5},#{fast => 42}},
+                                   {{main,6},#{fast => 42}}]
+[DEBUG] Node:j_diff Waiting for message, current buffer: [{{main,3},
+                                                           #{fast => 42}},
+                                                          {{main,4},
+                                                           #{fast => 42}},
+                                                          {{main,5},
+                                                           #{fast => 42}},
+                                                          {{main,6},
+                                                           #{fast => 42}}]

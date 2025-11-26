@@ -1,0 +1,14 @@
+# 実験: in と out 両方あり、out が内部ソースに依存
+# in: dummy（使われない）
+# out: o（内部ソース src に依存）
+module InOutBoth
+party p
+in
+  dummy{p}: Int
+out
+  o{p}: Int
+
+party p = periodic(1000)
+
+node src{p}: Int = 100
+node o{p}: Int = src

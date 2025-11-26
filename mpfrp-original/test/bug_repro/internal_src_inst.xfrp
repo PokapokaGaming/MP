@@ -1,0 +1,2 @@
+module InternalSrc_inst
+newnode (o) = InternalSrc{p}()

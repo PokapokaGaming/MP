@@ -1,0 +1,3 @@
+module InUsedPlusSrc_inst
+newnode (val) = Producer{p}()
+newnode (o) = InUsedPlusSrc{p}(val)

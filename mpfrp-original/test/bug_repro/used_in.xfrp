@@ -1,0 +1,13 @@
+# 実験: inが参照されている場合
+# in input が src に使われる
+module UsedIn
+party p
+in
+  input{p}: Int
+out
+  o{p}: Int
+
+party p = periodic(1000)
+
+node src{p}: Int = input + 100
+node o{p}: Int = src

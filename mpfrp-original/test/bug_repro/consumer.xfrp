@@ -1,0 +1,10 @@
+# Consumer: 入力を使って計算
+module Consumer
+party p
+in
+  input{p}: Int
+out
+  o{p}: Int
+
+node src{p}: Int = input + 100
+node o{p}: Int = src

@@ -1,0 +1,41 @@
+# having sinks which depend on several party
+# Modified: native fun key_input() replaced with constants
+module Test2Const
+party p, q, r
+in
+  in1{p} : Int,
+  in2{p} : Int,
+  in3{q} : Int,
+  in4{q} : Int,
+  in5{r} : Int
+out
+  pq{p} : (Int, Int),
+  ppq{q} : (Int, Int, Int),
+  ppqqr{r} : (Int, Int, Int, Int, Int),
+
+  # alternative to input
+  key1{p}: Int,
+  key2{p}: Int,
+  key3{q}: Int,
+  key4{q}: Int,
+  key5{r}: Int
+
+party p = periodic(1000)
+party q = periodic(2000)
+party r = periodic(3000)
+
+# Constants instead of native fun key_input()
+node input1{p}: Int = 1
+node input2{p}: Int = 2
+node input3{q}: Int = 3
+node input4{q}: Int = 4
+node input5{r}: Int = 5
+node key1{p}: Int = input1
+node key2{p}: Int = input2
+node key3{q}: Int = input3
+node key4{q}: Int = input4
+node key5{r}: Int = input5
+
+node pq{p}: (Int, Int) = (in1, in3)
+node ppq{q}: (Int, Int, Int) = (in1, in2, in3)
+node ppqqr{r}: (Int, Int, Int, Int, Int) = (in1, in2, in3, in4, in5)

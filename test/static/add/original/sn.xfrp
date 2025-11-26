@@ -1,0 +1,5 @@
+module sn
+newnode (cmb) = agg{p}(sens1, sens2, sens3)
+newnode (sens1) = sensor{p}()
+newnode (sens2) = sensor{p}()
+newnode (sens3) = sensor{p}()

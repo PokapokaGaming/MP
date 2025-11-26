@@ -1,0 +1,2 @@
+module InternalSrcOut_inst
+newnode (src, o) = InternalSrcOut{p}()

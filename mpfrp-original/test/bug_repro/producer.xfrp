@@ -1,0 +1,12 @@
+# 2つのモジュールを使って循環を作る
+# Producer: 定数を出力
+# Consumer: 入力を使う
+module Producer
+party p
+in
+out
+  val{p}: Int
+
+party p = periodic(1000)
+
+node val{p}: Int = 42

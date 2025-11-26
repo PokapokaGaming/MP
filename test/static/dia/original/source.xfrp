@@ -1,0 +1,5 @@
+module source
+party p
+in data_in{p}: Int
+out val{p}: Int
+node val{p}: Int = 42

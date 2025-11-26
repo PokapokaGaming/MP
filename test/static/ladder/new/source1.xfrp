@@ -1,0 +1,2 @@
+module source1
+node val: Int = 1

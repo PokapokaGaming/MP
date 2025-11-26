@@ -1,0 +1,6 @@
+party g
+leader = snk
+periodic(1000)
+newnode (snk) = sink(rly)
+newnode (rly) = relay(src)
+newnode (src) = source()

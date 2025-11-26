@@ -1,5 +1,0 @@
-module Main
-newnode (data) = Server{p}(c1, c2, c3)
-newnode (c1) = Client{p}(data)
-newnode (c2) = Client{p}(data)
-newnode (c3) = Client{p}(data)

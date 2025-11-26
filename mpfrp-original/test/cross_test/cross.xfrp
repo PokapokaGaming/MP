@@ -1,0 +1,23 @@
+# Simple cross-party test
+# p1 produces data every 500ms, p2 every 2000ms
+# sink depends on data from both parties
+
+module Cross
+party p1, p2
+in
+out
+  result{p2} : Int
+
+party p1 = periodic(500)
+party p2 = periodic(2000)
+
+native fun get_value(): Int
+
+# Source in p1
+node src1{p1}: Int = get_value()
+
+# Source in p2  
+node src2{p2}: Int = get_value()
+
+# Sink in p2 that depends on both p1.src1 and p2.src2
+node result{p2}: Int = src1 + src2

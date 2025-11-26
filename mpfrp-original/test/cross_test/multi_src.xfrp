@@ -1,0 +1,17 @@
+module MultiSrc
+party p1, p2
+in
+out
+  join{p1}: Int
+
+party p1 = periodic(500)
+party p2 = periodic(1000)
+
+node src1{p1}: Int = get_value()
+node src2{p1}: Int = get_value()
+node src3{p2}: Int = get_value()
+node src4{p2}: Int = get_value()
+
+native fun get_value(): Int
+
+node join{p1}: Int = src1 + src2 + src3 + src4

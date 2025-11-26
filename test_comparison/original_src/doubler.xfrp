@@ -1,6 +1,0 @@
-module Doubler
-party p
-in dummy{p}: Int, counter{p}: Int
-out d{p}: Int
-
-node d{p}: Int = 2 * counter

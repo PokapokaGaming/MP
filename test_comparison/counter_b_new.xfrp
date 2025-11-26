@@ -1,5 +1,0 @@
-module CounterB
-in dummy_b: Int
-out b: Int
-
-node init[10] b: Int = b@last + 10

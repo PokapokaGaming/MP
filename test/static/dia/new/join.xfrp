@@ -1,0 +1,5 @@
+module join
+in fast: Int,
+	slow: Int
+out diff: Int
+node diff: Int = fast - slow

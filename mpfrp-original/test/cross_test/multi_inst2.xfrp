@@ -1,0 +1,3 @@
+from MultiSrc use *
+
+instance multi_1 = MultiSrc

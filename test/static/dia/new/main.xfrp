@@ -1,0 +1,7 @@
+party main
+leader = join
+periodic(1000)
+newnode (j) = join(fast, slow)
+newnode (fast) = pass(src)
+newnode (slow) = pass(src)
+newnode (src) = source()

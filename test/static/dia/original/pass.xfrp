@@ -1,0 +1,5 @@
+module pass
+party p
+in i{p}: Int
+out o{p}: Int
+node o{p}: Int = i

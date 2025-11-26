@@ -1,0 +1,2 @@
+module UnusedIn_inst
+newnode (o) = UnusedIn{p}(o)

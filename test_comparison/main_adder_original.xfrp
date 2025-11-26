@@ -1,4 +1,0 @@
-module Main
-newnode (ca) = CounterA{p}(ad)
-newnode (cb) = CounterB{p}(ad)
-newnode (ad) = Adder{p}(ca, cb)

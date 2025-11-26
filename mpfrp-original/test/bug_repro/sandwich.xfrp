@@ -1,0 +1,14 @@
+# 実験2: パーティサンドイッチ
+# データフローがいったん別のパーティを経由して戻ってくる場合の検証
+module Sandwich
+party p1, p2
+in
+out o{p1}: Int
+
+party p1 = periodic(1000)
+party p2 = periodic(1000)
+
+node n1{p1}: Int = 1
+node n2{p2}: Int = n1
+node n3{p1}: Int = n2
+node o{p1}: Int = n3
