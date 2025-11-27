@@ -1,0 +1,5 @@
+# NodeA module (p1) - receives from source, passes to NodeB
+module node_a
+in src_val: Int
+out a_val: Int
+node a_val: Int = src_val * 10

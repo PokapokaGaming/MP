@@ -1,0 +1,59 @@
+[TRACE] Node:sens1_data Ver:0 Event:Request Payload:none
+[TRACE] Node:sens2_data Ver:0 Event:Request Payload:none
+[TRACE] Node:sens3_data Ver:0 Event:Request Payload:none
+[TRACE] Node:sens1_data Ver:0 Event:Compute Payload:42
+[TRACE] Node:sens2_data Ver:0 Event:Compute Payload:42
+[TRACE] Node:sens3_data Ver:0 Event:Compute Payload:42
+Output from g_sens1_data: 42
+Output from g_sens2_data: 42
+Output from g_sens3_data: 42
+[TRACE] Node:cmb_combined Ver:0 Event:Receive Payload:{s1,42}
+[TRACE] Node:cmb_combined Ver:0 Event:Receive Payload:{s2,42}
+[TRACE] Node:cmb_combined Ver:0 Event:Receive Payload:{s3,42}
+[TRACE] Node:cmb_combined Ver:0 Event:Compute Payload:126
+Output from g_cmb_combined: 126
+[TRACE] Node:sens2_data Ver:1 Event:Request Payload:none
+[TRACE] Node:sens1_data Ver:1 Event:Request Payload:none
+[TRACE] Node:sens3_data Ver:1 Event:Request Payload:none
+[TRACE] Node:sens2_data Ver:1 Event:Compute Payload:42
+[TRACE] Node:sens1_data Ver:1 Event:Compute Payload:42
+[TRACE] Node:sens3_data Ver:1 Event:Compute Payload:42
+Output from g_sens1_data: 42
+Output from g_sens2_data: 42
+Output from g_sens3_data: 42
+[TRACE] Node:cmb_combined Ver:1 Event:Receive Payload:{s1,42}
+[TRACE] Node:cmb_combined Ver:1 Event:Compute Payload:126
+Output from g_cmb_combined: 126
+[TRACE] Node:cmb_combined Ver:1 Event:Receive Payload:{s2,42}
+[TRACE] Node:cmb_combined Ver:1 Event:Receive Payload:{s3,42}
+[TRACE] Node:sens3_data Ver:2 Event:Request Payload:none
+[TRACE] Node:sens2_data Ver:2 Event:Request Payload:none
+[TRACE] Node:sens1_data Ver:2 Event:Request Payload:none
+[TRACE] Node:sens3_data Ver:2 Event:Compute Payload:42
+[TRACE] Node:sens2_data Ver:2 Event:Compute Payload:42
+[TRACE] Node:sens1_data Ver:2 Event:Compute Payload:42
+Output from g_sens3_data: 42
+Output from g_sens2_data: 42
+Output from g_sens1_data: 42
+[TRACE] Node:cmb_combined Ver:2 Event:Receive Payload:{s3,42}
+[TRACE] Node:cmb_combined Ver:2 Event:Compute Payload:126
+Output from g_cmb_combined: 126
+[TRACE] Node:cmb_combined Ver:2 Event:Receive Payload:{s1,42}
+[TRACE] Node:cmb_combined Ver:2 Event:Receive Payload:{s2,42}
+=INFO REPORT==== 28-Nov-2025::03:46:48.307255 ===
+SIGTERM received - shutting down
+
+[TRACE] Node:sens3_data Ver:3 Event:Request Payload:none
+[TRACE] Node:sens2_data Ver:3 Event:Request Payload:none
+[TRACE] Node:sens1_data Ver:3 Event:Request Payload:none
+[TRACE] Node:sens3_data Ver:3 Event:Compute Payload:42
+[TRACE] Node:sens2_data Ver:3 Event:Compute Payload:42
+[TRACE] Node:sens1_data Ver:3 Event:Compute Payload:42
+Output from g_sens3_data: 42
+Output from g_sens2_data: 42
+Output from g_sens1_data: 42
+[TRACE] Node:cmb_combined Ver:3 Event:Receive Payload:{s3,42}
+[TRACE] Node:cmb_combined Ver:3 Event:Compute Payload:126
+Output from g_cmb_combined: 126
+[TRACE] Node:cmb_combined Ver:3 Event:Receive Payload:{s2,42}
+[TRACE] Node:cmb_combined Ver:3 Event:Receive Payload:{s1,42}

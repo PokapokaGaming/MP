@@ -1,0 +1,6 @@
+# NodeC module (p1 - Fast) - receives from NodeB, passes to NodeD
+# This is the key node: should use cached b_val while p2 is slow
+module node_c
+in b_val: Int
+out c_val: Int
+node init[0] c_val: Int = b_val + c_val@last

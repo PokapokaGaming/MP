@@ -1,0 +1,16 @@
+# Zig-Zag Chain Instance File
+# p1 (Fast): 1000ms, p2 (Slow): 3000ms
+# Flow: Source(p1) -> NodeA(p1) -> NodeB(p2) -> NodeC(p1) -> NodeD(p2)
+
+party p1
+  leader = src
+  periodic(1000)
+  newnode (src) = source()
+  newnode (na) = node_a(src)
+  newnode (nc) = node_c(p2.nb)
+
+party p2
+  leader = nb
+  periodic(3000)
+  newnode (nb) = node_b(p1.na)
+  newnode (nd) = node_d(p1.nc)

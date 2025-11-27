@@ -1,0 +1,5 @@
+# NodeD module (p2 - Slow) - final sink, receives from NodeC
+module node_d
+in c_val: Int
+out d_val: Int
+node d_val: Int = c_val

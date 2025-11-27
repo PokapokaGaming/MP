@@ -1,5 +1,5 @@
 party main
-leader = join
+leader = j
 periodic(1000)
 newnode (j) = join(fast, slow)
 newnode (fast) = pass(src)

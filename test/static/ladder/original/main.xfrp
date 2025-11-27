@@ -1,0 +1,7 @@
+module main
+newnode (j1) = join1{p1,p2}(s11,s12,s21,s22)
+newnode (j2) = join2{p1,p2}(s11,s12,s21,s22)
+newnode (s11) = src{p1}()
+newnode (s12) = src{p1}()
+newnode (s21) = src{p2}()
+newnode (s22) = src{p2}()

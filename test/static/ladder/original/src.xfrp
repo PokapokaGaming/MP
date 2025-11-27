@@ -1,0 +1,5 @@
+module src
+party p
+in
+out value{p}: Int
+node value{p}: Int = 1

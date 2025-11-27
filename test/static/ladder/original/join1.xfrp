@@ -1,0 +1,9 @@
+module join1
+party p, q
+in input1{p}: Int,
+	input2{p}: Int,
+	input3{q}: Int,
+	input4{q}: Int
+out output{p}: Int
+party p = periodic(2000)
+node output{p}: Int = input1 + input2 + input3 + input4

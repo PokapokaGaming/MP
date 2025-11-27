@@ -1,13 +1,13 @@
 party p1
-leader = sink1
-periodic(500)
-newnode (s11) = source1()
-newnode (s12) = source2()
-newnode (sink1) = sink(s11, p2.s21)
+  leader = j1
+  periodic(2000)
+  newnode (s11) = src()
+  newnode (s12) = src()
+  newnode (j1) = join1(s11, s12, p2.s21, p2.s22)
 
 party p2
-leader = sink2
-periodic(2000)
-newnode (s21) = source3()
-newnode (s22) = source4()
-newnode (sink2) = sink(p1.s11, s21)
+  leader = j2
+  periodic(5000)
+  newnode (s21) = src()
+  newnode (s22) = src()
+  newnode (j2) = join2(p1.s11, p1.s12, s21, s22)

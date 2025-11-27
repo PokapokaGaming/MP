@@ -1,0 +1,39 @@
+[TRACE] Node:c1_c Ver:0 Event:Request Payload:none
+[TRACE] Node:c1_c Ver:0 Event:Compute Payload:1
+Output from main_c1_c: 1
+[TRACE] Node:d1_d Ver:0 Event:Receive Payload:{counter,1}
+[TRACE] Node:d1_d Ver:0 Event:Compute Payload:2
+Output from main_d1_d: 2
+[TRACE] Node:c1_c Ver:1 Event:Request Payload:none
+[TRACE] Node:c1_c Ver:1 Event:Compute Payload:1
+Output from main_c1_c: 1
+[TRACE] Node:d1_d Ver:1 Event:Receive Payload:{counter,1}
+[TRACE] Node:d1_d Ver:1 Event:Compute Payload:2
+Output from main_d1_d: 2
+[TRACE] Node:c1_c Ver:2 Event:Request Payload:none
+[TRACE] Node:c1_c Ver:2 Event:Compute Payload:1
+Output from main_c1_c: 1
+[TRACE] Node:d1_d Ver:2 Event:Receive Payload:{counter,1}
+[TRACE] Node:d1_d Ver:2 Event:Compute Payload:2
+Output from main_d1_d: 2
+[TRACE] Node:c1_c Ver:3 Event:Request Payload:none
+[TRACE] Node:c1_c Ver:3 Event:Compute Payload:1
+Output from main_c1_c: 1
+[TRACE] Node:d1_d Ver:3 Event:Receive Payload:{counter,1}
+[TRACE] Node:d1_d Ver:3 Event:Compute Payload:2
+Output from main_d1_d: 2
+[TRACE] Node:c1_c Ver:4 Event:Request Payload:none
+[TRACE] Node:c1_c Ver:4 Event:Compute Payload:1
+Output from main_c1_c: 1
+[TRACE] Node:d1_d Ver:4 Event:Receive Payload:{counter,1}
+[TRACE] Node:d1_d Ver:4 Event:Compute Payload:2
+Output from main_d1_d: 2
+=INFO REPORT==== 28-Nov-2025::03:48:26.530345 ===
+SIGTERM received - shutting down
+
+[TRACE] Node:c1_c Ver:5 Event:Request Payload:none
+[TRACE] Node:c1_c Ver:5 Event:Compute Payload:1
+Output from main_c1_c: 1
+[TRACE] Node:d1_d Ver:5 Event:Receive Payload:{counter,1}
+[TRACE] Node:d1_d Ver:5 Event:Compute Payload:2
+Output from main_d1_d: 2

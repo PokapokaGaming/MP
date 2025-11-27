@@ -1,4 +1,4 @@
 module sink
-in local: Int, remote: Int
+in a: Int, b: Int, c: Int, d: Int
 out result: Int
-node result: Int = local + remote
+node result: Int = a + b + c + d

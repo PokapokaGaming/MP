@@ -1,0 +1,2788 @@
+[DBG-J1] Buffer0=#{} NextVer0=#{p1 => 0,p2 => 0} Processed0=#{}
+[TRACE] Node:s11_value Ver:0 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:0 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:0 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:0 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:s21_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:0 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:0 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:0 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:0 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input1 => 1}} NextVer0=#{p1 => 0,p2 => 0} Processed0=#{}
+[TRACE] Node:j2_output Ver:0 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:0 Event:Receive Payload:{input2,1}
+[TRACE] Node:j2_output Ver:0 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1}} NextVer0=#{p1 => 1,p2 => 0} Processed0=#{input1 =>
+                                                                                          1}
+[TRACE] Node:j1_output Ver:0 Event:Receive Payload:{input3,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},{p2,0} => #{input3 => 1}} NextVer0=#{p1 =>
+                                                                                     1,
+                                                                                 p2 =>
+                                                                                     0} Processed0=#{input1 =>
+                                                                                                         1}
+[TRACE] Node:j1_output Ver:0 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},{p2,0} => #{input4 => 1}} NextVer0=#{p1 =>
+                                                                                     1,
+                                                                                 p2 =>
+                                                                                     1} Processed0=#{input1 =>
+                                                                                                         1,
+                                                                                                     input3 =>
+                                                                                                         1}
+[TRACE] Node:s11_value Ver:1 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:1 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:1 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:1 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:1 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:1 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:1 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1}} NextVer0=#{p1 => 1,p2 => 1} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:j1_output Ver:1 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1}} NextVer0=#{p1 => 2,p2 => 1} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:s11_value Ver:2 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:2 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:2 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:2 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:2 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:2 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:2 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1}} NextVer0=#{p1 => 2,p2 => 1} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:j1_output Ver:2 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1}} NextVer0=#{p1 => 3,p2 => 1} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:s21_value Ver:1 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:1 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:1 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:1 Event:Compute Payload:1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:1 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:1 Event:Receive Payload:{input3,1}
+[TRACE] Node:j2_output Ver:1 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input3 => 1}} NextVer0=#{p1 => 3,p2 => 1} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:j1_output Ver:1 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1}} NextVer0=#{p1 => 3,p2 => 2} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:s11_value Ver:3 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:3 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:3 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:3 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:3 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:3 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:3 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1}} NextVer0=#{p1 => 3,p2 => 2} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:j1_output Ver:3 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1}} NextVer0=#{p1 => 4,p2 => 2} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:s11_value Ver:4 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:4 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:4 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:4 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:4 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:4 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:4 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1}} NextVer0=#{p1 => 4,p2 => 2} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:j1_output Ver:4 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1}} NextVer0=#{p1 => 5,p2 => 2} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:s21_value Ver:2 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:2 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:2 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:2 Event:Compute Payload:1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:2 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:2 Event:Receive Payload:{input3,1}
+[TRACE] Node:j2_output Ver:2 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input3 => 1}} NextVer0=#{p1 => 5,p2 => 2} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:j1_output Ver:2 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1}} NextVer0=#{p1 => 5,p2 => 3} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:s11_value Ver:5 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:5 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:5 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:5 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:5 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:5 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:5 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1}} NextVer0=#{p1 => 5,p2 => 3} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:j1_output Ver:5 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1}} NextVer0=#{p1 => 6,p2 => 3} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:s11_value Ver:6 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:6 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:6 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:6 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:6 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:6 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:6 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1}} NextVer0=#{p1 => 6,p2 => 3} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:j1_output Ver:6 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1}} NextVer0=#{p1 => 7,p2 => 3} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:s11_value Ver:7 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:7 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:7 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:7 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:7 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:7 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:7 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1}} NextVer0=#{p1 => 7,p2 => 3} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:j1_output Ver:7 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1}} NextVer0=#{p1 => 8,p2 => 3} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:s21_value Ver:3 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:3 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:3 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:3 Event:Compute Payload:1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:3 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:3 Event:Receive Payload:{input3,1}
+[TRACE] Node:j2_output Ver:3 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input3 => 1}} NextVer0=#{p1 => 8,p2 => 3} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:j1_output Ver:3 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1}} NextVer0=#{p1 => 8,p2 => 4} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:s11_value Ver:8 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:8 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:8 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:8 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:8 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:8 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:8 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1}} NextVer0=#{p1 => 8,p2 => 4} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:j1_output Ver:8 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1}} NextVer0=#{p1 => 9,p2 => 4} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:s11_value Ver:9 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:9 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:9 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:9 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:9 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:9 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:9 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1}} NextVer0=#{p1 => 9,p2 => 4} Processed0=#{input1 =>
+                                                                                          1,
+                                                                                      input3 =>
+                                                                                          1}
+[TRACE] Node:j1_output Ver:9 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1}} NextVer0=#{p1 => 10,p2 => 4} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s21_value Ver:4 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:4 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:4 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:4 Event:Compute Payload:1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:4 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:4 Event:Receive Payload:{input3,1}
+[TRACE] Node:j2_output Ver:4 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input3 => 1}} NextVer0=#{p1 => 10,p2 => 4} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:4 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1}} NextVer0=#{p1 => 10,p2 => 5} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s11_value Ver:10 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:10 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:10 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:10 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:10 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:10 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:10 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1}} NextVer0=#{p1 => 10,p2 => 5} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:10 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1}} NextVer0=#{p1 => 11,p2 => 5} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s11_value Ver:11 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:11 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:11 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:11 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:11 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:11 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:11 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1}} NextVer0=#{p1 => 11,p2 => 5} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:11 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1}} NextVer0=#{p1 => 12,p2 => 5} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s11_value Ver:12 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:12 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:12 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:12 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:12 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:12 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:12 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1}} NextVer0=#{p1 => 12,p2 => 5} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:12 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1}} NextVer0=#{p1 => 13,p2 => 5} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s21_value Ver:5 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:5 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:5 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:5 Event:Compute Payload:1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:5 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:5 Event:Receive Payload:{input3,1}
+[TRACE] Node:j2_output Ver:5 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input3 => 1}} NextVer0=#{p1 => 13,p2 => 5} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:5 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1}} NextVer0=#{p1 => 13,p2 => 6} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s11_value Ver:13 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:13 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:13 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:13 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:13 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:13 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:13 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1}} NextVer0=#{p1 => 13,p2 => 6} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:13 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1}} NextVer0=#{p1 => 14,p2 => 6} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s11_value Ver:14 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:14 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:14 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:14 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:14 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:14 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:14 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1}} NextVer0=#{p1 => 14,p2 => 6} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:14 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1}} NextVer0=#{p1 => 15,p2 => 6} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s21_value Ver:6 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:6 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:6 Event:Compute Payload:1
+[TRACE] Node:s11_value Ver:15 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:15 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:6 Event:Compute Payload:1
+Output from p2_s21_value: 1
+[TRACE] Node:s11_value Ver:15 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:15 Event:Compute Payload:1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:6 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:6 Event:Receive Payload:{input3,1}
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:6 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input3 => 1}} NextVer0=#{p1 => 15,p2 => 6} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j2_output Ver:15 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:6 Event:Receive Payload:{input4,1}
+[TRACE] Node:j2_output Ver:15 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1}} NextVer0=#{p1 => 15,p2 => 7} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:15 Event:Receive Payload:{input1,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1}} NextVer0=#{p1 => 15,p2 => 7} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:15 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1}} NextVer0=#{p1 => 16,p2 => 7} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s11_value Ver:16 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:16 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:16 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:16 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:16 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:16 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:16 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1}} NextVer0=#{p1 => 16,p2 => 7} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:16 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1}} NextVer0=#{p1 => 17,p2 => 7} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s11_value Ver:17 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:17 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:17 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:17 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:17 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:17 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:17 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1}} NextVer0=#{p1 => 17,p2 => 7} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:17 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1}} NextVer0=#{p1 => 18,p2 => 7} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s21_value Ver:7 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:7 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:7 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:7 Event:Compute Payload:1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:7 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:7 Event:Receive Payload:{input3,1}
+[TRACE] Node:j2_output Ver:7 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input3 => 1}} NextVer0=#{p1 => 18,p2 => 7} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:7 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input4 => 1}} NextVer0=#{p1 => 18,p2 => 8} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s11_value Ver:18 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:18 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:18 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:18 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:18 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:18 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:18 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,18} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input4 => 1}} NextVer0=#{p1 => 18,p2 => 8} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:18 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input4 => 1}} NextVer0=#{p1 => 19,p2 => 8} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s11_value Ver:19 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:19 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:19 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:19 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:19 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:19 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:19 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,19} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input4 => 1}} NextVer0=#{p1 => 19,p2 => 8} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:19 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input4 => 1}} NextVer0=#{p1 => 20,p2 => 8} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s21_value Ver:8 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:8 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:8 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:8 Event:Compute Payload:1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:8 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:8 Event:Receive Payload:{input3,1}
+[TRACE] Node:j2_output Ver:8 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,8} => #{input3 => 1}} NextVer0=#{p1 => 20,p2 => 8} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:8 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,8} => #{input4 => 1}} NextVer0=#{p1 => 20,p2 => 9} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s11_value Ver:20 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:20 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:20 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:20 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:20 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:20 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:20 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,8} => #{input4 => 1}} NextVer0=#{p1 => 20,p2 => 9} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:20 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,8} => #{input4 => 1}} NextVer0=#{p1 => 21,p2 => 9} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s11_value Ver:21 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:21 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:21 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:21 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:21 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:21 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:21 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,21} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,8} => #{input4 => 1}} NextVer0=#{p1 => 21,p2 => 9} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:21 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,8} => #{input4 => 1}} NextVer0=#{p1 => 22,p2 => 9} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s11_value Ver:22 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:22 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:22 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:22 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:22 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:22 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:22 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p1,22} => #{input1 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,8} => #{input4 => 1}} NextVer0=#{p1 => 22,p2 => 9} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:22 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p1,0} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,0} => #{input4 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,8} => #{input4 => 1}} NextVer0=#{p1 => 23,p2 => 9} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:s21_value Ver:9 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:9 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:9 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:9 Event:Compute Payload:1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:9 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:9 Event:Receive Payload:{input3,1}
+[TRACE] Node:j2_output Ver:9 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input3 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 23,p2 => 9} Processed0=#{input1 =>
+                                                                                           1,
+                                                                                       input3 =>
+                                                                                           1}
+[TRACE] Node:j1_output Ver:9 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 23,p2 => 10} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:s11_value Ver:23 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:23 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:23 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:23 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:23 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:23 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:23 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input1 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 23,p2 => 10} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:j1_output Ver:23 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 24,p2 => 10} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:s11_value Ver:24 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:24 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:24 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:24 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:24 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:24 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:24 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input1 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 24,p2 => 10} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:j1_output Ver:24 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 25,p2 => 10} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:s21_value Ver:10 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:10 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:10 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:10 Event:Compute Payload:1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:10 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:10 Event:Receive Payload:{input3,1}
+[TRACE] Node:j2_output Ver:10 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input3 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 25,p2 => 10} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:j1_output Ver:10 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 25,p2 => 11} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:s11_value Ver:25 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:25 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:25 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:25 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:25 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:25 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:25 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,25} => #{input1 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 25,p2 => 11} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:j1_output Ver:25 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 26,p2 => 11} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:s11_value Ver:26 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:26 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:26 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:26 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:26 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:26 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:26 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input1 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 26,p2 => 11} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:j1_output Ver:26 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 27,p2 => 11} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:s11_value Ver:27 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:27 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:27 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:27 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:27 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:27 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:27 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input1 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 27,p2 => 11} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:j1_output Ver:27 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 28,p2 => 11} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:s21_value Ver:11 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:11 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:11 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:11 Event:Compute Payload:1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:11 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:11 Event:Receive Payload:{input3,1}
+[TRACE] Node:j2_output Ver:11 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,11} => #{input3 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 28,p2 => 11} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:j1_output Ver:11 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,11} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 28,p2 => 12} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:s11_value Ver:28 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:28 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:28 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:28 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:28 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:28 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:28 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,11} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,28} => #{input1 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 28,p2 => 12} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:j1_output Ver:28 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,11} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,28} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 29,p2 => 12} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:s11_value Ver:29 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:29 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:29 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:29 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:29 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:29 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:29 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,29} => #{input1 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,11} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,28} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 29,p2 => 12} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:j1_output Ver:29 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,29} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,11} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,28} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 30,p2 => 12} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:s21_value Ver:12 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:12 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:12 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:12 Event:Compute Payload:1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:12 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:12 Event:Receive Payload:{input3,1}
+[TRACE] Node:j2_output Ver:12 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,29} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,11} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p2,12} => #{input3 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,28} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 30,p2 => 12} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:j1_output Ver:12 Event:Receive Payload:{input4,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,29} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,11} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p2,12} => #{input4 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,28} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 30,p2 => 13} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:s11_value Ver:30 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:30 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:30 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:30 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:30 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:30 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:30 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,29} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,11} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,30} => #{input1 => 1},
+                   {p2,12} => #{input4 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,28} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 30,p2 => 13} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:j1_output Ver:30 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,29} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,11} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,30} => #{input2 => 1},
+                   {p2,12} => #{input4 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,28} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 31,p2 => 13} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:s11_value Ver:31 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:31 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:31 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:31 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:31 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:31 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:31 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,29} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,11} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,31} => #{input1 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,30} => #{input2 => 1},
+                   {p2,12} => #{input4 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,28} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 31,p2 => 13} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}
+[TRACE] Node:j1_output Ver:31 Event:Receive Payload:{input2,1}
+[DBG-J1] Buffer0=#{{p2,0} => #{input4 => 1},
+                   {p1,19} => #{input2 => 1},
+                   {p1,29} => #{input2 => 1},
+                   {p1,25} => #{input2 => 1},
+                   {p1,20} => #{input2 => 1},
+                   {p1,14} => #{input2 => 1},
+                   {p1,27} => #{input2 => 1},
+                   {p1,4} => #{input2 => 1},
+                   {p2,4} => #{input4 => 1},
+                   {p1,5} => #{input2 => 1},
+                   {p1,16} => #{input2 => 1},
+                   {p1,1} => #{input2 => 1},
+                   {p1,10} => #{input2 => 1},
+                   {p1,23} => #{input2 => 1},
+                   {p1,18} => #{input2 => 1},
+                   {p1,21} => #{input2 => 1},
+                   {p2,7} => #{input4 => 1},
+                   {p2,2} => #{input4 => 1},
+                   {p1,13} => #{input2 => 1},
+                   {p2,11} => #{input4 => 1},
+                   {p2,3} => #{input4 => 1},
+                   {p1,8} => #{input2 => 1},
+                   {p1,24} => #{input2 => 1},
+                   {p1,26} => #{input2 => 1},
+                   {p1,9} => #{input2 => 1},
+                   {p1,31} => #{input2 => 1},
+                   {p2,1} => #{input4 => 1},
+                   {p2,10} => #{input4 => 1},
+                   {p1,3} => #{input2 => 1},
+                   {p2,8} => #{input4 => 1},
+                   {p1,2} => #{input2 => 1},
+                   {p2,6} => #{input4 => 1},
+                   {p1,12} => #{input2 => 1},
+                   {p1,30} => #{input2 => 1},
+                   {p2,12} => #{input4 => 1},
+                   {p1,22} => #{input2 => 1},
+                   {p2,9} => #{input4 => 1},
+                   {p1,7} => #{input2 => 1},
+                   {p2,5} => #{input4 => 1},
+                   {p1,6} => #{input2 => 1},
+                   {p1,11} => #{input2 => 1},
+                   {p1,15} => #{input2 => 1},
+                   {p1,17} => #{input2 => 1},
+                   {p1,28} => #{input2 => 1},
+                   {p1,0} => #{input2 => 1}} NextVer0=#{p1 => 32,p2 => 13} Processed0=#{input1 =>
+                                                                                            1,
+                                                                                        input3 =>
+                                                                                            1}

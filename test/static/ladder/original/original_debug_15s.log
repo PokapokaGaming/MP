@@ -1,0 +1,151 @@
+[TRACE] Node:src_4_value Ver:{p1,0} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,0} Event:Request Payload:none
+[TRACE] Node:src_6_value Ver:{p2,0} Event:Request Payload:none
+[TRACE] Node:src_5_value Ver:{p2,0} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:src_6_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:src_5_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:0 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:0 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:0 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:0 Event:Receive Payload:{input1,1}
+[TRACE] Node:join2_2_output Ver:0 Event:Receive Payload:{input4,1}
+[TRACE] Node:join1_1_output Ver:0 Event:Receive Payload:{input4,1}
+[TRACE] Node:join2_2_output Ver:0 Event:Receive Payload:{input3,1}
+[TRACE] Node:join1_1_output Ver:0 Event:Receive Payload:{input3,1}
+[DEBUG] join2 computing at {p2, 0}. Inputs: input1={p1,0,1}, input2={p1,0,1}, input3={p2,0,1}, input4={p2,0,1}
+[DEBUG] join1 computing at {p2, 0}. Inputs: input1={p1,0,1}, input2={p1,0,1}, input3={p2,0,1}, input4={p2,0,1}
+[TRACE] Node:join2_2_output Ver:0 Event:Compute Payload:4
+[TRACE] Node:join1_1_output Ver:0 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,1} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,1} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:1 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:1 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:1 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:1 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:1 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:1 Event:Receive Payload:{input1,1}
+[DEBUG] join1 computing at {p1, 1}. Inputs: input1={p1,1,1}, input2={p1,1,1}, input3={p2,0,1}, input4={p2,0,1}
+[TRACE] Node:join1_1_output Ver:1 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,2} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,2} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:2 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:2 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:2 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:2 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:2 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:2 Event:Receive Payload:{input1,1}
+[DEBUG] join1 computing at {p1, 2}. Inputs: input1={p1,2,1}, input2={p1,2,1}, input3={p2,0,1}, input4={p2,0,1}
+[TRACE] Node:join1_1_output Ver:2 Event:Compute Payload:4
+[TRACE] Node:src_6_value Ver:{p2,1} Event:Request Payload:none
+[TRACE] Node:src_5_value Ver:{p2,1} Event:Request Payload:none
+[TRACE] Node:src_6_value Ver:1 Event:Compute Payload:1
+[TRACE] Node:src_5_value Ver:1 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:1 Event:Receive Payload:{input4,1}
+[TRACE] Node:join1_1_output Ver:1 Event:Receive Payload:{input4,1}
+[TRACE] Node:join2_2_output Ver:1 Event:Receive Payload:{input3,1}
+[TRACE] Node:join1_1_output Ver:1 Event:Receive Payload:{input3,1}
+[DEBUG] join2 computing at {p2, 1}. Inputs: input1={p1,2,1}, input2={p1,2,1}, input3={p2,1,1}, input4={p2,1,1}
+[TRACE] Node:join2_2_output Ver:1 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,3} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,3} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:3 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:3 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:3 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:3 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:3 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:3 Event:Receive Payload:{input1,1}
+[DEBUG] join1 computing at {p1, 3}. Inputs: input1={p1,3,1}, input2={p1,3,1}, input3={p2,1,1}, input4={p2,1,1}
+[TRACE] Node:join1_1_output Ver:3 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,4} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,4} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:4 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:4 Event:Compute Payload:1
+[TRACE] Node:join1_1_output Ver:4 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:4 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:4 Event:Receive Payload:{input1,1}
+[TRACE] Node:join2_2_output Ver:4 Event:Receive Payload:{input1,1}
+[DEBUG] join1 computing at {p1, 4}. Inputs: input1={p1,4,1}, input2={p1,4,1}, input3={p2,1,1}, input4={p2,1,1}
+[TRACE] Node:join1_1_output Ver:4 Event:Compute Payload:4
+[TRACE] Node:src_6_value Ver:{p2,2} Event:Request Payload:none
+[TRACE] Node:src_5_value Ver:{p2,2} Event:Request Payload:none
+[TRACE] Node:src_6_value Ver:2 Event:Compute Payload:1
+[TRACE] Node:src_5_value Ver:2 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:2 Event:Receive Payload:{input4,1}
+[TRACE] Node:join1_1_output Ver:2 Event:Receive Payload:{input4,1}
+[TRACE] Node:join2_2_output Ver:2 Event:Receive Payload:{input3,1}
+[TRACE] Node:join1_1_output Ver:2 Event:Receive Payload:{input3,1}
+[DEBUG] join2 computing at {p2, 2}. Inputs: input1={p1,4,1}, input2={p1,4,1}, input3={p2,2,1}, input4={p2,2,1}
+[TRACE] Node:join2_2_output Ver:2 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,5} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,5} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:5 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:5 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:5 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:5 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:5 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:5 Event:Receive Payload:{input1,1}
+[DEBUG] join1 computing at {p1, 5}. Inputs: input1={p1,5,1}, input2={p1,5,1}, input3={p2,2,1}, input4={p2,2,1}
+[TRACE] Node:join1_1_output Ver:5 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,6} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,6} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:6 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:6 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:6 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:6 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:6 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:6 Event:Receive Payload:{input1,1}
+[DEBUG] join1 computing at {p1, 6}. Inputs: input1={p1,6,1}, input2={p1,6,1}, input3={p2,2,1}, input4={p2,2,1}
+[TRACE] Node:join1_1_output Ver:6 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,7} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,7} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:7 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:7 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:7 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:7 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:7 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:7 Event:Receive Payload:{input1,1}
+[DEBUG] join1 computing at {p1, 7}. Inputs: input1={p1,7,1}, input2={p1,7,1}, input3={p2,2,1}, input4={p2,2,1}
+[TRACE] Node:join1_1_output Ver:7 Event:Compute Payload:4
+[TRACE] Node:src_6_value Ver:{p2,3} Event:Request Payload:none
+[TRACE] Node:src_5_value Ver:{p2,3} Event:Request Payload:none
+[TRACE] Node:src_6_value Ver:3 Event:Compute Payload:1
+[TRACE] Node:src_5_value Ver:3 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:3 Event:Receive Payload:{input4,1}
+[TRACE] Node:join1_1_output Ver:3 Event:Receive Payload:{input4,1}
+[TRACE] Node:join2_2_output Ver:3 Event:Receive Payload:{input3,1}
+[TRACE] Node:join1_1_output Ver:3 Event:Receive Payload:{input3,1}
+[DEBUG] join2 computing at {p2, 3}. Inputs: input1={p1,7,1}, input2={p1,7,1}, input3={p2,3,1}, input4={p2,3,1}
+[TRACE] Node:join2_2_output Ver:3 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,8} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,8} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:8 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:8 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:8 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:8 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:8 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:8 Event:Receive Payload:{input1,1}
+[DEBUG] join1 computing at {p1, 8}. Inputs: input1={p1,8,1}, input2={p1,8,1}, input3={p2,3,1}, input4={p2,3,1}
+[TRACE] Node:join1_1_output Ver:8 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,9} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,9} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:9 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:9 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:9 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:9 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:9 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:9 Event:Receive Payload:{input1,1}
+[DEBUG] join1 computing at {p1, 9}. Inputs: input1={p1,9,1}, input2={p1,9,1}, input3={p2,3,1}, input4={p2,3,1}
+[TRACE] Node:join1_1_output Ver:9 Event:Compute Payload:4
+[TRACE] Node:src_6_value Ver:{p2,4} Event:Request Payload:none
+[TRACE] Node:src_5_value Ver:{p2,4} Event:Request Payload:none
+[TRACE] Node:src_6_value Ver:4 Event:Compute Payload:1
+[TRACE] Node:src_5_value Ver:4 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:4 Event:Receive Payload:{input4,1}
+[TRACE] Node:join1_1_output Ver:4 Event:Receive Payload:{input4,1}
+[TRACE] Node:join2_2_output Ver:4 Event:Receive Payload:{input3,1}
+[TRACE] Node:join1_1_output Ver:4 Event:Receive Payload:{input3,1}
+[DEBUG] join2 computing at {p2, 4}. Inputs: input1={p1,9,1}, input2={p1,9,1}, input3={p2,4,1}, input4={p2,4,1}
+[TRACE] Node:join2_2_output Ver:4 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,10} Event:Request Payload:none

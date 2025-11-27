@@ -1,0 +1,65 @@
+[TRACE] Node:s11_value Ver:0 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:0 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:0 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:0 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:s21_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:0 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:0 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:0 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:0 Event:Receive Payload:{input2,1}
+[TRACE] Node:j1_output Ver:0 Event:Receive Payload:{input2,1}
+[TRACE] Node:j2_output Ver:0 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:0 Event:Receive Payload:{input3,1}
+[TRACE] Node:j2_output Ver:0 Event:Receive Payload:{input4,1}
+[TRACE] Node:j1_output Ver:0 Event:Receive Payload:{input4,1}
+[TRACE] Node:j2_output Ver:0 Event:Compute Payload:4
+[TRACE] Node:j1_output Ver:0 Event:Compute Payload:4
+Output from p2_j2_output: 4
+Output from p1_j1_output: 4
+[TRACE] Node:s11_value Ver:1 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:1 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:1 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:1 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:1 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:1 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:1 Event:Receive Payload:{input2,1}
+[TRACE] Node:j1_output Ver:0 Event:Compute Payload:4
+Output from p1_j1_output: 4
+[TRACE] Node:j1_output Ver:1 Event:Compute Payload:4
+Output from p1_j1_output: 4
+[TRACE] Node:j1_output Ver:1 Event:Receive Payload:{input2,1}
+[TRACE] Node:s11_value Ver:2 Event:Request Payload:none
+[TRACE] Node:s12_value Ver:2 Event:Request Payload:none
+[TRACE] Node:s11_value Ver:2 Event:Compute Payload:1
+[TRACE] Node:s12_value Ver:2 Event:Compute Payload:1
+Output from p1_s11_value: 1
+Output from p1_s12_value: 1
+[TRACE] Node:j2_output Ver:2 Event:Receive Payload:{input1,1}
+[TRACE] Node:j1_output Ver:2 Event:Receive Payload:{input1,1}
+[TRACE] Node:j2_output Ver:2 Event:Receive Payload:{input2,1}
+[TRACE] Node:j1_output Ver:2 Event:Compute Payload:4
+Output from p1_j1_output: 4
+[TRACE] Node:j1_output Ver:2 Event:Receive Payload:{input2,1}
+=INFO REPORT==== 28-Nov-2025::03:46:09.834692 ===
+SIGTERM received - shutting down
+
+[TRACE] Node:s21_value Ver:1 Event:Request Payload:none
+[TRACE] Node:s22_value Ver:1 Event:Request Payload:none
+[TRACE] Node:s21_value Ver:1 Event:Compute Payload:1
+[TRACE] Node:s22_value Ver:1 Event:Compute Payload:1
+Output from p2_s21_value: 1
+Output from p2_s22_value: 1
+[TRACE] Node:j2_output Ver:1 Event:Receive Payload:{input3,1}
+[TRACE] Node:j1_output Ver:1 Event:Receive Payload:{input3,1}
+[TRACE] Node:j2_output Ver:1 Event:Compute Payload:4
+[TRACE] Node:j1_output Ver:1 Event:Receive Payload:{input4,1}
+Output from p2_j2_output: 4
+[TRACE] Node:j2_output Ver:1 Event:Receive Payload:{input4,1}

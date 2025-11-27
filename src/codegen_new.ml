@@ -209,41 +209,43 @@ let gen_module_actor module_id =
   ]
 
 (* Generate generic node actor function for a module's node *)
+(* trigger_parties is passed via Config - computation triggers when data from any of these parties arrives *)
 let gen_node_actor module_id node_id has_deps =
   let func_name = "run_" ^ module_id ^ "_" ^ node_id in
   
   if has_deps then
     (* Compute node with dependencies - supports cross-party synchronization *)
-    (* Based on Original's pattern: use Processed map to accumulate values from different parties *)
+    (* Key insight from Original: 
+       - When data from a trigger party arrives AND all deps ready -> compute immediately
+       - When data from non-trigger party arrives AND all deps ready -> compute only if Deferred non-empty
+       This ensures computation is triggered by the correct party's sync pulse
+       For periodic nodes: trigger_parties = [OwnerParty]
+       For any_party(p,q): trigger_parties = [p, q] *)
     String.concat "\n" [
       func_name ^ "(Config, Connections, NodeState) ->";
-      "    #{dependencies := Deps, register_name := RegName, compute := ComputeFn} = Config,";
+      "    #{dependencies := Deps, register_name := RegName, compute := ComputeFn, trigger_parties := TriggerParties} = Config,";
       "    #{downstreams := Downstreams} = Connections,";
       "    #{buffer := Buffer0, next_ver := NextVer0, processed := Processed0, req_buffer := ReqBuffer0, deferred := Deferred0} = NodeState,";
       "    ";
       "    %% Process Buffer: Handle cross-party synchronization using Processed map";
-      "    %% Each party's data is stored with {Party, Ver} key";
-      "    %% When a party's data is complete in buffer, merge to Processed and check if all deps ready";
+      "    %% Key: computation triggers only when data from TriggerParties arrives (or clears Deferred)";
       "    HL = lists:sort(?SORTBuffer, maps:to_list(Buffer0)),";
       "    {NBuffer, NextVerT, ProcessedT, DeferredT} = lists:foldl(fun(E, {Buffer, NextVer, Processed, Deferred}) ->";
       "        case E of";
       "            {{Party, Ver} = Version, InputMap} ->";
-      "                %% Check sequential constraint for this party";
       "                CurrentNextVer = maps:get(Party, NextVer, 0),";
       "                case CurrentNextVer =:= Ver of";
       "                    true ->";
-      "                        %% Merge this party's data into Processed";
       "                        MergedProcessed = maps:merge(Processed, InputMap),";
-      "                        %% Check if all dependencies are now present in merged map";
       "                        AllPresent = lists:all(fun(DepName) ->";
       "                            maps:is_key(DepName, MergedProcessed)";
       "                        end, Deps),";
       "                        case AllPresent of";
       "                            true ->";
-      "                                %% All deps ready - compute result";
-      "                                case Deferred of";
-      "                                    [] -> void;";
-      "                                    _ ->";
+      "                                %% All deps ready - check if this party is in trigger list";
+      "                                case lists:member(Party, TriggerParties) of";
+      "                                    true ->";
+      "                                        %% Trigger party data: compute immediately";
       "                                        Result = ComputeFn(MergedProcessed),";
       "                                        io:format(\"[TRACE] Node:~p Ver:~p Event:Compute Payload:~p~n\", [trace_node_name(RegName), Ver, Result]),";
       "                                        out(RegName, Result),";
@@ -253,12 +255,29 @@ let gen_node_actor module_id node_id has_deps =
       "                                                    DownstreamPid ! {{Party, Ver}, PortTag, Result};";
       "                                                _ -> ok";
       "                                            end";
-      "                                        end, Downstreams)";
-      "                                end,";
-      "                                {maps:remove(Version, Buffer), maps:update(Party, Ver + 1, NextVer), MergedProcessed, []};";
+      "                                        end, Downstreams),";
+      "                                        {maps:remove(Version, Buffer), maps:update(Party, Ver + 1, NextVer), MergedProcessed, []};";
+      "                                    false ->";
+      "                                        %% Non-trigger party data: compute only if Deferred non-empty";
+      "                                        case Deferred of";
+      "                                            [] -> void;";
+      "                                            _ ->";
+      "                                                Result = ComputeFn(MergedProcessed),";
+      "                                                io:format(\"[TRACE] Node:~p Ver:~p Event:Compute Payload:~p~n\", [trace_node_name(RegName), Ver, Result]),";
+      "                                                out(RegName, Result),";
+      "                                                lists:foreach(fun(Downstream) ->";
+      "                                                    case Downstream of";
+      "                                                        {DownstreamPid, PortTag} ->";
+      "                                                            DownstreamPid ! {{Party, Ver}, PortTag, Result};";
+      "                                                        _ -> ok";
+      "                                                    end";
+      "                                                end, Downstreams)";
+      "                                        end,";
+      "                                        {maps:remove(Version, Buffer), maps:update(Party, Ver + 1, NextVer), MergedProcessed, []}";
+      "                                end;";
       "                            false ->";
-      "                                %% Not all deps ready yet - save to Processed and add to Deferred";
-      "                                {maps:remove(Version, Buffer), maps:update(Party, Ver + 1, NextVer), MergedProcessed, [Version | Deferred]}";
+      "                                %% Not all deps ready - keep in Buffer, merge to Processed, DO NOT advance NextVer";
+      "                                {Buffer, NextVer, MergedProcessed, [Version | Deferred]}";
       "                        end;";
       "                    false ->";
       "                        {Buffer, NextVer, Processed, Deferred}";
@@ -268,36 +287,50 @@ let gen_node_actor module_id node_id has_deps =
       "        end";
       "    end, {Buffer0, NextVer0, Processed0, Deferred0}, HL),";
       "    ";
-      "    %% Process Request Buffer (for relay nodes triggered by request)";
+      "    %% Process Request Buffer (for nodes triggered by sync pulse/request)";
       "    Sorted_req_buf = lists:sort(?SORTVerBuffer, ReqBuffer0),";
       "    {NNextVer, NProcessed, NReqBuffer, NDeferred} = lists:foldl(fun(E, {NextVer, Processed, ReqBuffer, Deferred}) ->";
       "        case E of";
       "            {Party, Ver} = Version ->";
-      "                CurrentNextVer = maps:get(Party, NextVer, 0),";
-      "                case CurrentNextVer =:= Ver of";
+      "                case lists:member(Party, TriggerParties) of";
       "                    true ->";
-      "                        %% Check if all deps are in Processed";
-      "                        AllPresent = lists:all(fun(DepName) ->";
-      "                            maps:is_key(DepName, Processed)";
-      "                        end, Deps),";
-      "                        case AllPresent of";
+      "                        %% Trigger party request: strict version matching required";
+      "                        CurrentNextVer = maps:get(Party, NextVer, 0),";
+      "                        case CurrentNextVer =:= Ver of";
       "                            true ->";
-      "                                Result = ComputeFn(Processed),";
-      "                                io:format(\"[TRACE] Node:~p Ver:~p Event:Compute Payload:~p~n\", [trace_node_name(RegName), Ver, Result]),";
-      "                                out(RegName, Result),";
-      "                                lists:foreach(fun(Downstream) ->";
-      "                                    case Downstream of";
-      "                                        {DownstreamPid, PortTag} ->";
-      "                                            DownstreamPid ! {{Party, Ver}, PortTag, Result};";
-      "                                        _ -> ok";
-      "                                    end";
-      "                                end, Downstreams),";
-      "                                {maps:update(Party, Ver + 1, NextVer), Processed, ReqBuffer, []};";
+      "                                AllPresent = lists:all(fun(DepName) ->";
+      "                                    maps:is_key(DepName, Processed)";
+      "                                end, Deps),";
+      "                                case AllPresent of";
+      "                                    true ->";
+      "                                        Result = ComputeFn(Processed),";
+      "                                        io:format(\"[TRACE] Node:~p Ver:~p Event:Compute Payload:~p~n\", [trace_node_name(RegName), Ver, Result]),";
+      "                                        out(RegName, Result),";
+      "                                        lists:foreach(fun(Downstream) ->";
+      "                                            case Downstream of";
+      "                                                {DownstreamPid, PortTag} ->";
+      "                                                    DownstreamPid ! {{Party, Ver}, PortTag, Result};";
+      "                                                _ -> ok";
+      "                                            end";
+      "                                        end, Downstreams),";
+      "                                        {maps:update(Party, Ver + 1, NextVer), Processed, ReqBuffer, []};";
+      "                                    false ->";
+      "                                        %% Deps not ready - defer";
+      "                                        {maps:update(Party, Ver + 1, NextVer), Processed, ReqBuffer, [Version | Deferred]}";
+      "                                end;";
       "                            false ->";
-      "                                {maps:update(Party, Ver + 1, NextVer), Processed, ReqBuffer, [Version | Deferred]}";
+      "                                %% Future version - keep in buffer";
+      "                                {NextVer, Processed, [Version | ReqBuffer], Deferred}";
       "                        end;";
       "                    false ->";
-      "                        {NextVer, Processed, [Version | ReqBuffer], Deferred}";
+      "                        %% Non-trigger party request - use strict version matching";
+      "                        CurrentNextVer = maps:get(Party, NextVer, 0),";
+      "                        case CurrentNextVer =:= Ver of";
+      "                            true ->";
+      "                                {maps:update(Party, Ver + 1, NextVer), Processed, ReqBuffer, Deferred};";
+      "                            false ->";
+      "                                {NextVer, Processed, [Version | ReqBuffer], Deferred}";
+      "                        end";
       "                end;";
       "            _ -> {NextVer, Processed, ReqBuffer, Deferred}";
       "        end";
@@ -380,6 +413,7 @@ let gen_all_actors inst_prog module_map =
     actors := gen_module_actor module_id :: !actors;
     
     (* Generate node actors only for compute nodes (mod_info.node), NOT for source nodes *)
+    (* owner_party is passed via Config at spawn time, not here *)
     List.iter (fun (node_id, _, _, _) ->
       (* Check if this node has dependencies *)
       let has_deps = List.length mod_info.source > 0 in
@@ -534,12 +568,23 @@ let gen_start inst_prog module_map =
         ) inputs;
         let next_ver_init = String.concat ", " (List.map (fun p -> p ^ " => 0") !dep_parties) in
         
+        (* Add trigger_parties to Config - determines when computation triggers *)
+        (* For periodic nodes, trigger_parties = [OwnerParty] *)
+        (* For any_party(p, q) nodes, trigger_parties = [p, q] (future extension) *)
         let node_spawn = Printf.sprintf
-          "    PID_%s = spawn(?MODULE, run_%s_%s, [#{register_name => %s, dependencies => %s, compute => %s}, #{downstreams => %s}, #{buffer => #{}, next_ver => #{%s}, processed => #{}, req_buffer => [], deferred => []}]),\n    register(%s, PID_%s)"
-          qualified module_id node_id qualified deps_str compute_fn downstreams next_ver_init qualified qualified in
+          "    PID_%s = spawn(?MODULE, run_%s_%s, [#{register_name => %s, dependencies => %s, compute => %s, trigger_parties => [%s]}, #{downstreams => %s}, #{buffer => #{}, next_ver => #{%s}, processed => #{}, req_buffer => [], deferred => []}]),\n    register(%s, PID_%s)"
+          qualified module_id node_id qualified deps_str compute_fn party_id downstreams next_ver_init qualified qualified in
         spawn_code := node_spawn :: !spawn_code
       ) mod_info.node
     ) all_instances;
+    
+    (* Calculate subscribers: all modules in this party except the leader *)
+    let all_module_names = List.map (fun (outputs, _, _) ->
+      party_id ^ "_" ^ List.hd outputs
+    ) all_instances in
+    let leader_name = party_id ^ "_" ^ leader in
+    let subscriber_names = List.filter (fun name -> name <> leader_name) all_module_names in
+    let subscribers_str = "[" ^ String.concat ", " subscriber_names ^ "]" in
     
     (* Add party actor config *)
     let party_config_code = String.concat "\n" [
@@ -548,7 +593,7 @@ let gen_start inst_prog module_map =
       "        leader => " ^ party_id ^ "_" ^ leader ^ ",";
       "        mode => periodic,";
       "        interval => " ^ string_of_int interval ^ ",";
-      "        subscribers => []";
+      "        subscribers => " ^ subscribers_str;
       "    },";
       "    PID_party_" ^ party_id ^ " = spawn(?MODULE, run_party, [PartyConfig_" ^ party_id ^ ", 0]),";
       "    register(party_" ^ party_id ^ ", PID_party_" ^ party_id ^ ")";

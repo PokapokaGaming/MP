@@ -1,0 +1,4 @@
+module src
+in
+out value: Int
+node value: Int = 1

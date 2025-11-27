@@ -1,2 +1,0 @@
-module source3
-node val: Int = 3

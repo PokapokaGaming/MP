@@ -1,0 +1,5 @@
+# NodeB module (p2 - Slow) - receives from NodeA, passes to NodeC
+module node_b
+in a_val: Int
+out b_val: Int
+node b_val: Int = a_val + 100

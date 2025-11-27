@@ -1,0 +1,7 @@
+module join1
+in input1: Int,
+   input2: Int,
+   input3: Int,
+   input4: Int
+out output: Int
+node output: Int = input1 + input2 + input3 + input4

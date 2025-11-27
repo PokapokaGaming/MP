@@ -1,0 +1,5 @@
+# Source module - generates incrementing counter
+module source
+in
+out val: Int
+node init[0] val: Int = val@last + 1
