@@ -27,7 +27,7 @@ let itp2i = fun (i, t, p) -> i
 %token
   MODULE IN OUT CONST NODE NEWNODE INIT FUN IF THEN ELSE
   LET CASE OF LAST TRUE FALSE PARTY NATIVE
-  LEADER PERIODIC PARTY_TEMPLATE TEMPLATE DEFAULT_CONNECT
+  LEADER PERIODIC PARTY_TEMPLATE
 
 %token
   COMMA LBRACKET RBRACKET LPAREN RPAREN LBRACE RBRACE COLON COLON2
@@ -272,27 +272,17 @@ qualified_id:
   | id = ID { SimpleId id }
   | pid = ID DOT iid = ID { QualifiedId(pid, iid) }
 
+(* party_template: partyと同じ構文で書ける *)
 template_block:
   | PARTY_TEMPLATE tid = ID
-    tdefs = nonempty_list(template_def)
-    dconn = option(default_connect_block)
+    LEADER EQUAL lid = ID
+    PERIODIC LPAREN ms = INT RPAREN
+    instances = nonempty_list(newnode_stmt)
     {
       {
         template_id = tid;
-        template_defs = tdefs;
-        default_connections = match dconn with Some c -> c | None -> [];
+        template_leader = lid;
+        template_periodic = ms;
+        template_instances = instances;
       }
     }
-
-template_def:
-  | TEMPLATE tname = ID EQUAL mname = ID
-    { (tname, mname) }
-
-default_connect_block:
-  | DEFAULT_CONNECT
-    conns = nonempty_list(connection_stmt)
-    { conns }
-
-connection_stmt:
-  | iid = qualified_id LPAREN deps = separated_list(COMMA, qualified_id) RPAREN
-    { (iid, deps) }

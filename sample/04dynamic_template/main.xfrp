@@ -1,0 +1,11 @@
+# Static party definition
+party main
+leader = c1
+periodic(1000)
+newnode (c1) = client()
+
+# Dynamic template - same syntax as party!
+party_template ClientTemplate
+leader = client
+periodic(500)
+newnode (client) = client()

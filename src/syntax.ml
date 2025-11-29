@@ -68,8 +68,6 @@ type qualified_id =
   | SimpleId of id
   | QualifiedId of id * id  (* party_id.instance_id *)
 
-type connection = qualified_id * qualified_id list  (* instance(deps...) *)
-
 type party_block = {
   party_id: id;
   leader: id;
@@ -77,10 +75,12 @@ type party_block = {
   instances: (id list * id * qualified_id list) list;  (* (outputs, module, inputs) *)
 }
 
+(* party_template: party_blockとほぼ同じ構造（統一された構文） *)
 type party_template = {
   template_id: id;
-  template_defs: (id * id) list;  (* (template_name, module_name) *)
-  default_connections: connection list;
+  template_leader: id;
+  template_periodic: int;
+  template_instances: (id list * id * qualified_id list) list;  (* newnode instances *)
 }
 
 type inst_block =

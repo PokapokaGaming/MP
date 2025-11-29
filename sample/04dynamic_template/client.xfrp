@@ -1,0 +1,4 @@
+module client
+in 
+out value: Int
+node init[0] value: Int = value@last + 1

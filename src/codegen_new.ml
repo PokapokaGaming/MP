@@ -677,7 +677,8 @@ let gen_out inst_prog module_map =
     ) party_block.Syntax.instances
   ) inst_prog.Syntax.parties;
   
-  String.concat "\n" (!entries @ ["out(_, _) -> erlang:error(badarg)."])
+  (* Default case: allow dynamic nodes (undefined name) or unknown nodes *)
+  String.concat "\n" (!entries @ ["out(undefined, Value) -> io:format(\"[Dynamic] Output: ~p~n\", [Value]), void;"; "out(_, _) -> void."])
 
 (* Generate export declarations *)
 let gen_exports inst_prog module_map =
@@ -703,14 +704,167 @@ let gen_exports inst_prog module_map =
   
   String.concat "\n" (List.rev !exports)
 
+(* Generate exports for template factory functions *)
+let gen_template_exports inst_prog =
+  let templates = inst_prog.Syntax.templates in
+  if List.length templates = 0 then ""
+  else begin
+    let factory_exports = List.map (fun template ->
+      "create_" ^ template.Syntax.template_id ^ "/1"
+    ) templates in
+    let manager_exports = ["list_templates/0"; "stop_party/1"; "get_parties/0"] in
+    "-export([" ^ String.concat ", " (factory_exports @ manager_exports) ^ "])."
+  end
+
+(* Generate a single template factory function - simplified to match party syntax *)
+let gen_single_template_factory template module_map _inst_prog =
+  let tid = template.Syntax.template_id in
+  let leader = template.Syntax.template_leader in
+  let periodic = string_of_int template.Syntax.template_periodic in
+  let instances = template.Syntax.template_instances in
+  
+  (* Generate spawn code for each newnode instance *)
+  let spawn_code = ref [] in
+  let pid_vars = ref [] in
+  
+  List.iter (fun (outputs, module_id, _inputs) ->
+    let inst_name = List.hd outputs in
+    let var_name = "PID_" ^ inst_name in
+    pid_vars := var_name :: !pid_vars;
+    
+    let has_mod_info = M.mem module_id module_map in
+    if has_mod_info then begin
+      let mod_info = M.find module_id module_map in
+      
+      (* Spawn node actors for this module *)
+      List.iter (fun (node_id, _, _, expr) ->
+        let node_var = var_name ^ "_" ^ node_id in
+        let compute_fn = "fun(Inputs) -> " ^ expr_to_erlang expr ^ " end" in
+        let deps_str = "[" ^ String.concat ", " mod_info.source ^ "]" in
+        
+        let node_spawn = Printf.sprintf
+          "    %s = spawn(fun() -> run_%s_%s(#{register_name => undefined, dependencies => %s, compute => %s, trigger_parties => [PartyName]}, #{downstreams => []}, #{buffer => #{}, next_ver => #{PartyName => 0}, processed => #{}, req_buffer => [], deferred => []}) end)"
+          node_var module_id node_id deps_str compute_fn in
+        spawn_code := node_spawn :: !spawn_code
+      ) mod_info.node;
+      
+      (* Spawn module actor *)
+      let node_names = List.map (fun (node_id, _, _, _) ->
+        var_name ^ "_" ^ node_id
+      ) mod_info.node in
+      let nodes_str = "[" ^ String.concat ", " node_names ^ "]" in
+      
+      let module_spawn = Printf.sprintf
+        "    %s = spawn(fun() -> run_%s([], [], PartyName, 0, #{nodes => %s, request_targets => %s}, []) end)"
+        var_name module_id nodes_str nodes_str in
+      spawn_code := module_spawn :: !spawn_code
+    end else begin
+      (* Fallback: spawn placeholder if module not found *)
+      let module_spawn = Printf.sprintf
+        "    %s = spawn(fun() -> receive stop -> ok end end)"
+        var_name in
+      spawn_code := module_spawn :: !spawn_code
+    end
+  ) instances;
+  
+  (* Generate party actor spawn *)
+  let leader_var = "PID_" ^ leader in
+  (* Filter out node-level PIDs (those with underscore after PID_xxx) *)
+  let all_module_vars = List.filter (fun v -> 
+    not (String.length v > 4 && 
+         let after_pid = String.sub v 4 (String.length v - 4) in
+         String.contains after_pid '_')
+  ) !pid_vars in
+  let subscribers = List.filter (fun v -> v <> leader_var) all_module_vars in
+  let subscribers_str = "[" ^ String.concat ", " subscribers ^ "]" in
+  
+  let party_spawn = Printf.sprintf
+    "    PartyConfig = #{party => PartyName, leader => %s, mode => periodic, interval => %s, subscribers => %s},\n    PartyPid = spawn(fun() -> run_party(PartyConfig, 0) end)"
+    leader_var periodic subscribers_str in
+  
+  let pids_list = "[" ^ String.concat ", " (List.rev !pid_vars) ^ ", PartyPid]" in
+  
+  String.concat "\n" [
+    "%% Factory function for template: " ^ tid;
+    "create_" ^ tid ^ "(PartyName) ->";
+    "    %% Spawn actors for this template instance";
+    String.concat ",\n" (List.rev !spawn_code) ^ ",";
+    party_spawn ^ ",";
+    "    %% Register with manager";
+    "    manager_register(PartyName, " ^ pids_list ^ "),";
+    "    {ok, PartyName}.";
+  ]
+
+(* Generate factory functions for each template *)
+let gen_template_factories inst_prog module_map =
+  let templates = inst_prog.Syntax.templates in
+  if List.length templates = 0 then ""
+  else begin
+    String.concat "\n\n" (List.map (fun template ->
+      gen_single_template_factory template module_map inst_prog
+    ) templates)
+  end
+
+(* Generate manager functions *)
+let gen_manager inst_prog =
+  let templates = inst_prog.Syntax.templates in
+  if List.length templates = 0 then ""
+  else begin
+    let template_names = List.map (fun t -> "'" ^ t.Syntax.template_id ^ "'") templates in
+    let template_atoms = "[" ^ String.concat ", " template_names ^ "]" in
+    
+    String.concat "\n\n" [
+      "%% Manager functions for dynamic party management";
+      "";
+      "%% ETS table for party registry";
+      "ensure_manager_table() ->";
+      "    case ets:info(mpfrp_parties) of";
+      "        undefined -> ets:new(mpfrp_parties, [named_table, public, set]);";
+      "        _ -> ok";
+      "    end.";
+      "";
+      "manager_register(PartyName, Pids) ->";
+      "    ensure_manager_table(),";
+      "    ets:insert(mpfrp_parties, {PartyName, Pids}),";
+      "    io:format(\"[Manager] Party ~p registered with ~p PIDs~n\", [PartyName, length(Pids)]).";
+      "";
+      "list_templates() ->";
+      "    " ^ template_atoms ^ ".";
+      "";
+      "get_parties() ->";
+      "    ensure_manager_table(),";
+      "    ets:tab2list(mpfrp_parties).";
+      "";
+      "stop_party(PartyName) ->";
+      "    ensure_manager_table(),";
+      "    case ets:lookup(mpfrp_parties, PartyName) of";
+      "        [{PartyName, Pids}] ->";
+      "            lists:foreach(fun(Pid) ->";
+      "                exit(Pid, shutdown)";
+      "            end, Pids),";
+      "            ets:delete(mpfrp_parties, PartyName),";
+      "            io:format(\"[Manager] Party ~p stopped~n\", [PartyName]),";
+      "            ok;";
+      "        [] ->";
+      "            {error, not_found}";
+      "    end.";
+    ]
+  end
+
 (* Main entry point *)
 let gen_new_inst inst_prog module_map =
   let party_block = List.hd inst_prog.Syntax.parties in
   let module_name = party_block.Syntax.party_id in
   
+  (* Generate template factory functions if templates exist *)
+  let template_exports = gen_template_exports inst_prog in
+  let template_factories = gen_template_factories inst_prog module_map in
+  let manager_code = gen_manager inst_prog in
+  
   String.concat "\n\n" [
     "-module(" ^ module_name ^ ").";
     gen_exports inst_prog module_map;
+    template_exports;
     "";
     gen_helpers ();
     "";
@@ -725,4 +879,8 @@ let gen_new_inst inst_prog module_map =
     gen_start inst_prog module_map;
     "";
     gen_out inst_prog module_map;
+    "";
+    template_factories;
+    "";
+    manager_code;
   ]

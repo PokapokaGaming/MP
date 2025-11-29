@@ -30,8 +30,6 @@ let () =
     "leader", LEADER;
     "periodic", PERIODIC;
     "party_template", PARTY_TEMPLATE;
-    "template", TEMPLATE;
-    "default_connect", DEFAULT_CONNECT;
   ]
 
 let next_line lexbuf =
