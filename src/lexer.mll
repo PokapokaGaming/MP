@@ -30,6 +30,10 @@ let () =
     "leader", LEADER;
     "periodic", PERIODIC;
     "party_template", PARTY_TEMPLATE;
+    "template", TEMPLATE;
+    "fold", FOLD;
+    "count", COUNT;
+    "sum", SUM;
   ]
 
 let next_line lexbuf =
@@ -60,6 +64,7 @@ rule read = parse
   | newline          { next_line lexbuf; read lexbuf }
   | '#'              { read_comment lexbuf; read lexbuf }
   | ','              { COMMA }
+  | "..."           { DOTDOTDOT }
   | '.'              { DOT }
   | '['              { LBRACKET }
   | ']'              { RBRACKET }
@@ -91,6 +96,7 @@ rule read = parse
   | '>'              { GT }
   | '!'              { BANG }
   | '='              { EQUAL }
+  | '$'              { DOLLAR }
   | '\'' ([^ '\\' '\r' '\n'] as c) '\''
     { CHAR(c) }
   | '\'' '\\' (['b' 'f' 'n' 'r' 't'] as c) '\''

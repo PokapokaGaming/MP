@@ -1,0 +1,4 @@
+module client
+in mean: Float
+out output: Int
+node output: Int = 10

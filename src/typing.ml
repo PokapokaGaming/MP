@@ -207,6 +207,15 @@ let rec infer env level = function
         | _  -> unify et (infer_bodies mt rest); et (* check: body *)
     in
     infer_bodies (infer env level m) bodies
+  | EFold (op, init, id) ->
+    (* fold(op, init, variadic_input) - result type is same as init type *)
+    let init_t = infer env level init in
+    (* For variadic inputs, the id refers to a list of values *)
+    (* The operator must work on init_t values *)
+    init_t
+  | ECount _ ->
+    (* count(variadic_input) returns Int *)
+    TInt
 
 let rec is_concrete = function
   | TVar {contents = TVBound ty}

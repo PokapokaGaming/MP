@@ -71,6 +71,7 @@ let peek_file_type filename =
     | Parser.MODULE -> close_in ic; `Module
     | Parser.PARTY -> close_in ic; `Party
     | Parser.PARTY_TEMPLATE -> close_in ic; `PartyTemplate
+    | Parser.TEMPLATE -> close_in ic; `PartyTemplate
     | Parser.EOF -> close_in ic; raise (CompileError("Empty file"))
     | _ -> skip_whitespace ()
   in

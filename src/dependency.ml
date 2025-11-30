@@ -47,6 +47,12 @@ let get_graph xmodule =
       | EFun (args, e) -> 
         ES.diff (f e) (ES.of_list (List.map (fun a -> Current a) args))
       | ECase(m, list) -> (f m :: List.map (fun (_, e) -> f e) list) |> List.fold_left ES.union ES.empty
+      | EFold (_, init, id) -> 
+        (* Fold depends on init expr and the variadic input id *)
+        ES.union (f init) (if S.mem id nodes then ES.singleton (Current id) else ES.empty)
+      | ECount id ->
+        (* Count depends on the variadic input id *)
+        if S.mem id nodes then ES.singleton (Current id) else ES.empty
     in f
   in
   let inv_map m =

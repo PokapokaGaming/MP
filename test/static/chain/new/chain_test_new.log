@@ -1,0 +1,36 @@
+[TRACE] Node:src_val Ver:0 Event:Request Payload:none
+[TRACE] Node:src_val Ver:0 Event:Compute Payload:1
+Output from g_src_val: 1
+[TRACE] Node:rly_r_val Ver:0 Event:Receive Payload:{s_val,1}
+[TRACE] Node:rly_r_val Ver:0 Event:Compute Payload:2
+Output from g_rly_r_val: 2
+[TRACE] Node:snk_k_val Ver:0 Event:Receive Payload:{r_val,2}
+[TRACE] Node:snk_k_val Ver:0 Event:Compute Payload:20
+Output from g_snk_k_val: 20
+[TRACE] Node:src_val Ver:1 Event:Request Payload:none
+[TRACE] Node:src_val Ver:1 Event:Compute Payload:1
+Output from g_src_val: 1
+[TRACE] Node:rly_r_val Ver:1 Event:Receive Payload:{s_val,1}
+[TRACE] Node:rly_r_val Ver:1 Event:Compute Payload:2
+Output from g_rly_r_val: 2
+[TRACE] Node:snk_k_val Ver:1 Event:Receive Payload:{r_val,2}
+[TRACE] Node:snk_k_val Ver:1 Event:Compute Payload:20
+Output from g_snk_k_val: 20
+[TRACE] Node:src_val Ver:2 Event:Request Payload:none
+[TRACE] Node:src_val Ver:2 Event:Compute Payload:1
+Output from g_src_val: 1
+[TRACE] Node:rly_r_val Ver:2 Event:Receive Payload:{s_val,1}
+[TRACE] Node:rly_r_val Ver:2 Event:Compute Payload:2
+Output from g_rly_r_val: 2
+[TRACE] Node:snk_k_val Ver:2 Event:Receive Payload:{r_val,2}
+[TRACE] Node:snk_k_val Ver:2 Event:Compute Payload:20
+Output from g_snk_k_val: 20
+[TRACE] Node:src_val Ver:3 Event:Request Payload:none
+[TRACE] Node:src_val Ver:3 Event:Compute Payload:1
+Output from g_src_val: 1
+[TRACE] Node:rly_r_val Ver:3 Event:Receive Payload:{s_val,1}
+[TRACE] Node:rly_r_val Ver:3 Event:Compute Payload:2
+Output from g_rly_r_val: 2
+[TRACE] Node:snk_k_val Ver:3 Event:Receive Payload:{r_val,2}
+[TRACE] Node:snk_k_val Ver:3 Event:Compute Payload:20
+Output from g_snk_k_val: 20

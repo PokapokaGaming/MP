@@ -3,6 +3,9 @@ type moduleid = string
 
 type id_and_type = id * Type.t
 
+(* Variadic input: (name, type, is_variadic) *)
+type id_and_type_variadic = id * Type.t * bool
+
 type id_and_type_opt = id * Type.t option
 
 type id_type_opt_party = id * Type.t option * string
@@ -54,6 +57,8 @@ type expr
   | ELet of (id * expr * Type.t option) list * expr
   | ECase of expr * (pattern * expr) list
   | EFun of id list * expr
+  | EFold of binop * expr * id           (* fold(op, init, variadic_input) *)
+  | ECount of id                          (* count(variadic_input) *)
 
 type definition
   = Const of id_and_type_opt * expr
@@ -67,6 +72,10 @@ type definition
 type qualified_id = 
   | SimpleId of id
   | QualifiedId of id * id  (* party_id.instance_id *)
+  | ParamRef of id          (* $param - テンプレートパラメータへの参照 *)
+
+(* 出力接続: main.s1(c4, c5) または $upstream(n1) のような記述 *)
+type output_connection = qualified_id * id list  (* target_instance, local_instances *)
 
 type party_block = {
   party_id: id;
@@ -75,12 +84,16 @@ type party_block = {
   instances: (id list * id * qualified_id list) list;  (* (outputs, module, inputs) *)
 }
 
-(* party_template: party_blockとほぼ同じ構造（統一された構文） *)
+(* template: 動的インスタンス化の雛形 *)
+(* template_params: 接続先などを動的に指定するためのパラメータ *)
+(* 例: template chain(upstream) で upstream がパラメータになる *)
 type party_template = {
   template_id: id;
-  template_leader: id;
-  template_periodic: int;
+  template_params: id list;  (* パラメータリスト - API呼び出し時に指定 *)
+  template_leader: id;  (* 新規パーティ立ち上げ時のリーダー（必須） *)
+  template_periodic: int;  (* 新規パーティ立ち上げ時の周期（必須） *)
   template_instances: (id list * id * qualified_id list) list;  (* newnode instances *)
+  template_outputs: output_connection list;  (* 既存インスタンスへの出力接続 *)
 }
 
 type inst_block =
@@ -92,10 +105,11 @@ type inst_program = {
   templates: party_template list;
 }
 
+(* in_node: ((id, type), party, is_variadic) *)
 type program = {
   id: moduleid;
   party: string list;
-  in_node: (id_and_type * string) list;
+  in_node: (id_and_type * string * bool) list;  (* Added is_variadic flag *)
   out_node: (id_and_type * string) list;
   definition: definition list;
   id_party_lst: (id * string) list;
@@ -150,6 +164,12 @@ let rec string_of_expr = function
   | ECase(m, cls) -> 
     let f (p, e) = string_of_pat p ^ " -> "^ string_of_expr e ^ "; " in
     "case " ^ string_of_expr m ^ " of " ^ String.concat "" (List.map f cls)
+  | EFold (op, init, id) ->
+    let op_str = match op with
+      | BAdd -> "+" | BSub -> "-" | BMul -> "*"
+      | BLAnd -> "&&" | BLOr -> "||" | _ -> "?" in
+    "fold(" ^ op_str ^ ", " ^ string_of_expr init ^ ", " ^ id ^ ")"
+  | ECount id -> "count(" ^ id ^ ")"
 
 let string_of_definition defs = 
   let str_ty = function | Some (t) -> Type.string_of_type t
@@ -195,6 +215,6 @@ let print program =
   let str_ty t = Type.string_of_type t in
   print_endline program.id;
   (program.party |> String.concat ",") |> print_endline;
-  (List.map (fun (it, p) -> "(" ^ fst it ^ "," ^  str_ty (snd it) ^ "," ^ p ^ ")") program.in_node) |> String.concat "," |> print_endline;
+  (List.map (fun (it, p, v) -> "(" ^ fst it ^ "," ^  str_ty (snd it) ^ "," ^ p ^ "," ^ string_of_bool v ^ ")") program.in_node) |> String.concat "," |> print_endline;
   (List.map (fun (it, p) -> "(" ^ fst it ^ "," ^  str_ty (snd it) ^ "," ^ p ^ ")") program.out_node) |> String.concat "," |> print_endline;
   string_of_definition program.definition |> print_endline;

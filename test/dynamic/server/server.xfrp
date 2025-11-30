@@ -1,0 +1,6 @@
+module server
+in client1: Int,
+client2: Int,
+client3: Int
+out mean: Float
+node mean: Float = (client1 + client2 + client3) / 3

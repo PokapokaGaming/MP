@@ -1,0 +1,10 @@
+party main
+leader = src
+periodic(1000)
+newnode (src) = source()
+
+template chain(upstream)
+leader = n1
+periodic(500)
+newnode (n1) = pass(n1)
+$upstream(n1)

@@ -1,0 +1,4 @@
+module join
+in inputs... : Int
+out total : Int
+node total : Int = sum(inputs)

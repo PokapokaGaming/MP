@@ -22,7 +22,8 @@ type t = {
   newnode: (string list * string * string list * string list) list;
   leader: (id * id * expr list) list;
   typeinfo: tannot M.t;
-  id2party: string M.t
+  id2party: string M.t;
+  variadic_inputs: id list  (* List of input ports that are variadic *)
 }
 
 let collect defs = 
@@ -38,9 +39,11 @@ let collect defs =
   ) ([], [], [], [], [], []) defs in
   (List.rev a, List.rev b, List.rev c, List.rev d, List.rev e, List.rev f)
 let remove_type = function
-  (it, p) -> ((fst it), p)
+  (it, p, _) -> ((fst it), p)  (* Updated for variadic flag *)
 let remove_party = function
-  (it,_) -> (fst it, snd it)
+  (it, _, _) -> (fst it, snd it)  (* Updated for variadic flag *)
+let remove_party_out = function
+  (it,_) -> (fst it, snd it)  (* For out_node which has no variadic flag *)
 let extract_node nps = List.map fst nps
 
 let make_type program = 
@@ -52,7 +55,7 @@ let make_type program =
     | (Native (i, (ta,tr))) -> M.add i (TAFun (ta, tr)) m
     | (NewNode (_, _, _, _)) | Party (_, _, _) -> m
   ) in_t program.definition in
-  let out_t = List.fold_left (fun m (i,t) -> M.add i (TANode (Some t)) m) def_t (List.map remove_party program.out_node) in
+  let out_t = List.fold_left (fun m (i,t) -> M.add i (TANode (Some t)) m) def_t (List.map remove_party_out program.out_node) in
   out_t
 
 let of_program program =
@@ -60,17 +63,22 @@ let of_program program =
   (* Use only in_node declarations as true extern_input, not key_input() nodes *)
   (* key_input() nodes are computation nodes that generate values internally *)
   let extern_input = extract_node (List.map remove_type program.in_node) in
+  (* Extract variadic input port names *)
+  let variadic_inputs = List.filter_map (fun ((id, _), _, is_variadic) ->
+    if is_variadic then Some id else None
+  ) program.in_node in
   {
     id = program.id;
     party = program.party;
     source = extract_node (List.map remove_type program.in_node);
     extern_input = extern_input;
-    sink = extract_node (List.map remove_type program.out_node);
+    sink = extract_node (List.map (fun (it, _) -> ((fst it), "")) program.out_node);
     const = const;
     node = node;
     newnode = newnode;
     func = func;
     leader = leader;
     typeinfo = make_type program;
-    id2party = list2map program.id_party_lst
+    id2party = list2map program.id_party_lst;
+    variadic_inputs = variadic_inputs
   }

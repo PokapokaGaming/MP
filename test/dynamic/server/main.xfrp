@@ -1,0 +1,23 @@
+party main
+leader = s1
+periodic(1000)
+newnode (s1) = server(c1, c2, c3)
+newnode (c1) = client(s1)
+newnode (c2) = client(s1)
+newnode (c3) = client(s1)
+
+template sub
+leader = s1
+periodic(1000)
+newnode (s1) = server(c1, c2, c3)
+newnode (c1) = client(s1)
+newnode (c2) = client(s1)
+newnode (c3) = client(s1)
+
+template twoclient
+leader = c5
+periodic(500)
+newnode (c4) = client(main.s1)
+newnode (c5) = client(main.s1)
+main.s1(c4)
+main.s1(c5)

@@ -1,7 +1,3 @@
-# Zig-Zag Chain Instance File
-# p1 (Fast): 1000ms, p2 (Slow): 3000ms
-# Flow: Source(p1) -> NodeA(p1) -> NodeB(p2) -> NodeC(p1) -> NodeD(p2)
-
 party p1
   leader = src
   periodic(1000)

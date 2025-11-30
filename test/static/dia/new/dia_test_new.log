@@ -1,0 +1,52 @@
+[TRACE] Node:src_val Ver:0 Event:Request Payload:none
+[TRACE] Node:src_val Ver:0 Event:Compute Payload:42
+Output from main_src_val: 42
+[TRACE] Node:slow_o Ver:0 Event:Receive Payload:{i,42}
+[TRACE] Node:fast_o Ver:0 Event:Receive Payload:{i,42}
+[TRACE] Node:slow_o Ver:0 Event:Compute Payload:42
+[TRACE] Node:fast_o Ver:0 Event:Compute Payload:42
+Output from main_slow_o: 42
+Output from main_fast_o: 42
+[TRACE] Node:j_diff Ver:0 Event:Receive Payload:{slow,42}
+[TRACE] Node:j_diff Ver:0 Event:Receive Payload:{fast,42}
+[TRACE] Node:j_diff Ver:0 Event:Compute Payload:0
+Output from main_j_diff: 0
+[TRACE] Node:src_val Ver:1 Event:Request Payload:none
+[TRACE] Node:src_val Ver:1 Event:Compute Payload:42
+Output from main_src_val: 42
+[TRACE] Node:slow_o Ver:1 Event:Receive Payload:{i,42}
+[TRACE] Node:fast_o Ver:1 Event:Receive Payload:{i,42}
+[TRACE] Node:slow_o Ver:1 Event:Compute Payload:42
+[TRACE] Node:fast_o Ver:1 Event:Compute Payload:42
+Output from main_slow_o: 42
+Output from main_fast_o: 42
+[TRACE] Node:j_diff Ver:1 Event:Receive Payload:{slow,42}
+[TRACE] Node:j_diff Ver:1 Event:Compute Payload:0
+Output from main_j_diff: 0
+[TRACE] Node:j_diff Ver:1 Event:Receive Payload:{fast,42}
+[TRACE] Node:src_val Ver:2 Event:Request Payload:none
+[TRACE] Node:src_val Ver:2 Event:Compute Payload:42
+Output from main_src_val: 42
+[TRACE] Node:slow_o Ver:2 Event:Receive Payload:{i,42}
+[TRACE] Node:fast_o Ver:2 Event:Receive Payload:{i,42}
+[TRACE] Node:slow_o Ver:2 Event:Compute Payload:42
+[TRACE] Node:fast_o Ver:2 Event:Compute Payload:42
+Output from main_slow_o: 42
+Output from main_fast_o: 42
+[TRACE] Node:j_diff Ver:2 Event:Receive Payload:{slow,42}
+[TRACE] Node:j_diff Ver:2 Event:Compute Payload:0
+Output from main_j_diff: 0
+[TRACE] Node:j_diff Ver:2 Event:Receive Payload:{fast,42}
+[TRACE] Node:src_val Ver:3 Event:Request Payload:none
+[TRACE] Node:src_val Ver:3 Event:Compute Payload:42
+Output from main_src_val: 42
+[TRACE] Node:slow_o Ver:3 Event:Receive Payload:{i,42}
+[TRACE] Node:fast_o Ver:3 Event:Receive Payload:{i,42}
+[TRACE] Node:slow_o Ver:3 Event:Compute Payload:42
+[TRACE] Node:fast_o Ver:3 Event:Compute Payload:42
+Output from main_slow_o: 42
+Output from main_fast_o: 42
+[TRACE] Node:j_diff Ver:3 Event:Receive Payload:{slow,42}
+[TRACE] Node:j_diff Ver:3 Event:Compute Payload:0
+Output from main_j_diff: 0
+[TRACE] Node:j_diff Ver:3 Event:Receive Payload:{fast,42}

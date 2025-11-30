@@ -25,3 +25,4 @@ test/benchmark
 *.erl
 *.beam
 docs/*
+thesis/*

@@ -1,0 +1,4 @@
+module source
+in
+out data : Int
+node data : Int = 1

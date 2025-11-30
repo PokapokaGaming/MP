@@ -4,7 +4,7 @@ leader = c1
 periodic(1000)
 newnode (c1) = client()
 
-# Dynamic template - same syntax as party!
+# Template for dynamically creating new clients
 party_template ClientTemplate
 leader = client
 periodic(500)

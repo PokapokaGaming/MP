@@ -1,0 +1,15 @@
+# Static party definition  
+party main
+leader = src
+periodic(1000)
+newnode (src) = source()
+newnode (pass1) = pass(src)
+newnode (j) = join(pass1)
+
+# Template for dynamic branch
+template branch(upstream)
+leader = p
+periodic(500)
+newnode (p) = pass($upstream)
+main.j(p)
+

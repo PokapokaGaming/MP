@@ -27,13 +27,14 @@ let itp2i = fun (i, t, p) -> i
 %token
   MODULE IN OUT CONST NODE NEWNODE INIT FUN IF THEN ELSE
   LET CASE OF LAST TRUE FALSE PARTY NATIVE
-  LEADER PERIODIC PARTY_TEMPLATE
+  LEADER PERIODIC PARTY_TEMPLATE TEMPLATE
+  FOLD COUNT SUM DOTDOTDOT
 
 %token
   COMMA LBRACKET RBRACKET LPAREN RPAREN LBRACE RBRACE COLON COLON2
   SEMICOLON AT ARROW TILDE PLUS MINUS PERCENT ASTERISK DOT
   SLASH XOR OR2 AND2 OR AND EQUAL2 NEQ LSHIFT LTE LT
-  RSHIFT GTE GT BANG EQUAL
+  RSHIFT GTE GT BANG EQUAL DOLLAR
 
 %token <char> CHAR
 %token <string> ID
@@ -63,7 +64,7 @@ let itp2i = fun (i, t, p) -> i
 
 prog_module:
   | MODULE id = ID
-    IN innodes = separated_list(COMMA, id_and_type)
+    IN innodes = separated_list(COMMA, id_and_type_variadic)
     OUT outnodes = separated_list(COMMA, id_and_type)
     defs = nonempty_list(definition)
     EOF
@@ -71,7 +72,7 @@ prog_module:
     {
       id = id;
       party = [];
-      in_node = List.map (fun it -> (it, "")) innodes;
+      in_node = List.map (fun (i, t, v) -> ((i, t), "", v)) innodes;
       out_node = List.map (fun it -> (it, "")) outnodes;
       definition = defs;
       id_party_lst = NodesS.elements !nodes
@@ -117,6 +118,9 @@ expr:
         | [x]  -> x
         | _    -> ETuple(xs)
     }
+  | FOLD LPAREN op = fold_op COMMA init = expr COMMA id = ID RPAREN { EFold(op, init, id) }
+  | COUNT LPAREN id = ID RPAREN { ECount(id) }
+  | SUM LPAREN id = ID RPAREN { EFold(BAdd, EConst(CInt 0), id) }
   | IF c = expr THEN a = expr ELSE b = expr
     %prec prec_if
     { EIf(c, a, b) }
@@ -145,6 +149,13 @@ binop:
   | AND      { BAnd }
   | XOR      { BXor }
   | OR       { BOr }
+  | AND2     { BLAnd }
+  | OR2      { BLOr }
+
+fold_op:
+  | PLUS     { BAdd }
+  | MINUS    { BSub }
+  | ASTERISK { BMul }
   | AND2     { BLAnd }
   | OR2      { BLOr }
 
@@ -181,6 +192,13 @@ id_and_type_opt:
     { (i, Some t) }
   | i = ID
     { (i, None) }
+
+(* Variadic input: inputs... : Int *)
+id_and_type_variadic:
+  | i = ID DOTDOTDOT COLON t = type_spec
+    { (i, t, true) }
+  | i = ID COLON t = type_spec
+    { (i, t, false) }
 
 id_and_type:
   | i = ID COLON t = type_spec
@@ -271,18 +289,44 @@ newnode_stmt:
 qualified_id:
   | id = ID { SimpleId id }
   | pid = ID DOT iid = ID { QualifiedId(pid, iid) }
+  | DOLLAR id = ID { ParamRef id }
 
-(* party_template: partyと同じ構文で書ける *)
+(* party_template: partyと同じ構文で書ける。leader/periodicは新規パーティ作成に必須 *)
+(* template chain(upstream) の形式でパラメータを受け取れる *)
 template_block:
-  | PARTY_TEMPLATE tid = ID
+  | TEMPLATE tid = ID LPAREN params = separated_list(COMMA, ID) RPAREN
     LEADER EQUAL lid = ID
     PERIODIC LPAREN ms = INT RPAREN
-    instances = nonempty_list(newnode_stmt)
+    instances = list(newnode_stmt)
+    outputs = list(output_stmt)
     {
       {
         template_id = tid;
+        template_params = params;
         template_leader = lid;
         template_periodic = ms;
         template_instances = instances;
+        template_outputs = outputs;
       }
     }
+  | TEMPLATE tid = ID
+    LEADER EQUAL lid = ID
+    PERIODIC LPAREN ms = INT RPAREN
+    instances = list(newnode_stmt)
+    outputs = list(output_stmt)
+    {
+      {
+        template_id = tid;
+        template_params = [];
+        template_leader = lid;
+        template_periodic = ms;
+        template_instances = instances;
+        template_outputs = outputs;
+      }
+    }
+
+(* 出力接続文: main.s1(c4, c5) または $upstream(n1) のような記述 *)
+(* $付きIDはパラメータ参照を示す *)
+output_stmt:
+  | target = qualified_id LPAREN locals = separated_nonempty_list(COMMA, ID) RPAREN
+    { (target, locals) }
