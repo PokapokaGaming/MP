@@ -1,0 +1,9 @@
+party p1
+leader = src
+periodic(500)
+newnode (src) = SourceP1()
+
+template ReceiverTemplate(src_input)
+leader = recv
+periodic(1000)
+newnode (recv) = ReceiverP2($src_input)

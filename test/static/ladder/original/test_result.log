@@ -1,0 +1,119 @@
+
+=== MPFRP Ladder Test ===
+p1 period: 2000ms (fast)
+p2 period: 5000ms (slow)
+join1 triggers on: p1
+join2 triggers on: p2
+
+[1764522584529] p1 pulse Ver:0
+[1764522584529] p2 pulse Ver:0
+[1764522584532] s11 producing value 1 at Ver:0
+[1764522584532] s12 producing value 1 at Ver:0
+[1764522584532] join1 received p1 sync_pulse Ver:0 (Expected:0)
+[1764522584532] s21 producing value 1 at Ver:0
+[1764522584532] s22 producing value 1 at Ver:0
+[1764522584532] join2 received p2 sync_pulse Ver:0 (Expected:0)
+[1764522584532] join1 AllDepsPresent:false Processed:[] Deferred:[]
+[1764522584532] join2 AllDepsPresent:false Processed:[] Deferred:[]
+[1764522584532] join1 p2 data not ready, adding to Deferred
+[1764522584532] join2 p1 data not ready, adding to Deferred
+[1764522584532] join1 received s11 data from p1 Ver:0 (Expected:1)
+[1764522584532] join2 received s11 data from p1 Ver:0 (Expected:0)
+[1764522584532] join1 received s12 data from p1 Ver:0 (Expected:1)
+[1764522584532] join2 p1 data buffered (Deferred empty or deps not ready)
+[1764522584532] join1 received s21 data from p2 Ver:0 (Expected:0)
+[1764522584532] join2 received s12 data from p1 Ver:0 (Expected:1)
+[1764522584532] join1 p2 data buffered (Deferred empty or deps not ready)
+[1764522584532] join2 received s21 data from p2 Ver:0 (Expected:1)
+[1764522584532] join1 received s22 data from p2 Ver:0 (Expected:1)
+[1764522584532] join2 received s22 data from p2 Ver:0 (Expected:1)
+[1764522586532] p1 pulse Ver:1
+[1764522586533] s11 producing value 1 at Ver:1
+[1764522586533] s12 producing value 1 at Ver:1
+[1764522586533] join1 received p1 sync_pulse Ver:1 (Expected:1)
+[1764522586533] join2 received s11 data from p1 Ver:1 (Expected:1)
+[1764522586533] join1 AllDepsPresent:false Processed:[s21] Deferred:[{p1,0}]
+[1764522586533] join2 p1 data buffered (Deferred empty or deps not ready)
+[1764522586533] join1 p2 data not ready, adding to Deferred
+[1764522586533] join2 received s12 data from p1 Ver:1 (Expected:2)
+[1764522586533] join1 received s11 data from p1 Ver:1 (Expected:2)
+[1764522586534] join1 received s12 data from p1 Ver:1 (Expected:2)
+[1764522588533] p1 pulse Ver:2
+[1764522588533] s11 producing value 1 at Ver:2
+[1764522588533] s12 producing value 1 at Ver:2
+[1764522588533] join1 received p1 sync_pulse Ver:2 (Expected:2)
+[1764522588534] join2 received s11 data from p1 Ver:2 (Expected:2)
+[1764522588533] join1 AllDepsPresent:false Processed:[s21] Deferred:[{p1,1},
+                                                                     {p1,0}]
+[1764522588534] join2 p1 data buffered (Deferred empty or deps not ready)
+[1764522588533] join1 p2 data not ready, adding to Deferred
+[1764522588534] join2 received s12 data from p1 Ver:2 (Expected:3)
+[1764522588534] join1 received s11 data from p1 Ver:2 (Expected:3)
+[1764522588534] join1 received s12 data from p1 Ver:2 (Expected:3)
+[1764522589533] p2 pulse Ver:1
+[1764522589534] s21 producing value 1 at Ver:1
+[1764522589534] s22 producing value 1 at Ver:1
+[1764522589534] join2 received p2 sync_pulse Ver:1 (Expected:1)
+[1764522589535] join1 received s21 data from p2 Ver:1 (Expected:1)
+[1764522589534] join2 AllDepsPresent:false Processed:[s11] Deferred:[{p2,0}]
+[1764522589535] join1 p2 data buffered (Deferred empty or deps not ready)
+[1764522589534] join2 p1 data not ready, adding to Deferred
+[1764522589535] join1 received s22 data from p2 Ver:1 (Expected:2)
+[1764522589535] join2 received s21 data from p2 Ver:1 (Expected:2)
+[1764522589535] join2 received s22 data from p2 Ver:1 (Expected:2)
+[1764522590534] p1 pulse Ver:3
+[1764522590534] s11 producing value 1 at Ver:3
+[1764522590534] s12 producing value 1 at Ver:3
+[1764522590534] join1 received p1 sync_pulse Ver:3 (Expected:3)
+[1764522590534] join2 received s11 data from p1 Ver:3 (Expected:3)
+[1764522590534] join1 AllDepsPresent:false Processed:[s21] Deferred:[{p1,2},
+                                                                     {p1,1},
+                                                                     {p1,0}]
+[1764522590534] join2 p1 data buffered (Deferred empty or deps not ready)
+[1764522590534] join1 p2 data not ready, adding to Deferred
+[1764522590534] join2 received s12 data from p1 Ver:3 (Expected:4)
+[1764522590534] join1 received s11 data from p1 Ver:3 (Expected:4)
+[1764522590534] join1 received s12 data from p1 Ver:3 (Expected:4)
+[1764522592570] p1 pulse Ver:4
+[1764522592655] s11 producing value 1 at Ver:4
+[1764522592655] s12 producing value 1 at Ver:4
+[1764522592655] join1 received p1 sync_pulse Ver:4 (Expected:4)
+[1764522592655] join2 received s11 data from p1 Ver:4 (Expected:4)
+[1764522592655] join1 AllDepsPresent:false Processed:[s21] Deferred:[{p1,3},
+                                                                     {p1,2},
+                                                                     {p1,1},
+                                                                     {p1,0}]
+[1764522592655] join2 p1 data buffered (Deferred empty or deps not ready)
+[1764522592655] join1 p2 data not ready, adding to Deferred
+[1764522592661] join2 received s12 data from p1 Ver:4 (Expected:5)
+[1764522592662] join1 received s11 data from p1 Ver:4 (Expected:5)
+[1764522592662] join1 received s12 data from p1 Ver:4 (Expected:5)
+[1764522594536] p2 pulse Ver:2
+[1764522594541] s21 producing value 1 at Ver:2
+[1764522594541] s22 producing value 1 at Ver:2
+[1764522594541] join2 received p2 sync_pulse Ver:2 (Expected:2)
+[1764522594541] join1 received s21 data from p2 Ver:2 (Expected:2)
+[1764522594541] join2 AllDepsPresent:false Processed:[s11] Deferred:[{p2,1},
+                                                                     {p2,0}]
+[1764522594541] join1 p2 data buffered (Deferred empty or deps not ready)
+[1764522594541] join2 p1 data not ready, adding to Deferred
+[1764522594541] join1 received s22 data from p2 Ver:2 (Expected:3)
+[1764522594542] join2 received s21 data from p2 Ver:2 (Expected:3)
+[1764522594542] join2 received s22 data from p2 Ver:2 (Expected:3)
+[1764522594656] p1 pulse Ver:5
+[1764522594656] s11 producing value 1 at Ver:5
+[1764522594656] s12 producing value 1 at Ver:5
+[1764522594656] join1 received p1 sync_pulse Ver:5 (Expected:5)
+[1764522594656] join2 received s11 data from p1 Ver:5 (Expected:5)
+[1764522594656] join1 AllDepsPresent:false Processed:[s21] Deferred:[{p1,4},
+                                                                     {p1,3},
+                                                                     {p1,2},
+                                                                     {p1,1},
+                                                                     {p1,0}]
+[1764522594656] join2 p1 data buffered (Deferred empty or deps not ready)
+[1764522594656] join1 p2 data not ready, adding to Deferred
+[1764522594656] join2 received s12 data from p1 Ver:5 (Expected:6)
+[1764522594656] join1 received s11 data from p1 Ver:5 (Expected:6)
+[1764522594656] join1 received s12 data from p1 Ver:5 (Expected:6)
+
+=== Test Complete ===

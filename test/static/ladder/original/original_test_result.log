@@ -1,0 +1,258 @@
+main_fixed.erl:66:21: Warning: variable 'Value' is unused
+%   66| out(join1_1_output, Value) -> void;
+%     |                     ^
+
+main_fixed.erl:67:21: Warning: variable 'Value' is unused
+%   67| out(join2_2_output, Value) -> void;
+%     |                     ^
+
+main_fixed.erl:68:18: Warning: variable 'Value' is unused
+%   68| out(src_3_value, Value) -> void;
+%     |                  ^
+
+main_fixed.erl:69:18: Warning: variable 'Value' is unused
+%   69| out(src_4_value, Value) -> void;
+%     |                  ^
+
+main_fixed.erl:70:18: Warning: variable 'Value' is unused
+%   70| out(src_5_value, Value) -> void;
+%     |                  ^
+
+main_fixed.erl:71:18: Warning: variable 'Value' is unused
+%   71| out(src_6_value, Value) -> void;
+%     |                  ^
+
+main_fixed.erl:113:24: Warning: variable 'Val' is unused
+%  113| 			{{p1, Ver}, input1, Val} when Ver > P1_verT ->
+%     | 			                    ^
+
+main_fixed.erl:123:24: Warning: variable 'Val' is unused
+%  123| 			{{p1, Ver}, input2, Val} when Ver > P1_verT ->
+%     | 			                    ^
+
+main_fixed.erl:133:24: Warning: variable 'Val' is unused
+%  133| 			{{p2, Ver}, input3, Val} when Ver > P2_verT ->
+%     | 			                    ^
+
+main_fixed.erl:143:24: Warning: variable 'Val' is unused
+%  143| 			{{p2, Ver}, input4, Val} when Ver > P2_verT ->
+%     | 			                    ^
+
+main_fixed.erl:212:28: Warning: variable 'V' is unused
+%  212| 								lists:foreach(fun (V) -> 
+%     | 								                   ^
+
+main_fixed.erl:233:30: Warning: variable 'V' is unused
+%  233| 										lists:foreach(fun (V) -> 
+%     | 										                   ^
+
+main_fixed.erl:256:28: Warning: variable 'V' is unused
+%  256| 								lists:foreach(fun (V) -> 
+%     | 								                   ^
+
+main_fixed.erl:276:26: Warning: variable 'Ver' is unused
+%  276| join1_1_request_node(p1, Ver) ->
+%     |                          ^
+
+main_fixed.erl:278:26: Warning: variable 'Ver' is unused
+%  278| join1_1_request_node(p2, Ver) ->
+%     |                          ^
+
+main_fixed.erl:309:24: Warning: variable 'Val' is unused
+%  309| 			{{p1, Ver}, input1, Val} when Ver > P1_verT ->
+%     | 			                    ^
+
+main_fixed.erl:319:24: Warning: variable 'Val' is unused
+%  319| 			{{p1, Ver}, input2, Val} when Ver > P1_verT ->
+%     | 			                    ^
+
+main_fixed.erl:329:24: Warning: variable 'Val' is unused
+%  329| 			{{p2, Ver}, input3, Val} when Ver > P2_verT ->
+%     | 			                    ^
+
+main_fixed.erl:339:24: Warning: variable 'Val' is unused
+%  339| 			{{p2, Ver}, input4, Val} when Ver > P2_verT ->
+%     | 			                    ^
+
+main_fixed.erl:412:30: Warning: variable 'V' is unused
+%  412| 										lists:foreach(fun (V) -> 
+%     | 										                   ^
+
+main_fixed.erl:430:28: Warning: variable 'V' is unused
+%  430| 								lists:foreach(fun (V) -> 
+%     | 								                   ^
+
+main_fixed.erl:452:28: Warning: variable 'V' is unused
+%  452| 								lists:foreach(fun (V) -> 
+%     | 								                   ^
+
+main_fixed.erl:472:26: Warning: variable 'Ver' is unused
+%  472| join2_2_request_node(p1, Ver) ->
+%     |                          ^
+
+main_fixed.erl:474:26: Warning: variable 'Ver' is unused
+%  474| join2_2_request_node(p2, Ver) ->
+%     |                          ^
+
+main_fixed.erl:528:28: Warning: variable 'V' is unused
+%  528| 								lists:foreach(fun (V) -> 
+%     | 								                   ^
+
+main_fixed.erl:602:28: Warning: variable 'V' is unused
+%  602| 								lists:foreach(fun (V) -> 
+%     | 								                   ^
+
+main_fixed.erl:676:28: Warning: variable 'V' is unused
+%  676| 								lists:foreach(fun (V) -> 
+%     | 								                   ^
+
+main_fixed.erl:750:28: Warning: variable 'V' is unused
+%  750| 								lists:foreach(fun (V) -> 
+%     | 								                   ^
+
+[TRACE] Node:src_4_value Ver:{p1,0} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,0} Event:Request Payload:none
+[TRACE] Node:src_6_value Ver:{p2,0} Event:Request Payload:none
+[TRACE] Node:src_5_value Ver:{p2,0} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:src_6_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:src_5_value Ver:0 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:0 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:0 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:0 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:0 Event:Receive Payload:{input1,1}
+[TRACE] Node:join2_2_output Ver:0 Event:Receive Payload:{input4,1}
+[TRACE] Node:join1_1_output Ver:0 Event:Receive Payload:{input4,1}
+[TRACE] Node:join2_2_output Ver:0 Event:Receive Payload:{input3,1}
+[TRACE] Node:join1_1_output Ver:0 Event:Receive Payload:{input3,1}
+[TRACE] Node:join2_2_output Ver:0 Event:Compute Payload:4
+[TRACE] Node:join1_1_output Ver:0 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,1} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,1} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:1 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:1 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:1 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:1 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:1 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:1 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:1 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,2} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,2} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:2 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:2 Event:Compute Payload:1
+[TRACE] Node:join1_1_output Ver:2 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:2 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:2 Event:Receive Payload:{input1,1}
+[TRACE] Node:join2_2_output Ver:2 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:2 Event:Compute Payload:4
+[TRACE] Node:src_6_value Ver:{p2,1} Event:Request Payload:none
+[TRACE] Node:src_5_value Ver:{p2,1} Event:Request Payload:none
+[TRACE] Node:src_6_value Ver:1 Event:Compute Payload:1
+[TRACE] Node:src_5_value Ver:1 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:1 Event:Receive Payload:{input4,1}
+[TRACE] Node:join1_1_output Ver:1 Event:Receive Payload:{input4,1}
+[TRACE] Node:join2_2_output Ver:1 Event:Receive Payload:{input3,1}
+[TRACE] Node:join1_1_output Ver:1 Event:Receive Payload:{input3,1}
+[TRACE] Node:join2_2_output Ver:1 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,3} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,3} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:3 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:3 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:3 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:3 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:3 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:3 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:3 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,4} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,4} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:4 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:4 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:4 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:4 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:4 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:4 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:4 Event:Compute Payload:4
+[TRACE] Node:src_6_value Ver:{p2,2} Event:Request Payload:none
+[TRACE] Node:src_5_value Ver:{p2,2} Event:Request Payload:none
+[TRACE] Node:src_6_value Ver:2 Event:Compute Payload:1
+[TRACE] Node:src_5_value Ver:2 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:2 Event:Receive Payload:{input4,1}
+[TRACE] Node:join1_1_output Ver:2 Event:Receive Payload:{input4,1}
+[TRACE] Node:join2_2_output Ver:2 Event:Receive Payload:{input3,1}
+[TRACE] Node:join1_1_output Ver:2 Event:Receive Payload:{input3,1}
+[TRACE] Node:join2_2_output Ver:2 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,5} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,5} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:5 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:5 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:5 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:5 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:5 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:5 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:5 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,6} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,6} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:6 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:6 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:6 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:6 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:6 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:6 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:6 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,7} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,7} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:7 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:7 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:7 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:7 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:7 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:7 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:7 Event:Compute Payload:4
+[TRACE] Node:src_6_value Ver:{p2,3} Event:Request Payload:none
+[TRACE] Node:src_5_value Ver:{p2,3} Event:Request Payload:none
+[TRACE] Node:src_6_value Ver:3 Event:Compute Payload:1
+[TRACE] Node:src_5_value Ver:3 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:3 Event:Receive Payload:{input4,1}
+[TRACE] Node:join1_1_output Ver:3 Event:Receive Payload:{input4,1}
+[TRACE] Node:join2_2_output Ver:3 Event:Receive Payload:{input3,1}
+[TRACE] Node:join1_1_output Ver:3 Event:Receive Payload:{input3,1}
+[TRACE] Node:join2_2_output Ver:3 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,8} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,8} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:8 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:8 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:8 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:8 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:8 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:8 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:8 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,9} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,9} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:9 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:9 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:9 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:9 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:9 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:9 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:9 Event:Compute Payload:4
+
+=== Test Complete ===
+[TRACE] Node:src_6_value Ver:{p2,4} Event:Request Payload:none
+[TRACE] Node:src_5_value Ver:{p2,4} Event:Request Payload:none
+[TRACE] Node:src_6_value Ver:4 Event:Compute Payload:1
+[TRACE] Node:src_5_value Ver:4 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:4 Event:Receive Payload:{input4,1}
+[TRACE] Node:join1_1_output Ver:4 Event:Receive Payload:{input4,1}
+[TRACE] Node:join2_2_output Ver:4 Event:Receive Payload:{input3,1}
+[TRACE] Node:join1_1_output Ver:4 Event:Receive Payload:{input3,1}
+[TRACE] Node:join2_2_output Ver:4 Event:Compute Payload:4
+[TRACE] Node:src_4_value Ver:{p1,10} Event:Request Payload:none
+[TRACE] Node:src_3_value Ver:{p1,10} Event:Request Payload:none
+[TRACE] Node:src_4_value Ver:10 Event:Compute Payload:1
+[TRACE] Node:src_3_value Ver:10 Event:Compute Payload:1
+[TRACE] Node:join2_2_output Ver:10 Event:Receive Payload:{input2,1}
+[TRACE] Node:join1_1_output Ver:10 Event:Receive Payload:{input2,1}
+[TRACE] Node:join2_2_output Ver:10 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:10 Event:Receive Payload:{input1,1}
+[TRACE] Node:join1_1_output Ver:10 Event:Compute Payload:4

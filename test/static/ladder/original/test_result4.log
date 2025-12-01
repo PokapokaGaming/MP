@@ -1,0 +1,186 @@
+main_debug4.erl:2:2: Warning: export_all flag enabled - all functions will be exported
+%    2| -compile(export_all).
+%     |  ^
+
+main_debug4.erl:93:28: Warning: variable 'Value' is unused
+%   93|         {{Party, Ver}, Id, Value} = Received ->
+%     |                            ^
+
+=== MPFRP Original Behavior Test (Corrected) ===
+p1 period: 2000ms, p2 period: 5000ms
+
+[1764522847331] === p1 PULSE Ver:0 ===
+[1764522847334] join1: REQUEST from p1 Ver:0
+[1764522847334] join2: REQUEST from p1 Ver:0
+[1764522847334] join1: Processing buffer with 0 entries
+[1764522847334] join2: Processing buffer with 0 entries
+[1764522847334] join1: ReqBuffer p1 Ver:0, deps not ready, deferring
+[1764522847334] join2: DATA s11 from p1 Ver:0
+[1764522847334] join1: DATA s11 from p1 Ver:0
+[1764522847334] join2: Buffer keys after update: [{p1,0}]
+[1764522847334] join1: Buffer keys after update: [{p1,0}]
+[1764522847334] join2: DATA s12 from p1 Ver:0
+[1764522847334] join1: DATA s12 from p1 Ver:0
+[1764522847334] join2: Buffer keys after update: [{p1,0}]
+[1764522847334] join1: Buffer keys after update: [{p1,0}]
+[1764522849335] === p1 PULSE Ver:1 ===
+[1764522849336] join1: REQUEST from p1 Ver:1
+[1764522849336] join2: REQUEST from p1 Ver:1
+[1764522849337] join1: Processing buffer with 1 entries
+[1764522849337] join2: Processing buffer with 1 entries
+[1764522849337] join1: ReqBuffer p1 Ver:1, deps not ready, deferring
+[1764522849337] join2: other_party p1 Ver:0, deps not ready
+[1764522849337] join1: DATA s11 from p1 Ver:1
+[1764522849337] join2: DATA s11 from p1 Ver:1
+[1764522849337] join1: Buffer keys after update: [{p1,0},{p1,1}]
+[1764522849337] join2: Buffer keys after update: [{p1,1}]
+[1764522849338] join1: DATA s12 from p1 Ver:1
+[1764522849338] join2: DATA s12 from p1 Ver:1
+[1764522849338] join1: Buffer keys after update: [{p1,0},{p1,1}]
+[1764522849338] join2: Buffer keys after update: [{p1,1}]
+[1764522850331] === p2 PULSE Ver:0 ===
+[1764522850331] join1: REQUEST from p2 Ver:0
+[1764522850331] join2: REQUEST from p2 Ver:0
+[1764522850331] join1: Processing buffer with 2 entries
+[1764522850332] join2: Processing buffer with 1 entries
+[1764522850332] join1: DATA s21 from p2 Ver:0
+[1764522850332] join2: other_party p1 Ver:1, deps not ready
+[1764522850332] join1: Buffer keys after update: [{p1,0},{p1,1},{p2,0}]
+[1764522850332] join2: ReqBuffer p2 Ver:0, deps not ready, deferring
+[1764522850332] join1: DATA s22 from p2 Ver:0
+[1764522850332] join2: DATA s21 from p2 Ver:0
+[1764522850332] join1: Buffer keys after update: [{p1,0},{p1,1},{p2,0}]
+[1764522850332] join2: Buffer keys after update: [{p2,0}]
+[1764522850332] join2: DATA s22 from p2 Ver:0
+[1764522850332] join2: Buffer keys after update: [{p2,0}]
+[1764522851337] === p1 PULSE Ver:2 ===
+[1764522851337] join1: REQUEST from p1 Ver:2
+[1764522851337] join2: REQUEST from p1 Ver:2
+[1764522851337] join1: Processing buffer with 3 entries
+[1764522851337] join2: Processing buffer with 1 entries
+[1764522851337] join1: other_party p2 Ver:0, deps not ready
+[1764522851337] join2: DATA s11 from p1 Ver:2
+[1764522851338] join1: ReqBuffer p1 Ver:2, deps not ready, deferring
+[1764522851337] join2: Buffer keys after update: [{p1,2},{p2,0}]
+[1764522851338] join1: DATA s11 from p1 Ver:2
+[1764522851338] join2: DATA s12 from p1 Ver:2
+[1764522851338] join1: Buffer keys after update: [{p1,0},{p1,1},{p1,2}]
+[1764522851338] join2: Buffer keys after update: [{p1,2},{p2,0}]
+[1764522851338] join1: DATA s12 from p1 Ver:2
+[1764522851338] join1: Buffer keys after update: [{p1,0},{p1,1},{p1,2}]
+[1764522853338] === p1 PULSE Ver:3 ===
+[1764522853338] join1: REQUEST from p1 Ver:3
+[1764522853338] join2: REQUEST from p1 Ver:3
+[1764522853338] join1: Processing buffer with 3 entries
+[1764522853338] join2: Processing buffer with 2 entries
+[1764522853338] join1: ReqBuffer p1 Ver:3, deps not ready, deferring
+[1764522853338] join2: other_party p1 Ver:2, deps not ready
+[1764522853338] join1: DATA s11 from p1 Ver:3
+[1764522853338] join2: DATA s11 from p1 Ver:3
+[1764522853338] join1: Buffer keys after update: [{p1,0},{p1,1},{p1,2},{p1,3}]
+[1764522853338] join2: Buffer keys after update: [{p1,3},{p2,0}]
+[1764522853338] join1: DATA s12 from p1 Ver:3
+[1764522853338] join2: DATA s12 from p1 Ver:3
+[1764522853338] join1: Buffer keys after update: [{p1,0},{p1,1},{p1,2},{p1,3}]
+[1764522853338] join2: Buffer keys after update: [{p1,3},{p2,0}]
+[1764522855332] === p2 PULSE Ver:1 ===
+[1764522855332] join1: REQUEST from p2 Ver:1
+[1764522855332] join2: REQUEST from p2 Ver:1
+[1764522855332] join1: Processing buffer with 4 entries
+[1764522855332] join2: Processing buffer with 2 entries
+[1764522855332] join1: DATA s21 from p2 Ver:1
+[1764522855332] join2: other_party p1 Ver:3, deps not ready
+[1764522855332] join1: Buffer keys after update: [{p1,0},
+                                                  {p1,1},
+                                                  {p1,2},
+                                                  {p1,3},
+                                                  {p2,1}]
+[1764522855333] join2: ReqBuffer p2 Ver:1, deps not ready, deferring
+[1764522855333] join1: DATA s22 from p2 Ver:1
+[1764522855333] join2: DATA s21 from p2 Ver:1
+[1764522855333] join1: Buffer keys after update: [{p1,0},
+                                                  {p1,1},
+                                                  {p1,2},
+                                                  {p1,3},
+                                                  {p2,1}]
+[1764522855333] join2: Buffer keys after update: [{p2,0},{p2,1}]
+[1764522855333] join2: DATA s22 from p2 Ver:1
+[1764522855333] join2: Buffer keys after update: [{p2,0},{p2,1}]
+[1764522855339] === p1 PULSE Ver:4 ===
+[1764522855339] join1: REQUEST from p1 Ver:4
+[1764522855339] join2: REQUEST from p1 Ver:4
+[1764522855339] join1: Processing buffer with 5 entries
+[1764522855339] join2: Processing buffer with 2 entries
+[1764522855339] join1: other_party p2 Ver:1, deps not ready
+[1764522855339] join2: DATA s11 from p1 Ver:4
+[1764522855339] join1: ReqBuffer p1 Ver:4, deps not ready, deferring
+[1764522855339] join2: Buffer keys after update: [{p1,4},{p2,0},{p2,1}]
+[1764522855340] join1: DATA s11 from p1 Ver:4
+[1764522855340] join2: DATA s12 from p1 Ver:4
+[1764522855340] join1: Buffer keys after update: [{p1,0},
+                                                  {p1,1},
+                                                  {p1,2},
+                                                  {p1,3},
+                                                  {p1,4}]
+[1764522855340] join2: Buffer keys after update: [{p1,4},{p2,0},{p2,1}]
+[1764522855340] join1: DATA s12 from p1 Ver:4
+[1764522855340] join1: Buffer keys after update: [{p1,0},
+                                                  {p1,1},
+                                                  {p1,2},
+                                                  {p1,3},
+                                                  {p1,4}]
+[1764522857340] === p1 PULSE Ver:5 ===
+[1764522857340] join1: REQUEST from p1 Ver:5
+[1764522857340] join2: REQUEST from p1 Ver:5
+[1764522857340] join1: Processing buffer with 5 entries
+[1764522857340] join2: Processing buffer with 3 entries
+[1764522857340] join1: ReqBuffer p1 Ver:5, deps not ready, deferring
+[1764522857340] join2: other_party p1 Ver:4, deps not ready
+[1764522857340] join1: DATA s11 from p1 Ver:5
+[1764522857341] join2: DATA s11 from p1 Ver:5
+[1764522857340] join1: Buffer keys after update: [{p1,0},
+                                                  {p1,1},
+                                                  {p1,2},
+                                                  {p1,3},
+                                                  {p1,4},
+                                                  {p1,5}]
+[1764522857341] join2: Buffer keys after update: [{p1,5},{p2,0},{p2,1}]
+[1764522857341] join1: DATA s12 from p1 Ver:5
+[1764522857341] join2: DATA s12 from p1 Ver:5
+[1764522857341] join1: Buffer keys after update: [{p1,0},
+                                                  {p1,1},
+                                                  {p1,2},
+                                                  {p1,3},
+                                                  {p1,4},
+                                                  {p1,5}]
+[1764522857341] join2: Buffer keys after update: [{p1,5},{p2,0},{p2,1}]
+[1764522859341] === p1 PULSE Ver:6 ===
+[1764522859343] join1: REQUEST from p1 Ver:6
+[1764522859343] join2: REQUEST from p1 Ver:6
+[1764522859343] join1: Processing buffer with 6 entries
+[1764522859343] join2: Processing buffer with 3 entries
+[1764522859343] join1: ReqBuffer p1 Ver:6, deps not ready, deferring
+[1764522859343] join2: other_party p1 Ver:5, deps not ready
+[1764522859343] join1: DATA s11 from p1 Ver:6
+[1764522859343] join2: DATA s11 from p1 Ver:6
+[1764522859343] join1: Buffer keys after update: [{p1,0},
+                                                  {p1,1},
+                                                  {p1,2},
+                                                  {p1,3},
+                                                  {p1,4},
+                                                  {p1,5},
+                                                  {p1,6}]
+[1764522859343] join2: Buffer keys after update: [{p1,6},{p2,0},{p2,1}]
+[1764522859344] join1: DATA s12 from p1 Ver:6
+[1764522859344] join2: DATA s12 from p1 Ver:6
+[1764522859344] join1: Buffer keys after update: [{p1,0},
+                                                  {p1,1},
+                                                  {p1,2},
+                                                  {p1,3},
+                                                  {p1,4},
+                                                  {p1,5},
+                                                  {p1,6}]
+[1764522859344] join2: Buffer keys after update: [{p1,6},{p2,0},{p2,1}]
+
+=== Test Complete ===
+[1764522860333] === p2 PULSE Ver:2 ===

@@ -1,0 +1,130 @@
+
+=== MPFRP Ladder Test (Fixed) ===
+p1 period: 2000ms (fast)
+p2 period: 5000ms (slow)
+join1{p1} triggers on: p1 sync pulse
+join2{p2} triggers on: p2 sync pulse
+
+[1764522686586] === p1 PULSE Ver:0 ===
+[1764522686586] === p2 PULSE Ver:0 ===
+[1764522686588] s11 producing 1 at p1 Ver:0
+[1764522686588] s12 producing 1 at p1 Ver:0
+[1764522686588] join1: MY PARTY p1 pulse Ver:0
+[1764522686588] join2: OTHER PARTY p1 pulse Ver:0
+[1764522686588] s21 producing 1 at p2 Ver:0
+[1764522686588] s22 producing 1 at p2 Ver:0
+[1764522686588] join1: AllDeps=false, Keys=[], Deferred=0
+[1764522686589] join2: MY PARTY p2 pulse Ver:0
+[1764522686588] join1: deps not ready, deferring
+[1764522686589] join2: AllDeps=false, Keys=[], Deferred=0
+[1764522686589] join1: OTHER PARTY p2 pulse Ver:0
+[1764522686589] join2: deps not ready, deferring
+[1764522686589] join1: OLD data s11 from p1 Ver:0 (Expected:1)
+[1764522686589] join2: OLD data s11 from p1 Ver:0 (Expected:1)
+[1764522686589] join1: OLD data s12 from p1 Ver:0 (Expected:1)
+[1764522686589] join2: OLD data s12 from p1 Ver:0 (Expected:1)
+[1764522686589] join1: OLD data s21 from p2 Ver:0 (Expected:1)
+[1764522686589] join2: OLD data s21 from p2 Ver:0 (Expected:1)
+[1764522686589] join1: OLD data s22 from p2 Ver:0 (Expected:1)
+[1764522686589] join2: OLD data s22 from p2 Ver:0 (Expected:1)
+[1764522688589] === p1 PULSE Ver:1 ===
+[1764522688589] s11 producing 1 at p1 Ver:1
+[1764522688589] s12 producing 1 at p1 Ver:1
+[1764522688589] join1: MY PARTY p1 pulse Ver:1
+[1764522688589] join2: OTHER PARTY p1 pulse Ver:1
+[1764522688589] join1: AllDeps=false, Keys=[], Deferred=1
+[1764522688589] join2: OLD data s11 from p1 Ver:1 (Expected:2)
+[1764522688589] join1: deps not ready, deferring
+[1764522688589] join2: OLD data s12 from p1 Ver:1 (Expected:2)
+[1764522688589] join1: OLD data s11 from p1 Ver:1 (Expected:2)
+[1764522688589] join1: OLD data s12 from p1 Ver:1 (Expected:2)
+[1764522690590] === p1 PULSE Ver:2 ===
+[1764522690590] s11 producing 1 at p1 Ver:2
+[1764522690590] s12 producing 1 at p1 Ver:2
+[1764522690590] join1: MY PARTY p1 pulse Ver:2
+[1764522690590] join2: OTHER PARTY p1 pulse Ver:2
+[1764522690590] join1: AllDeps=false, Keys=[], Deferred=2
+[1764522690590] join2: OLD data s11 from p1 Ver:2 (Expected:3)
+[1764522690590] join1: deps not ready, deferring
+[1764522690591] join2: OLD data s12 from p1 Ver:2 (Expected:3)
+[1764522690591] join1: OLD data s11 from p1 Ver:2 (Expected:3)
+[1764522690591] join1: OLD data s12 from p1 Ver:2 (Expected:3)
+[1764522691589] === p2 PULSE Ver:1 ===
+[1764522691589] s21 producing 1 at p2 Ver:1
+[1764522691589] s22 producing 1 at p2 Ver:1
+[1764522691589] join1: OTHER PARTY p2 pulse Ver:1
+[1764522691589] join2: MY PARTY p2 pulse Ver:1
+[1764522691589] join1: OLD data s21 from p2 Ver:1 (Expected:2)
+[1764522691589] join2: AllDeps=false, Keys=[], Deferred=1
+[1764522691589] join1: OLD data s22 from p2 Ver:1 (Expected:2)
+[1764522691589] join2: deps not ready, deferring
+[1764522691589] join2: OLD data s21 from p2 Ver:1 (Expected:2)
+[1764522691589] join2: OLD data s22 from p2 Ver:1 (Expected:2)
+[1764522692591] === p1 PULSE Ver:3 ===
+[1764522692591] s11 producing 1 at p1 Ver:3
+[1764522692591] s12 producing 1 at p1 Ver:3
+[1764522692591] join1: MY PARTY p1 pulse Ver:3
+[1764522692591] join2: OTHER PARTY p1 pulse Ver:3
+[1764522692591] join1: AllDeps=false, Keys=[], Deferred=3
+[1764522692591] join2: OLD data s11 from p1 Ver:3 (Expected:4)
+[1764522692591] join1: deps not ready, deferring
+[1764522692592] join2: OLD data s12 from p1 Ver:3 (Expected:4)
+[1764522692592] join1: OLD data s11 from p1 Ver:3 (Expected:4)
+[1764522692592] join1: OLD data s12 from p1 Ver:3 (Expected:4)
+[1764522694592] === p1 PULSE Ver:4 ===
+[1764522694592] s11 producing 1 at p1 Ver:4
+[1764522694592] s12 producing 1 at p1 Ver:4
+[1764522694592] join1: MY PARTY p1 pulse Ver:4
+[1764522694592] join2: OTHER PARTY p1 pulse Ver:4
+[1764522694592] join1: AllDeps=false, Keys=[], Deferred=4
+[1764522694592] join2: OLD data s11 from p1 Ver:4 (Expected:5)
+[1764522694592] join1: deps not ready, deferring
+[1764522694592] join2: OLD data s12 from p1 Ver:4 (Expected:5)
+[1764522694592] join1: OLD data s11 from p1 Ver:4 (Expected:5)
+[1764522694593] join1: OLD data s12 from p1 Ver:4 (Expected:5)
+[1764522696590] === p2 PULSE Ver:2 ===
+[1764522696590] s21 producing 1 at p2 Ver:2
+[1764522696590] s22 producing 1 at p2 Ver:2
+[1764522696590] join1: OTHER PARTY p2 pulse Ver:2
+[1764522696590] join2: MY PARTY p2 pulse Ver:2
+[1764522696590] join1: OLD data s21 from p2 Ver:2 (Expected:3)
+[1764522696590] join2: AllDeps=false, Keys=[], Deferred=2
+[1764522696590] join1: OLD data s22 from p2 Ver:2 (Expected:3)
+[1764522696590] join2: deps not ready, deferring
+[1764522696590] join2: OLD data s21 from p2 Ver:2 (Expected:3)
+[1764522696590] join2: OLD data s22 from p2 Ver:2 (Expected:3)
+[1764522696593] === p1 PULSE Ver:5 ===
+[1764522696593] s11 producing 1 at p1 Ver:5
+[1764522696593] s12 producing 1 at p1 Ver:5
+[1764522696593] join1: MY PARTY p1 pulse Ver:5
+[1764522696593] join2: OTHER PARTY p1 pulse Ver:5
+[1764522696593] join1: AllDeps=false, Keys=[], Deferred=5
+[1764522696593] join2: OLD data s11 from p1 Ver:5 (Expected:6)
+[1764522696593] join1: deps not ready, deferring
+[1764522696593] join2: OLD data s12 from p1 Ver:5 (Expected:6)
+[1764522696593] join1: OLD data s11 from p1 Ver:5 (Expected:6)
+[1764522696593] join1: OLD data s12 from p1 Ver:5 (Expected:6)
+[1764522698594] === p1 PULSE Ver:6 ===
+[1764522698594] s11 producing 1 at p1 Ver:6
+[1764522698594] s12 producing 1 at p1 Ver:6
+[1764522698594] join1: MY PARTY p1 pulse Ver:6
+[1764522698594] join2: OTHER PARTY p1 pulse Ver:6
+[1764522698594] join1: AllDeps=false, Keys=[], Deferred=6
+[1764522698594] join2: OLD data s11 from p1 Ver:6 (Expected:7)
+[1764522698594] join1: deps not ready, deferring
+[1764522698594] join2: OLD data s12 from p1 Ver:6 (Expected:7)
+[1764522698595] join1: OLD data s11 from p1 Ver:6 (Expected:7)
+[1764522698595] join1: OLD data s12 from p1 Ver:6 (Expected:7)
+[1764522700595] === p1 PULSE Ver:7 ===
+[1764522700596] s11 producing 1 at p1 Ver:7
+[1764522700596] s12 producing 1 at p1 Ver:7
+[1764522700596] join1: MY PARTY p1 pulse Ver:7
+[1764522700596] join2: OTHER PARTY p1 pulse Ver:7
+[1764522700596] join1: AllDeps=false, Keys=[], Deferred=7
+[1764522700596] join2: OLD data s11 from p1 Ver:7 (Expected:8)
+[1764522700596] join1: deps not ready, deferring
+[1764522700596] join2: OLD data s12 from p1 Ver:7 (Expected:8)
+[1764522700596] join1: OLD data s11 from p1 Ver:7 (Expected:8)
+[1764522700596] join1: OLD data s12 from p1 Ver:7 (Expected:8)
+
+=== Test Complete ===

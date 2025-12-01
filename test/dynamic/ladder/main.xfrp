@@ -1,0 +1,30 @@
+# Ladder Topology with Cross-Period Synchronization Test
+#
+# Initial Static Topology:
+#   Party p1 (Fast: 500ms)    Party p2 (Slow: 1000ms)
+#   src1 -> pass11 -> join1   src2 -> pass21 -> join2
+#
+# After Dynamic Expansion with cross-connect:
+#   join1 receives from: pass11, pass12, pass21, pass22
+#   join2 receives from: pass11, pass12, pass21, pass22
+
+party p1
+leader = src1
+periodic(500)
+newnode(src1) = Source()
+newnode(pass11) = Pass(src1)
+newnode(join1) = Join(pass11)
+
+party p2
+leader = src2
+periodic(1000)
+newnode(src2) = Source()
+newnode(pass21) = Pass(src2)
+newnode(join2) = Join(pass21)
+
+# Template for dynamically adding pass nodes
+template PassNode(upstream)
+leader = pass_dyn
+periodic(500)
+newnode(pass_dyn) = Pass($upstream)
+

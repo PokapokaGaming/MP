@@ -595,6 +595,10 @@ let gen_node_actor module_id node_id has_deps =
       "            " ^ func_name ^ "(Config, Connections#{downstreams := NewDownstreams}, NodeState#{buffer := NBuffer, next_ver := NNextVer, processed := NProcessed, req_buffer := NReqBuffer, deferred := NDeferred, last := NLast});";
       "        ";
       "        %% Dynamic connection: add upstream with port name and initial version (sync call with Ack)";
+      "        %% CRITICAL: Following Original's cross-party semantics:";
+      "        %%   - Cross-party data does NOT trigger computation (only when Deferred non-empty)";
+      "        %%   - Therefore, DO NOT add cross-party to trigger_parties";
+      "        %%   - NextVer should be set to InitialVer for the new party to accept data from that version";
       "        {add_upstream, DepName, DepParty, PortName, InitialVer, Caller} ->";
       "            io:format(\"[DYN] Node:~p adding upstream ~p from party ~p to port ~p at Ver:~p, CurrentDeps=~p~n\", [RegName, DepName, DepParty, PortName, InitialVer, Deps]),";
       "            NewDeps = [DepName | Deps],";
@@ -602,14 +606,15 @@ let gen_node_actor module_id node_id has_deps =
       "            NewDepToPort = maps:put(DepName, PortName, DepToPort),";
       "            NewConfig = Config#{dependencies := NewDeps, dep_to_port := NewDepToPort},";
       "            %% Initialize NextVer for new party with the provided InitialVer";
+      "            %% Only set if not already present (avoid overwriting existing party state)";
       "            NewNextVer = case maps:is_key(DepParty, NNextVer) of true -> NNextVer; false -> maps:put(DepParty, InitialVer, NNextVer) end,";
       "            io:format(\"[DYN] Node:~p NextVer after add_upstream: ~p~n\", [RegName, NewNextVer]),";
-      "            %% Also add new party to trigger_parties";
-      "            CurrentTriggers = maps:get(trigger_parties, Config, []),";
-      "            NewTriggers = case lists:member(DepParty, CurrentTriggers) of true -> CurrentTriggers; false -> [DepParty | CurrentTriggers] end,";
-      "            NewConfig2 = NewConfig#{trigger_parties := NewTriggers},";
+      "            %% NOTE: Do NOT add cross-party to trigger_parties!";
+      "            %% According to Original spec (other_party_code), cross-party data only triggers";
+      "            %% computation when Deferred is non-empty (i.e., own party already requested compute).";
+      "            %% This is handled in buffer processing: IsTrigger check determines compute timing.";
       "            Caller ! {ok, connected},";
-      "            " ^ func_name ^ "(NewConfig2, Connections, NodeState#{buffer := NBuffer, next_ver := NewNextVer, processed := NProcessed, req_buffer := NReqBuffer, deferred := NDeferred, last := NLast});";
+      "            " ^ func_name ^ "(NewConfig, Connections, NodeState#{buffer := NBuffer, next_ver := NewNextVer, processed := NProcessed, req_buffer := NReqBuffer, deferred := NDeferred, last := NLast});";
       "        ";
       "        {request, {Party, Ver}} ->";
       "            io:format(\"[TRACE] Node:~p Ver:~p Event:Request Payload:none~n\", [trace_node_name(RegName), Ver]),";
@@ -1187,6 +1192,15 @@ let gen_single_template_factory template module_map inst_prog =
       ) mod_info.node in
       let nodes_str = "[" ^ String.concat ", " node_pids ^ "]" in
       
+      (* Build sink_nodes list: nodes that are marked as output (sink) in the module *)
+      let sink_node_pids = List.filter_map (fun (node_id, _, _, _) ->
+        if List.mem node_id mod_info.sink then
+          Some (var_prefix ^ "_NodePid")
+        else
+          None
+      ) mod_info.node in
+      let sink_nodes_str = "[" ^ String.concat ", " sink_node_pids ^ "]" in
+      
       (* Calculate SyncDownstreams for this module *)
       (* Same-party upstream instances that should receive sync pulse forwarding *)
       (* Use namespaced names: PartyName_InstanceName *)
@@ -1210,7 +1224,7 @@ let gen_single_template_factory template module_map inst_prog =
       (* Instance registration name format: PartyName_InstanceName for proper namespacing *)
       (* Use CurrentVer for Party_ver to sync with existing party state *)
       spawn_lines := (Printf.sprintf "                    %s_Name = list_to_atom(atom_to_list(PartyName) ++ \"_\" ++ atom_to_list(maps:get(%s, InstanceNameMap)))" var_prefix local_name) :: !spawn_lines;
-      spawn_lines := (Printf.sprintf "                    %s_Pid = spawn(fun() -> run_%s([], [], PartyName, CurrentVer, #{nodes => %s, node_dependencies => %s, upstream_parties => %s}, %s) end)" var_prefix module_id nodes_str node_deps_str upstream_parties_str sync_downstreams_str) :: !spawn_lines;
+      spawn_lines := (Printf.sprintf "                    %s_Pid = spawn(fun() -> run_%s([], [], PartyName, CurrentVer, #{nodes => %s, node_dependencies => %s, upstream_parties => %s, sink_nodes => %s}, %s) end)" var_prefix module_id nodes_str node_deps_str upstream_parties_str sink_nodes_str sync_downstreams_str) :: !spawn_lines;
       spawn_lines := (Printf.sprintf "                    true = register(%s_Name, %s_Pid)" var_prefix var_prefix) :: !spawn_lines;
       instance_vars := (var_prefix ^ "_Pid") :: !instance_vars
     end else begin

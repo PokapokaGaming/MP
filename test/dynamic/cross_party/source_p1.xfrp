@@ -1,0 +1,5 @@
+module SourceP1
+in
+out val: Int
+
+node init[0] val: Int = val@last + 1

@@ -1,0 +1,5 @@
+module Source
+in
+out val: Int
+
+node val: Int = 1

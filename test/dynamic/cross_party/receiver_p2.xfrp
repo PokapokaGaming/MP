@@ -1,0 +1,5 @@
+module ReceiverP2
+in external_input: Int
+out result: Int
+
+node result: Int = external_input * 2
