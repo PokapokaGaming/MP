@@ -1,0 +1,18 @@
+// Test case for graceful shutdown
+// This tests the dynamic disconnection and deletion of instances
+
+module Main
+in
+  x : Int
+out
+  result : Int
+
+node result{p1} : Int
+  init[0]
+  = x + 1
+
+// ==============================
+
+party p1 2000
+  leader = main_result
+  newnode main = Main(timer(p1))
