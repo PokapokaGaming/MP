@@ -179,309 +179,6 @@ let gen_helpers () =
     "    timer:sleep(Interval).";
   ]
 
-(* Generate embedded runtime library functions *)
-(* These replace the need for separate mpfrp_registry.erl and mpfrp_runtime.erl *)
-let gen_embedded_runtime () =
-  String.concat "\n" [
-    "%% ============================================================================";
-    "%% Embedded MPFRP Runtime Library";
-    "%% ============================================================================";
-    "%% This replaces the need for separate mpfrp_registry.erl and mpfrp_runtime.erl";
-    "%% All runtime functions are embedded directly in the generated module.";
-    "%% ============================================================================";
-    "";
-    "%% --- Registry Tables ---";
-    "-define(PARTY_TABLE, mpfrp_parties).";
-    "-define(INSTANCE_PARTY_TABLE, mpfrp_instance_party).";
-    "-define(DEFAULT_TIMEOUT, 30000).";
-    "-define(CALL_TIMEOUT, 5000).";
-    "";
-    "%% --- Registry Initialization ---";
-    "mpfrp_registry_init() ->";
-    "    case ets:info(?PARTY_TABLE) of";
-    "        undefined -> ets:new(?PARTY_TABLE, [named_table, public, set, {read_concurrency, true}]);";
-    "        _ -> ok";
-    "    end,";
-    "    case ets:info(?INSTANCE_PARTY_TABLE) of";
-    "        undefined -> ets:new(?INSTANCE_PARTY_TABLE, [named_table, public, set, {read_concurrency, true}]);";
-    "        _ -> ok";
-    "    end,";
-    "    ok.";
-    "";
-    "mpfrp_registry_cleanup() ->";
-    "    catch ets:delete(?PARTY_TABLE),";
-    "    catch ets:delete(?INSTANCE_PARTY_TABLE),";
-    "    ok.";
-    "";
-    "%% --- Party Status Management ---";
-    "mpfrp_registry_update_party_status(PartyId, Status, Token) ->";
-    "    case ets:info(?PARTY_TABLE) of";
-    "        undefined -> ok;  %% Table not initialized yet";
-    "        _ ->";
-    "            case ets:lookup(?PARTY_TABLE, PartyId) of";
-    "                [{PartyId, Info}] ->";
-    "                    ets:insert(?PARTY_TABLE, {PartyId, Info#{status := Status, suspend_token := Token}});";
-    "                [] ->";
-    "                    ets:insert(?PARTY_TABLE, {PartyId, #{status => Status, suspend_token => Token, party_pid => undefined}})";
-    "            end";
-    "    end,";
-    "    ok.";
-    "";
-    "mpfrp_registry_get_party_status(PartyId) ->";
-    "    case ets:info(?PARTY_TABLE) of";
-    "        undefined -> undefined;";
-    "        _ ->";
-    "            case ets:lookup(?PARTY_TABLE, PartyId) of";
-    "                [{PartyId, Info}] -> Info;";
-    "                [] -> undefined";
-    "            end";
-    "    end.";
-    "";
-    "mpfrp_registry_get_party_pid(PartyId) ->";
-    "    case whereis(PartyId) of";
-    "        undefined -> undefined;";
-    "        Pid -> Pid";
-    "    end.";
-    "";
-    "%% --- Runtime: Suspend/Resume ---";
-    "mpfrp_suspend_party(PartyId) ->";
-    "    mpfrp_suspend_party(PartyId, ?DEFAULT_TIMEOUT).";
-    "";
-    "mpfrp_suspend_party(PartyId, Timeout) ->";
-    "    case mpfrp_registry_get_party_pid(PartyId) of";
-    "        undefined -> {error, party_not_found};";
-    "        PartyPid ->";
-    "            Token = make_ref(),";
-    "            PartyPid ! {suspend, Token, Timeout, self()},";
-    "            receive";
-    "                {suspended, PartyId, Token} -> {ok, Token};";
-    "                {error, Reason} -> {error, Reason}";
-    "            after ?CALL_TIMEOUT -> {error, timeout}";
-    "            end";
-    "    end.";
-    "";
-    "mpfrp_resume_party(PartyId, Token) ->";
-    "    case mpfrp_registry_get_party_pid(PartyId) of";
-    "        undefined -> {error, party_not_found};";
-    "        PartyPid ->";
-    "            PartyPid ! {resume, Token, self()},";
-    "            receive";
-    "                {resumed, PartyId, Token} -> ok;";
-    "                {error, Reason} -> {error, Reason}";
-    "            after ?CALL_TIMEOUT -> {error, timeout}";
-    "            end";
-    "    end.";
-    "";
-    "%% --- Runtime: Dynamic Connection ---";
-    "mpfrp_connect(FromNode, ToNode, PortTag) ->";
-    "    mpfrp_connect(FromNode, ToNode, PortTag, ?CALL_TIMEOUT).";
-    "";
-    "mpfrp_connect(FromNode, ToNode, PortTag, Timeout) ->";
-    "    %% Get upstream party for version";
-    "    FromParty = extract_party_from_node(FromNode),";
-    "    FromParty ! {get_version, self()},";
-    "    Ver = receive {version, V} -> V after Timeout -> 0 end,";
-    "    %% Add downstream to sender";
-    "    FromNode ! {add_downstream, {ToNode, PortTag}, self()},";
-    "    R1 = receive {ok, connected} -> ok after Timeout -> {error, timeout} end,";
-    "    %% Add upstream to receiver";
-    "    ToNode ! {add_upstream, PortTag, FromParty, PortTag, Ver, self()},";
-    "    R2 = receive {ok, connected} -> ok after Timeout -> {error, timeout} end,";
-    "    case {R1, R2} of";
-    "        {ok, ok} -> ok;";
-    "        _ -> {error, {R1, R2}}";
-    "    end.";
-    "";
-    "mpfrp_disconnect(FromNode, ToNode) ->";
-    "    mpfrp_disconnect(FromNode, ToNode, ?CALL_TIMEOUT).";
-    "";
-    "mpfrp_disconnect(FromNode, ToNode, Timeout) ->";
-    "    FromNode ! {remove_downstream, ToNode, self()},";
-    "    R1 = receive {ok, disconnected} -> ok after Timeout -> {error, timeout} end,";
-    "    ToNode ! {remove_upstream, FromNode, self()},";
-    "    R2 = receive {ok, disconnected} -> ok after Timeout -> {error, timeout} end,";
-    "    case {R1, R2} of";
-    "        {ok, ok} -> ok;";
-    "        _ -> {error, {R1, R2}}";
-    "    end.";
-    "";
-    "%% --- Runtime: Introspection ---";
-    "mpfrp_get_connections(NodeId) ->";
-    "    NodeId ! {get_connections, self()},";
-    "    receive";
-    "        {connections, Upstreams, Downstreams} -> {ok, #{upstreams => Upstreams, downstreams => Downstreams}}";
-    "    after ?CALL_TIMEOUT -> {error, timeout}";
-    "    end.";
-    "";
-    "mpfrp_get_node_version(NodeId) ->";
-    "    NodeId ! {get_version, self()},";
-    "    receive";
-    "        {version, Ver} -> {ok, Ver}";
-    "    after ?CALL_TIMEOUT -> {error, timeout}";
-    "    end.";
-    "";
-    "%% --- Helper: Extract party from node name ---";
-    "extract_party_from_node(NodeName) when is_atom(NodeName) ->";
-    "    NameStr = atom_to_list(NodeName),";
-    "    case string:split(NameStr, \"_\", leading) of";
-    "        [PartyStr | _] -> list_to_atom(PartyStr);";
-    "        _ -> undefined";
-    "    end.";
-  ]
-
-(* Generate INSTANCE_REGISTRY - metadata for all static instances *)
-(* This enables Plan B+ dynamic connection resolution *)
-let gen_instance_registry inst_prog module_map =
-  let entries = ref [] in
-  
-  List.iter (fun party_block ->
-    let party_id = party_block.Syntax.party_id in
-    
-    List.iter (fun (outputs, module_id, _inputs) ->
-      let inst_name = List.hd outputs in
-      let qualified_inst = party_id ^ "_" ^ inst_name in
-      
-      if M.mem module_id module_map then begin
-        let mod_info = M.find module_id module_map in
-        
-        (* Get output port names (sink nodes) *)
-        let output_ports = mod_info.sink in
-        let output_ports_str = "[" ^ String.concat ", " output_ports ^ "]" in
-        
-        (* Get output node actor names *)
-        let output_nodes = List.filter_map (fun (node_id, _, _, _) ->
-          if List.mem node_id mod_info.sink then
-            Some (party_id ^ "_" ^ inst_name ^ "_" ^ node_id)
-          else
-            None
-        ) mod_info.node in
-        let output_nodes_str = "[" ^ String.concat ", " output_nodes ^ "]" in
-        
-        (* Get input port names (source) *)
-        let input_ports = mod_info.source in
-        let input_ports_str = "[" ^ String.concat ", " input_ports ^ "]" in
-        
-        (* Get first input node actor name (for connection) *)
-        let input_nodes = List.map (fun (node_id, _, _, _) ->
-          party_id ^ "_" ^ inst_name ^ "_" ^ node_id
-        ) mod_info.node in
-        let input_nodes_str = "[" ^ String.concat ", " input_nodes ^ "]" in
-        
-        (* Module actor name *)
-        let module_actor = qualified_inst in
-        
-        let entry = Printf.sprintf "        %s => #{module => '%s', party => %s, outputs => %s, output_nodes => %s, inputs => %s, input_nodes => %s, module_actor => %s}"
-          qualified_inst module_id party_id output_ports_str output_nodes_str input_ports_str input_nodes_str module_actor in
-        entries := entry :: !entries
-      end
-    ) party_block.Syntax.instances
-  ) inst_prog.Syntax.parties;
-  
-  if List.length !entries = 0 then
-    "-define(INSTANCE_REGISTRY, #{})."
-  else
-    "-define(INSTANCE_REGISTRY, #{\n" ^ String.concat ",\n" (List.rev !entries) ^ "\n    })."
-
-(* Generate resolve_connection function for Plan B+ *)
-(* Also takes module_map to generate MODULE_INPUTS macro *)
-let gen_resolve_connection module_map =
-  (* Generate MODULE_INPUTS macro from module_map *)
-  let module_inputs_entries = M.fold (fun mod_id mod_info acc ->
-    let inputs_str = "[" ^ String.concat ", " mod_info.source ^ "]" in
-    Printf.sprintf "        '%s' => %s" mod_id inputs_str :: acc
-  ) module_map [] in
-  let module_inputs_macro = if List.length module_inputs_entries = 0 then
-    "-define(MODULE_INPUTS, #{})."
-  else
-    "-define(MODULE_INPUTS, #{\n" ^ String.concat ",\n" (List.rev module_inputs_entries) ^ "\n    })."
-  in
-  
-  String.concat "\n" [
-    module_inputs_macro;
-    "";
-    "%% ============================================================================";
-    "%% Plan B+ Connection Resolution";
-    "%% ============================================================================";
-    "%% Resolves connection targets from instance names to node actor names.";
-    "%% ";
-    "%% Two modes:";
-    "%%   A. Auto-pairing: Atom (instance name) -> Zip outputs to inputs";
-    "%%   B. Port-explicit: {Instance, Port} -> Specific port only";
-    "%% ============================================================================";
-    "";
-    "%% @doc Resolve a connection target to list of {NodeActorName, PortTag} pairs";
-    "%% Returns: [{UpstreamNodeActor, PortTag}] for connecting to downstream";
-    "resolve_connection(Target, DownstreamModuleId) when is_atom(Target) ->";
-    "    %% Mode A: Auto-pairing - Target is an instance name";
-    "    case maps:get(Target, ?INSTANCE_REGISTRY, undefined) of";
-    "        undefined ->";
-    "            %% Target might be a raw node name (backward compatibility)";
-    "            io:format(\"[WARN] resolve_connection: ~p not in registry, using as raw node name~n\", [Target]),";
-    "            [{Target, data}];";
-    "        #{output_nodes := OutputNodes, outputs := _OutputPorts} ->";
-    "            %% Get downstream's input ports for zip";
-    "            DownstreamInputs = get_module_inputs(DownstreamModuleId),";
-    "            %% Zip: pair outputs with inputs, shorter list wins";
-    "            ZipLen = min(length(OutputNodes), length(DownstreamInputs)),";
-    "            OutputNodesN = lists:sublist(OutputNodes, ZipLen),";
-    "            InputPortsN = lists:sublist(DownstreamInputs, ZipLen),";
-    "            %% Log if mismatched";
-    "            case length(OutputNodes) =/= length(DownstreamInputs) of";
-    "                true ->";
-    "                    Unused = max(length(OutputNodes), length(DownstreamInputs)) - ZipLen,";
-    "                    io:format(\"[WARN] Connection ~p -> ~p: ~p ports ignored (zip mismatch)~n\", ";
-    "                              [Target, DownstreamModuleId, Unused]);";
-    "                false -> ok";
-    "            end,";
-    "            lists:zip(OutputNodesN, InputPortsN)";
-    "    end;";
-    "";
-    "resolve_connection({Instance, Port}, _DownstreamModuleId) ->";
-    "    %% Mode B: Port-explicit - Target is {Instance, Port}";
-    "    case maps:get(Instance, ?INSTANCE_REGISTRY, undefined) of";
-    "        undefined ->";
-    "            io:format(\"[ERROR] resolve_connection: instance ~p not found~n\", [Instance]),";
-    "            [];";
-    "        #{output_nodes := OutputNodes, outputs := OutputPorts} ->";
-    "            %% Find the specific port";
-    "            case lists:zip(OutputPorts, OutputNodes) of";
-    "                PortMap ->";
-    "                    case lists:keyfind(Port, 1, PortMap) of";
-    "                        {Port, NodeActor} -> [{NodeActor, Port}];";
-    "                        false ->";
-    "                            io:format(\"[ERROR] Port ~p not found in instance ~p~n\", [Port, Instance]),";
-    "                            []";
-    "                    end";
-    "            end";
-    "    end;";
-    "";
-    "resolve_connection(Target, _) ->";
-    "    io:format(\"[ERROR] Invalid connection target: ~p~n\", [Target]),";
-    "    [].";
-    "";
-    "%% @doc Get input port names for a module (static lookup from MODULE_INPUTS)";
-    "get_module_inputs(ModuleId) when is_atom(ModuleId) ->";
-    "    maps:get(ModuleId, ?MODULE_INPUTS, [data]).";
-    "";
-    "%% @doc Get instance info from registry";
-    "get_instance_info(InstanceName) ->";
-    "    maps:get(InstanceName, ?INSTANCE_REGISTRY, undefined).";
-    "";
-    "%% @doc Register dynamic instance in registry (for template-created instances)";
-    "register_dynamic_instance(InstanceName, Info) ->";
-    "    ensure_manager_table(),";
-    "    ets:insert(mpfrp_dynamic_registry, {InstanceName, Info}),";
-    "    ok.";
-    "";
-    "%% @doc Lookup dynamic instance";
-    "get_dynamic_instance(InstanceName) ->";
-    "    ensure_manager_table(),";
-    "    case ets:lookup(mpfrp_dynamic_registry, InstanceName) of";
-    "        [{InstanceName, Info}] -> Info;";
-    "        [] -> undefined";
-    "    end.";
-  ]
-
 (* Generate compute_request_targets/4 function - dynamic request target computation *)
 (* Follows Original's gen_request_node_fun logic:
    - Request targets are: extern_input (source nodes) + sinks without same-party upstream
@@ -534,7 +231,7 @@ let gen_run_party () =
     "run_party(Config, Ver) ->";
     "    #{party := Party, leader := Leader, mode := Mode} = Config,";
     "    %% Update global registry status";
-    "    catch mpfrp_registry_update_party_status(Party, running, undefined),";
+    "    catch mpfrp_registry:update_party_status(Party, running, undefined),";
     "    case Mode of";
     "        periodic ->";
     "            #{interval := Interval} = Config,";
@@ -543,7 +240,7 @@ let gen_run_party () =
     "            receive";
     "                {suspend, Token, Timeout, Caller} ->";
     "                    io:format(\"[PARTY] ~p suspended at Ver:~p (token=~p, timeout=~p)~n\", [Party, Ver + 1, Token, Timeout]),";
-    "                    catch mpfrp_registry_update_party_status(Party, suspended, Token),";
+    "                    catch mpfrp_registry:update_party_status(Party, suspended, Token),";
     "                    Caller ! {suspended, Party, Token},";
     "                    run_party_suspended(Config, Ver + 1, Token, Timeout);";
     "                {get_version, Caller} ->";
@@ -557,7 +254,7 @@ let gen_run_party () =
     "            receive";
     "                {suspend, Token, Timeout, Caller} ->";
     "                    io:format(\"[PARTY] ~p suspended at Ver:~p (token=~p)~n\", [Party, Ver + 1, Token]),";
-    "                    catch mpfrp_registry_update_party_status(Party, suspended, Token),";
+    "                    catch mpfrp_registry:update_party_status(Party, suspended, Token),";
     "                    Caller ! {suspended, Party, Token},";
     "                    run_party_suspended(Config, Ver + 1, Token, Timeout);";
     "                {get_version, Caller} ->";
@@ -581,7 +278,7 @@ let gen_run_party () =
     "    receive";
     "        {resume, Token, Caller} ->";
     "            io:format(\"[PARTY] ~p resumed at Ver:~p (token=~p)~n\", [Party, Ver, Token]),";
-    "            catch mpfrp_registry_update_party_status(Party, running, undefined),";
+    "            catch mpfrp_registry:update_party_status(Party, running, undefined),";
     "            Caller ! {resumed, Party, Token},";
     "            Leader ! {Party, Ver},";
     "            run_party(Config, Ver);";
@@ -599,7 +296,7 @@ let gen_run_party () =
     "    after Timeout ->";
     "        %% Timeout - auto resume for safety";
     "        io:format(\"[PARTY] ~p TIMEOUT: auto-resuming at Ver:~p~n\", [Party, Ver]),";
-    "        catch mpfrp_registry_update_party_status(Party, running, undefined),";
+    "        catch mpfrp_registry:update_party_status(Party, running, undefined),";
     "        Leader ! {Party, Ver},";
     "        run_party(Config, Ver)";
     "    end.";
@@ -1472,13 +1169,6 @@ let gen_exports inst_prog module_map =
   let unique_modules = get_unique_modules inst_prog in
   let exports = ref ["-export([start/0, out/2, run_party/2, compute_request_targets/4])."] in
   
-  (* Export embedded runtime functions *)
-  exports := "-export([mpfrp_registry_init/0, mpfrp_registry_cleanup/0])." :: !exports;
-  exports := "-export([mpfrp_registry_update_party_status/3, mpfrp_registry_get_party_status/1, mpfrp_registry_get_party_pid/1])." :: !exports;
-  exports := "-export([mpfrp_suspend_party/1, mpfrp_suspend_party/2, mpfrp_resume_party/2])." :: !exports;
-  exports := "-export([mpfrp_connect/3, mpfrp_connect/4, mpfrp_disconnect/2, mpfrp_disconnect/3])." :: !exports;
-  exports := "-export([mpfrp_get_connections/1, mpfrp_get_node_version/1])." :: !exports;
-  
   (* Export module actors *)
   let module_exports = List.map (fun m -> "run_" ^ m ^ "/6") unique_modules in
   if List.length module_exports > 0 then
@@ -1703,9 +1393,6 @@ let gen_single_template_factory template module_map inst_prog =
   
   (* Generate connections for ParamRef inputs in newnode statements *)
   (* e.g., newnode (p) = pass($upstream) needs: upstream -> p connection *)
-  (* Plan B+ Support: ConnectionTargets can be:
-     - Atom (instance name): Auto-pair outputs to inputs
-     - {Instance, Port} tuple: Explicit port selection *)
   List.iter (fun (outputs, module_id, inputs) ->
     let local_name = List.hd outputs in
     if M.mem module_id module_map then begin
@@ -1718,26 +1405,21 @@ let gen_single_template_factory template module_map inst_prog =
             (match mod_info.node with
             | (first_node_id, _, _, _) :: _ ->
                 let local_node_name = Printf.sprintf "list_to_atom(atom_to_list(PartyName) ++ \"_\" ++ atom_to_list(maps:get(%s, InstanceNameMap)) ++ \"_%s\")" local_name first_node_id in
+                let upstream_node_name = Printf.sprintf "maps:get(%s, ConnectionTargets)" param_name in
+                (* Extract party name from upstream node's registered name *)
+                connection_lines := (Printf.sprintf "                    UpstreamNodeName_%s = %s" local_name upstream_node_name) :: !connection_lines;
+                connection_lines := (Printf.sprintf "                    UpstreamParty_%s = list_to_atom(hd(string:split(atom_to_list(UpstreamNodeName_%s), \"_\", leading)))" local_name local_name) :: !connection_lines;
+                (* Get current version from upstream party for proper synchronization *)
+                connection_lines := (Printf.sprintf "                    UpstreamParty_%s ! {get_version, self()}" local_name) :: !connection_lines;
+                connection_lines := (Printf.sprintf "                    UpstreamVer_%s = receive {version, V_%s} -> V_%s after 5000 -> 0 end" local_name local_name local_name) :: !connection_lines;
+                (* Upstream adds local as downstream: upstream sends data to local *)
+                connection_lines := (Printf.sprintf "                    UpstreamNodeName_%s ! {add_downstream, {%s, %s}, self()}, receive {ok, connected} -> ok after 5000 -> timeout end" local_name local_node_name port_name) :: !connection_lines;
+                (* Local adds upstream as upstream with initial version: local receives data from upstream *)
+                connection_lines := (Printf.sprintf "                    %s ! {add_upstream, %s, UpstreamParty_%s, %s, UpstreamVer_%s, self()}, receive {ok, connected} -> ok after 5000 -> timeout end" local_node_name port_name local_name port_name local_name) :: !connection_lines;
+                (* Add sync downstream: upstream's module actor forwards sync pulses to local's module actor *)
                 let local_module_name = Printf.sprintf "list_to_atom(atom_to_list(PartyName) ++ \"_\" ++ atom_to_list(maps:get(%s, InstanceNameMap)))" local_name in
-                (* Plan B+: Resolve connection target using resolve_connection *)
-                connection_lines := (Printf.sprintf "                    %% Plan B+ Connection Resolution for %s" param_name) :: !connection_lines;
-                connection_lines := (Printf.sprintf "                    ConnectionTarget_%s = maps:get(%s, ConnectionTargets)" local_name param_name) :: !connection_lines;
-                connection_lines := (Printf.sprintf "                    ResolvedConnections_%s = resolve_connection(ConnectionTarget_%s, '%s')" local_name local_name module_id) :: !connection_lines;
-                (* For each resolved connection, establish the link *)
-                connection_lines := "                    lists:foreach(fun({UpstreamNodeName, _UpstreamPort}) ->" :: !connection_lines;
-                connection_lines := "                        %% Extract party from upstream node name" :: !connection_lines;
-                connection_lines := "                        UpstreamParty = list_to_atom(hd(string:split(atom_to_list(UpstreamNodeName), \"_\", leading)))," :: !connection_lines;
-                connection_lines := "                        %% Get current version from upstream party" :: !connection_lines;
-                connection_lines := "                        UpstreamParty ! {get_version, self()}," :: !connection_lines;
-                connection_lines := "                        UpstreamVer = receive {version, V} -> V after 5000 -> 0 end," :: !connection_lines;
-                connection_lines := "                        %% Upstream adds local as downstream" :: !connection_lines;
-                connection_lines := (Printf.sprintf "                        UpstreamNodeName ! {add_downstream, {%s, %s}, self()}, receive {ok, connected} -> ok after 5000 -> timeout end," local_node_name port_name) :: !connection_lines;
-                connection_lines := "                        %% Local adds upstream with initial version" :: !connection_lines;
-                connection_lines := (Printf.sprintf "                        %s ! {add_upstream, %s, UpstreamParty, %s, UpstreamVer, self()}, receive {ok, connected} -> ok after 5000 -> timeout end," local_node_name port_name port_name) :: !connection_lines;
-                connection_lines := "                        %% Add sync downstream: upstream's module forwards sync pulses to local's module" :: !connection_lines;
-                connection_lines := "                        UpstreamModuleName = list_to_atom(string:join(lists:droplast(string:split(atom_to_list(UpstreamNodeName), \"_\", all)), \"_\"))," :: !connection_lines;
-                connection_lines := (Printf.sprintf "                        UpstreamModuleName ! {add_sync_downstream, %s, self()}, receive {ok, connected} -> ok after 5000 -> timeout end" local_module_name) :: !connection_lines;
-                connection_lines := (Printf.sprintf "                    end, ResolvedConnections_%s)" local_name) :: !connection_lines
+                connection_lines := (Printf.sprintf "                    UpstreamModuleName_%s = list_to_atom(string:join(lists:droplast(string:split(atom_to_list(UpstreamNodeName_%s), \"_\", all)), \"_\"))" local_name local_name) :: !connection_lines;
+                connection_lines := (Printf.sprintf "                    UpstreamModuleName_%s ! {add_sync_downstream, %s, self()}, receive {ok, connected} -> ok after 5000 -> timeout end" local_name local_module_name) :: !connection_lines
             | [] -> ())
         | Syntax.SimpleId _ | Syntax.QualifiedId _ -> ()  (* Handled elsewhere *)
       ) inputs
@@ -1817,9 +1499,8 @@ let gen_single_template_factory template module_map inst_prog =
         ) source_locals
     | Syntax.ParamRef param_name ->
         (* ParamRef: $upstream(n1) means "n1 receives data from upstream" *)
-        (* Plan B+ Support: ConnectionTargets can be:
-           - Atom (instance name): resolve_connection returns [{NodeActor, Port}] via auto-pairing
-           - {Instance, Port} tuple: resolve_connection returns specific port *)
+        (* upstream = the external data source (e.g., main_src_data) *)
+        (* n1 = the local instance that will receive data *)
         (* Data flow: upstream -> n1 *)
         List.iter (fun local_inst ->
           let _ = capitalize local_inst in
@@ -1835,41 +1516,24 @@ let gen_single_template_factory template module_map inst_prog =
             | (first_node_id, _, _, _) :: _ ->
                 (* Local node actor name: this template instance's node (receiver) *)
                 let local_node_name = Printf.sprintf "list_to_atom(atom_to_list(PartyName) ++ \"_\" ++ atom_to_list(maps:get(%s, InstanceNameMap)) ++ \"_%s\")" local_inst first_node_id in
-                (* Local module actor name for sync downstream *)
-                let local_module_name = Printf.sprintf "list_to_atom(atom_to_list(PartyName) ++ \"_\" ++ atom_to_list(maps:get(%s, InstanceNameMap)))" local_inst in
+                (* Upstream node actor name: resolved from ConnectionTargets parameter (sender) *)
+                let upstream_node_name = Printf.sprintf "maps:get(%s, ConnectionTargets)" param_name in
                 (* Port tag should match the module's input port name (e.g., "input" for pass module) *)
                 let port_tag = if List.length local_mod.source > 0 then List.hd local_mod.source else local_inst in
-                
-                (* Plan B+: Use resolve_connection to handle both atom and {Instance, Port} formats *)
-                (* Generate as a single multi-line Erlang expression to avoid comma issues *)
-                let plan_b_code = Printf.sprintf "                    %% Plan B+ Connection: resolve %s parameter for %s
-                    ConnectionTarget_%s = maps:get(%s, ConnectionTargets),
-                    ResolvedConnections_%s = resolve_connection(ConnectionTarget_%s, '%s'),
-                    SyncDownstreamSet_%s = sets:new(),
-                    FinalSyncSet_%s = lists:foldl(fun({UpstreamNodeName, _UpstreamPort}, SyncSet) ->
-                        UpstreamParty = list_to_atom(hd(string:split(atom_to_list(UpstreamNodeName), \"_\", leading))),
-                        UpstreamParty ! {get_version, self()},
-                        UpstreamVer = receive {version, V} -> V after 5000 -> 0 end,
-                        UpstreamNodeName ! {add_downstream, {%s, %s}, self()}, receive {ok, connected} -> ok after 5000 -> timeout end,
-                        %s ! {add_upstream, %s, UpstreamParty, %s, UpstreamVer, self()}, receive {ok, connected} -> ok after 5000 -> timeout end,
-                        UpstreamModuleName = list_to_atom(string:join(lists:droplast(string:split(atom_to_list(UpstreamNodeName), \"_\", all)), \"_\")),
-                        sets:add_element(UpstreamModuleName, SyncSet)
-                    end, SyncDownstreamSet_%s, ResolvedConnections_%s),
-                    lists:foreach(fun(UpstreamModuleName) ->
-                        UpstreamModuleName ! {add_sync_downstream, %s, self()}, receive {ok, connected} -> ok after 5000 -> timeout end
-                    end, sets:to_list(FinalSyncSet_%s))"
-                  param_name local_inst
-                  local_inst param_name
-                  local_inst local_inst local_module_id
-                  local_inst
-                  local_inst
-                  local_node_name port_tag
-                  local_node_name port_tag port_tag
-                  local_inst local_inst
-                  local_module_name
-                  local_inst
-                in
-                connection_lines := plan_b_code :: !connection_lines
+                (* Extract party name from upstream node's registered name *)
+                connection_lines := (Printf.sprintf "                    UpstreamNodeName_%s = %s" local_inst upstream_node_name) :: !connection_lines;
+                connection_lines := (Printf.sprintf "                    UpstreamParty_%s = list_to_atom(hd(string:split(atom_to_list(UpstreamNodeName_%s), \"_\", leading)))" local_inst local_inst) :: !connection_lines;
+                (* Get current version from upstream party *)
+                connection_lines := (Printf.sprintf "                    UpstreamParty_%s ! {get_version, self()}" local_inst) :: !connection_lines;
+                connection_lines := (Printf.sprintf "                    UpstreamVer_%s = receive {version, V_%s} -> V_%s after 5000 -> 0 end" local_inst local_inst local_inst) :: !connection_lines;
+                (* Upstream adds local as downstream: upstream sends data to local *)
+                connection_lines := (Printf.sprintf "                    UpstreamNodeName_%s ! {add_downstream, {%s, %s}, self()}, receive {ok, connected} -> ok after 5000 -> timeout end" local_inst local_node_name port_tag) :: !connection_lines;
+                (* Local adds upstream as upstream with initial version: local receives data from upstream *)
+                connection_lines := (Printf.sprintf "                    %s ! {add_upstream, %s, UpstreamParty_%s, %s, UpstreamVer_%s, self()}, receive {ok, connected} -> ok after 5000 -> timeout end" local_node_name port_tag local_inst port_tag local_inst) :: !connection_lines;
+                (* Add sync downstream: upstream's module actor forwards sync pulses to local's module actor *)
+                let local_module_name = Printf.sprintf "list_to_atom(atom_to_list(PartyName) ++ \"_\" ++ atom_to_list(maps:get(%s, InstanceNameMap)))" local_inst in
+                connection_lines := (Printf.sprintf "                    UpstreamModuleName_%s = list_to_atom(string:join(lists:droplast(string:split(atom_to_list(UpstreamNodeName_%s), \"_\", all)), \"_\"))" local_inst local_inst) :: !connection_lines;
+                connection_lines := (Printf.sprintf "                    UpstreamModuleName_%s ! {add_sync_downstream, %s, self()}, receive {ok, connected} -> ok after 5000 -> timeout end" local_inst local_module_name) :: !connection_lines
             | [] -> ()
           end
         ) source_locals
@@ -2076,23 +1740,14 @@ let gen_new_inst inst_prog module_map =
   let template_factories = gen_template_factories inst_prog module_map in
   let manager_code = gen_manager inst_prog in
   
-  (* Generate INSTANCE_REGISTRY for Plan B+ support *)
-  let instance_registry = gen_instance_registry inst_prog module_map in
-  
   String.concat "\n\n" [
     "-module(" ^ module_name ^ ").";
     gen_exports inst_prog module_map;
     template_exports;
     "";
-    instance_registry;
-    "";
     gen_helpers ();
     "";
-    gen_embedded_runtime ();
-    "";
     gen_trace_helper ();
-    "";
-    gen_resolve_connection module_map;
     "";
     gen_compute_request_targets ();
     "";
