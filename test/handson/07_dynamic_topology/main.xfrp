@@ -1,0 +1,39 @@
+# 07_dynamic_topology: 動的トポロジー変更デモ
+#
+# 初期構成:
+#   Party main:  Source --> Sink
+#   Party other: Source (独立カウンター)
+#
+# シナリオ1: チェーン延伸
+#   create_chain_add で RelayAdd を挿入してチェーンを伸ばす
+#
+# シナリオ2: ロジック入れ替え  
+#   create_chain_mult で RelayMult に差し替え
+
+# === メインパーティ ===
+party main
+leader = src
+periodic(1000)
+newnode (src) = Source()
+newnode (snk) = Sink(src)
+
+# === 別パーティ（独立動作） ===
+party other
+leader = src2
+periodic(1000)
+newnode (src2) = Source()
+
+# === テンプレート: 加算リレーチェーン ===
+# upstream の出力に +1 してチェーンを延伸
+template chain_add(upstream)
+leader = relay
+periodic(1000)
+newnode (relay) = RelayAdd($upstream)
+
+# === テンプレート: 乗算リレーチェーン ===  
+# upstream の出力を *2 してチェーンを延伸
+template chain_mult(upstream)
+leader = relay
+periodic(1000)
+newnode (relay) = RelayMult($upstream)
+

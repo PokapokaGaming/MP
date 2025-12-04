@@ -1,0 +1,8 @@
+# 可変長入力を受け取る集約モジュール
+# sum(inputs) で全入力の合計を計算
+
+module Aggregator
+in inputs... : Int
+out total: Int
+
+node total: Int = sum(inputs)

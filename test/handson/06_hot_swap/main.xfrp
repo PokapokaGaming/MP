@@ -1,0 +1,6 @@
+# インスタンスファイル: ホットスワップデモ
+
+party main
+leader = cnt
+periodic(500)
+newnode (cnt) = Counter()

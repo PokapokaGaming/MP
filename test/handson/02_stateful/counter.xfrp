@@ -1,0 +1,7 @@
+# カウンターモジュール: @last を使った状態保持
+
+module counter
+in
+out value: Int
+
+node init[0] value: Int = value@last + 1

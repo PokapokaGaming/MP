@@ -1,0 +1,6 @@
+# MPFRP ハンズオンテスト: 基本構文
+
+module source
+in
+out value: Int
+node value: Int = 1

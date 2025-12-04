@@ -1,0 +1,14 @@
+# 01_basics: 基本的なノード接続テスト
+#
+# 最もシンプルなトポロジ:
+#   src (1) --> doubled (2)
+#
+# 期待される計算:
+#   src = 1
+#   doubled = 2 * 1 = 2
+
+party main
+leader = src
+periodic(1000)
+newnode (src) = source()
+newnode (doubled) = doubler(src)

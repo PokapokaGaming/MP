@@ -1,6 +1,0 @@
-party Main
-leader = data
-periodic(60000)
-newnode (data) = Server(c1, c2, c3)
-party_template Tmpl
-template t1 = Mod1

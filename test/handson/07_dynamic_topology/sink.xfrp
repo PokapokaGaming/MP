@@ -1,0 +1,7 @@
+# シンクモジュール: 入力をそのまま出力（最終出力用）
+
+module Sink
+in x: Int
+out result: Int
+
+node result: Int = x

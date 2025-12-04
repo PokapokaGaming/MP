@@ -1,0 +1,21 @@
+# 04_dynamic_variadic: 可変長入力への動的追加・削除テスト
+#
+# 初期構成:
+#   src1 -----> Aggregator (sum) --> total
+#
+# テンプレート client を使って動的に src を追加できる
+# 追加: main.agg(c) で c を agg の inputs に追加
+# 削除後も計算が継続することを確認
+
+party main
+leader = src1
+periodic(1000)
+newnode (src1) = Source()
+newnode (agg) = Aggregator(src1)
+
+# 動的追加用テンプレート
+template client
+leader = c
+periodic(1000)
+newnode (c) = Source()
+main.agg(c)

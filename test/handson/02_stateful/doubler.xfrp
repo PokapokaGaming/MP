@@ -1,0 +1,7 @@
+# 入力を2倍にして出力
+
+module doubler
+in x: Int
+out result: Int
+
+node result: Int = x * 2

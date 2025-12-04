@@ -1,0 +1,25 @@
+# 05_dynamic_fixed: パラメータ参照による動的接続
+#
+# 初期構成:
+#   party main:
+#     src (1,2,3,...) --> (出力のみ)
+#
+# テンプレート chain(upstream) を使用:
+#   新規パーティ作成時に $upstream で接続先を指定
+#   template chain(upstream):
+#     pass --→ $upstream から受信
+#
+# 使用例:
+#   create_chain(sub1, #{pass => p1}, #{upstream => main_src_value})
+
+party main
+leader = src
+periodic(1000)
+newnode (src) = Source()
+
+# パラメータ付きテンプレート
+# upstream: 接続先ノード名を動的に指定
+template chain(upstream)
+leader = pass
+periodic(500)
+newnode (pass) = Pass($upstream)

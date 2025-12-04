@@ -1,0 +1,7 @@
+# ソースモジュール: カウンター
+
+module Counter
+in
+out cval: Int
+
+node init[0] cval: Int = cval@last + 1

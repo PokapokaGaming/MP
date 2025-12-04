@@ -1,0 +1,7 @@
+# 合流モジュール: 2つの入力を加算
+
+module Join
+in a: Int, b: Int
+out result: Int
+
+node result: Int = a + b

@@ -1,0 +1,6 @@
+# 入力を2倍にするモジュール
+
+module doubler
+in x: Int
+out result: Int
+node result: Int = x * 2

@@ -1,0 +1,31 @@
+# 03_multiparty_sync: ラダー型トポロジでのクロスパーティ同期
+#
+# トポロジ (Ladder型):
+#
+#   Party fast (500ms)           Party slow (1000ms)
+#   ================           ================
+#   src_f (1,2,3,...)  ------> join_s
+#                       \    /
+#                        \  /
+#                         \/
+#                         /\
+#                        /  \
+#   join_f <-----------  src_s (1,2,3,...)
+#
+# ポイント:
+#   - fast は slow の2倍の速度で動作
+#   - join_f は fast の src_f と slow の src_s を結合
+#   - join_s は slow の src_s と fast の src_f を結合
+#   - クロスパーティデータはバッファリングされ、順序保証される
+
+party fast
+leader = src_f
+periodic(500)
+newnode (src_f) = source()
+newnode (join_f) = join(src_f, slow.src_s)
+
+party slow
+leader = src_s
+periodic(1000)
+newnode (src_s) = source()
+newnode (join_s) = join(src_s, fast.src_f)

@@ -1,0 +1,7 @@
+# パススルーモジュール: 入力をそのまま出力
+
+module Pass
+in input: Int
+out result: Int
+
+node result: Int = input

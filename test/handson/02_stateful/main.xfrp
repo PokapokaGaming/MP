@@ -1,0 +1,14 @@
+# 02_stateful: @last を使った状態保持テスト
+#
+# テスト内容:
+#   counter: 単純なインクリメント (1, 2, 3, 4, ...)
+#   doubler: counterを2倍 (2, 4, 6, 8, ...)
+#
+# @last を使用することで、各周期ごとに前回の値を参照し
+# 状態を維持しながらカウントアップしていく
+
+party main
+leader = cnt
+periodic(1000)
+newnode (cnt) = counter()
+newnode (dbl) = doubler(cnt)

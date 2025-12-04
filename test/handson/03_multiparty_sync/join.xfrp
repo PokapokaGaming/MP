@@ -1,0 +1,8 @@
+# ジョインノード: 2つの入力を受け取り合計を出力
+# クロスパーティ同期を確認するため使用
+
+module join
+in a: Int, b: Int
+out result: Int
+
+node result: Int = a + b

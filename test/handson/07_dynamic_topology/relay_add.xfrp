@@ -1,0 +1,7 @@
+# 加算リレーモジュール: 入力に +1 して出力
+
+module RelayAdd
+in x: Int
+out result: Int
+
+node result: Int = x + 1
