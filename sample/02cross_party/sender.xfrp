@@ -1,0 +1,6 @@
+module Sender
+party p1
+in
+out val{p1}: Int
+party p1 = periodic(1000)
+node val{p1}: Int = val@last + 1

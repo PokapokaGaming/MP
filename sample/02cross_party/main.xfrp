@@ -1,0 +1,3 @@
+module Main
+newnode (v) = Sender{p1}()
+newnode (r) = Receiver{p2}(v)

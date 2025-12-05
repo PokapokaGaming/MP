@@ -1,0 +1,5 @@
+module worker
+in data: Int
+out result: Int
+
+node result: Int = data * 2

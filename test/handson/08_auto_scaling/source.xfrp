@@ -1,0 +1,5 @@
+module source
+in
+out load: Int
+
+node init[0] load: Int = load@last + 1

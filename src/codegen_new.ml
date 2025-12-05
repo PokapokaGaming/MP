@@ -327,6 +327,222 @@ let gen_embedded_runtime () =
     "        [PartyStr | _] -> list_to_atom(PartyStr);";
     "        _ -> undefined";
     "    end.";
+    "";
+    "%% ============================================================================";
+    "%% Embedded Controller (Task 08: Self-Modifying System)";
+    "%% ============================================================================";
+    "%% Handles API commands from XFRP output with rate limiting and instance caps.";
+    "%% Uses spawn + monitor (no OTP supervisor) for simplicity.";
+    "%% ============================================================================";
+    "";
+    "-define(CONTROLLER_TABLE, mpfrp_controller_state).";
+    "-define(MAX_INSTANCES, 100).";
+    "-define(RATE_LIMIT_WINDOW_MS, 1000).";
+    "-define(RATE_LIMIT_MAX_CALLS, 10).";
+    "-define(DEBOUNCE_MS, 100).";
+    "";
+    "%% --- Controller Initialization (called from start/0) ---";
+    "%% Idempotent: safe to call multiple times";
+    "init_controller() ->";
+    "    case whereis(mpfrp_controller) of";
+    "        undefined ->";
+    "            %% Create ETS table (with existence check)";
+    "            case ets:info(?CONTROLLER_TABLE) of";
+    "                undefined ->";
+    "                    ets:new(?CONTROLLER_TABLE, [named_table, public, set, {read_concurrency, true}]),";
+    "                    ets:insert(?CONTROLLER_TABLE, {instance_count, 0}),";
+    "                    ets:insert(?CONTROLLER_TABLE, {rate_limit, []}),";
+    "                    ets:insert(?CONTROLLER_TABLE, {last_commands, #{}});";
+    "                _ -> ok";
+    "            end,";
+    "            %% Spawn controller (no link - isolation)";
+    "            ControllerPid = spawn(fun controller_loop/0),";
+    "            register(mpfrp_controller, ControllerPid),";
+    "            %% Spawn monitor process to restart controller on crash";
+    "            spawn(fun() -> controller_monitor(ControllerPid) end),";
+    "            ok;";
+    "        _Pid ->";
+    "            %% Already started, return without error";
+    "            {ok, already_started}";
+    "    end.";
+    "";
+    "%% --- Controller Monitor (restarts controller on crash) ---";
+    "controller_monitor(ControllerPid) ->";
+    "    Ref = erlang:monitor(process, ControllerPid),";
+    "    receive";
+    "        {'DOWN', Ref, process, ControllerPid, Reason} ->";
+    "            io:format(\"[Controller] Crashed: ~p, restarting...~n\", [Reason]),";
+    "            timer:sleep(100),  %% Brief delay before restart";
+    "            NewPid = spawn(fun controller_loop/0),";
+    "            catch unregister(mpfrp_controller),";
+    "            register(mpfrp_controller, NewPid),";
+    "            controller_monitor(NewPid)";
+    "    end.";
+    "";
+    "%% --- Controller Loop ---";
+    "controller_loop() ->";
+    "    receive";
+    "        {api_command, Command} ->";
+    "            handle_api_command(Command),";
+    "            controller_loop();";
+    "        {get_stats, Caller} ->";
+    "            Stats = get_controller_stats(),";
+    "            Caller ! {controller_stats, Stats},";
+    "            controller_loop();";
+    "        stop ->";
+    "            io:format(\"[Controller] Stopping~n\"),";
+    "            ok";
+    "    end.";
+    "";
+    "%% --- API Command Handler with Guards ---";
+    "handle_api_command(Command) ->";
+    "    case check_rate_limit() of";
+    "        {error, rate_limited} ->";
+    "            io:format(\"[Controller] Rate limited, ignoring command: ~p~n\", [Command]);";
+    "        ok ->";
+    "            case check_debounce(Command) of";
+    "                {error, debounced} ->";
+    "                    ok;  %% Silently ignore duplicate";
+    "                ok ->";
+    "                    execute_command(Command)";
+    "            end";
+    "    end.";
+    "";
+    "%% --- Rate Limiter ---";
+    "check_rate_limit() ->";
+    "    Now = erlang:monotonic_time(millisecond),";
+    "    [{rate_limit, Timestamps}] = ets:lookup(?CONTROLLER_TABLE, rate_limit),";
+    "    %% Filter timestamps within window";
+    "    ValidTimestamps = [T || T <- Timestamps, Now - T < ?RATE_LIMIT_WINDOW_MS],";
+    "    case length(ValidTimestamps) >= ?RATE_LIMIT_MAX_CALLS of";
+    "        true ->";
+    "            {error, rate_limited};";
+    "        false ->";
+    "            ets:insert(?CONTROLLER_TABLE, {rate_limit, [Now | ValidTimestamps]}),";
+    "            ok";
+    "    end.";
+    "";
+    "%% --- Debounce (prevent duplicate commands) ---";
+    "check_debounce(Command) ->";
+    "    Now = erlang:monotonic_time(millisecond),";
+    "    [{last_commands, LastCommands}] = ets:lookup(?CONTROLLER_TABLE, last_commands),";
+    "    case maps:get(Command, LastCommands, 0) of";
+    "        LastTime when Now - LastTime < ?DEBOUNCE_MS ->";
+    "            {error, debounced};";
+    "        _ ->";
+    "            ets:insert(?CONTROLLER_TABLE, {last_commands, maps:put(Command, Now, LastCommands)}),";
+    "            ok";
+    "    end.";
+    "";
+    "%% --- Execute Command (after guards pass) ---";
+    "execute_command(Command) when is_list(Command) ->";
+    "    case parse_command(Command) of";
+    "        {create, TemplateId, PartyName, InstanceMap, ConnectionTargets} ->";
+    "            case check_instance_cap() of";
+    "                {error, Reason} ->";
+    "                    io:format(\"[Controller] Instance cap exceeded: ~p~n\", [Reason]);";
+    "                ok ->";
+    "                    io:format(\"[Controller] Executing CREATE: ~p~n\", [{TemplateId, PartyName, InstanceMap, ConnectionTargets}]),";
+    "                    %% Call the factory function";
+    "                    try";
+    "                        FactoryFun = list_to_atom(\"create_\" ++ atom_to_list(TemplateId)),";
+    "                        case erlang:function_exported(?MODULE, FactoryFun, 3) of";
+    "                            true -> apply(?MODULE, FactoryFun, [PartyName, InstanceMap, ConnectionTargets]);";
+    "                            false ->";
+    "                                case erlang:function_exported(?MODULE, FactoryFun, 2) of";
+    "                                    true -> apply(?MODULE, FactoryFun, [PartyName, InstanceMap]);";
+    "                                    false -> io:format(\"[Controller] Unknown template: ~p~n\", [TemplateId])";
+    "                                end";
+    "                        end,";
+    "                        increment_instance_count()";
+    "                    catch E:R ->";
+    "                        io:format(\"[Controller] CREATE failed: ~p:~p~n\", [E, R])";
+    "                    end";
+    "            end;";
+    "        {stop, PartyName} ->";
+    "            io:format(\"[Controller] Executing STOP: ~p~n\", [PartyName]),";
+    "            try";
+    "                stop_party(PartyName),";
+    "                decrement_instance_count()";
+    "            catch E:R ->";
+    "                io:format(\"[Controller] STOP failed: ~p:~p~n\", [E, R])";
+    "            end;";
+    "        {error, Reason} ->";
+    "            io:format(\"[Controller] Invalid command: ~p (~p)~n\", [Command, Reason]);";
+    "        unknown ->";
+    "            io:format(\"[Controller] Unknown command format: ~p~n\", [Command])";
+    "    end;";
+    "execute_command(Command) ->";
+    "    io:format(\"[Controller] Command must be string: ~p~n\", [Command]).";
+    "";
+    "%% --- Command Parser ---";
+    "%% Format: \"CREATE:template_id:party_name:inst1=name1,inst2=name2:upstream=src\"";
+    "%%         \"STOP:party_name\"";
+    "parse_command(Command) ->";
+    "    Parts = string:split(Command, \":\", all),";
+    "    case Parts of";
+    "        [\"CREATE\", TemplateStr, PartyStr, InstMapStr, ConnStr] ->";
+    "            {create, ";
+    "             list_to_atom(TemplateStr),";
+    "             list_to_atom(PartyStr),";
+    "             parse_instance_map(InstMapStr),";
+    "             parse_connection_targets(ConnStr)};";
+    "        [\"CREATE\", TemplateStr, PartyStr, InstMapStr] ->";
+    "            {create,";
+    "             list_to_atom(TemplateStr),";
+    "             list_to_atom(PartyStr),";
+    "             parse_instance_map(InstMapStr),";
+    "             #{}};";
+    "        [\"STOP\", PartyStr] ->";
+    "            {stop, list_to_atom(PartyStr)};";
+    "        _ ->";
+    "            unknown";
+    "    end.";
+    "";
+    "%% Parse \"inst1=name1,inst2=name2\" -> #{inst1 => name1, inst2 => name2}";
+    "parse_instance_map(Str) ->";
+    "    Pairs = string:split(Str, \",\", all),";
+    "    lists:foldl(fun(Pair, Acc) ->";
+    "        case string:split(Pair, \"=\", leading) of";
+    "            [K, V] -> maps:put(list_to_atom(K), list_to_atom(V), Acc);";
+    "            _ -> Acc";
+    "        end";
+    "    end, #{}, Pairs).";
+    "";
+    "%% Parse \"upstream=src,other=val\" -> #{upstream => src, other => val}";
+    "parse_connection_targets(Str) ->";
+    "    parse_instance_map(Str).  %% Same format";
+    "";
+    "%% --- Instance Cap Check ---";
+    "check_instance_cap() ->";
+    "    [{instance_count, Count}] = ets:lookup(?CONTROLLER_TABLE, instance_count),";
+    "    case Count >= ?MAX_INSTANCES of";
+    "        true -> {error, {max_instances_reached, Count}};";
+    "        false -> ok";
+    "    end.";
+    "";
+    "increment_instance_count() ->";
+    "    ets:update_counter(?CONTROLLER_TABLE, instance_count, 1).";
+    "";
+    "decrement_instance_count() ->";
+    "    ets:update_counter(?CONTROLLER_TABLE, instance_count, {2, -1, 0, 0}).";
+    "";
+    "%% --- Controller Stats ---";
+    "get_controller_stats() ->";
+    "    [{instance_count, Count}] = ets:lookup(?CONTROLLER_TABLE, instance_count),";
+    "    [{rate_limit, Timestamps}] = ets:lookup(?CONTROLLER_TABLE, rate_limit),";
+    "    Now = erlang:monotonic_time(millisecond),";
+    "    RecentCalls = length([T || T <- Timestamps, Now - T < ?RATE_LIMIT_WINDOW_MS]),";
+    "    #{instance_count => Count, recent_api_calls => RecentCalls}.";
+    "";
+    "%% --- Dispatch command from out/2 to controller ---";
+    "dispatch_to_controller(Command) ->";
+    "    case whereis(mpfrp_controller) of";
+    "        undefined ->";
+    "            io:format(\"[WARN] Controller not running, ignoring: ~p~n\", [Command]);";
+    "        Pid ->";
+    "            Pid ! {api_command, Command}";
+    "    end.";
   ]
 
 (* Generate INSTANCE_REGISTRY - metadata for all static instances *)
@@ -529,9 +745,23 @@ let gen_compute_request_targets () =
 
 (* Generate run_party/2 function - sends sync pulse to leader only *)
 (* Extended with Token-based suspend/resume for atomic dynamic updates *)
+(* Uses NextFireTime to maintain timing consistency across suspend/resume *)
 let gen_run_party () =
   String.concat "\n" [
+    "%% run_party/2 - Entry point, calculates initial NextFireTime";
     "run_party(Config, Ver) ->";
+    "    #{mode := Mode} = Config,";
+    "    case Mode of";
+    "        periodic ->";
+    "            #{interval := Interval} = Config,";
+    "            NextFireTime = erlang:monotonic_time(millisecond) + Interval,";
+    "            run_party_loop(Config, Ver, NextFireTime);";
+    "        any_party ->";
+    "            run_party_loop(Config, Ver, undefined)";
+    "    end.";
+    "";
+    "%% run_party_loop/3 - Main loop with NextFireTime tracking";
+    "run_party_loop(Config, Ver, NextFireTime) ->";
     "    #{party := Party, leader := Leader, mode := Mode} = Config,";
     "    %% Update global registry status";
     "    catch mpfrp_registry_update_party_status(Party, running, undefined),";
@@ -539,18 +769,23 @@ let gen_run_party () =
     "        periodic ->";
     "            #{interval := Interval} = Config,";
     "            Leader ! {Party, Ver},";
-    "            %% Use receive...after for suspend/resume support";
+    "            %% Calculate remaining time until next fire";
+    "            Now = erlang:monotonic_time(millisecond),";
+    "            WaitTime = max(0, NextFireTime - Now),";
     "            receive";
     "                {suspend, Token, Timeout, Caller} ->";
     "                    io:format(\"[PARTY] ~p suspended at Ver:~p (token=~p, timeout=~p)~n\", [Party, Ver + 1, Token, Timeout]),";
     "                    catch mpfrp_registry_update_party_status(Party, suspended, Token),";
     "                    Caller ! {suspended, Party, Token},";
-    "                    run_party_suspended(Config, Ver + 1, Token, Timeout);";
+    "                    %% Pass NextFireTime to suspended state (timing preserved)";
+    "                    run_party_suspended(Config, Ver + 1, Token, Timeout, NextFireTime);";
     "                {get_version, Caller} ->";
     "                    Caller ! {version, Ver + 1},";
-    "                    run_party(Config, Ver)";
-    "            after Interval ->";
-    "                run_party(Config, Ver + 1)";
+    "                    run_party_loop(Config, Ver, NextFireTime)";
+    "            after WaitTime ->";
+    "                %% Fire! Calculate next fire time";
+    "                NewNextFireTime = erlang:monotonic_time(millisecond) + Interval,";
+    "                run_party_loop(Config, Ver + 1, NewNextFireTime)";
     "            end;";
     "        any_party ->";
     "            #{dependencies := Dependencies} = Config,";
@@ -559,49 +794,80 @@ let gen_run_party () =
     "                    io:format(\"[PARTY] ~p suspended at Ver:~p (token=~p)~n\", [Party, Ver + 1, Token]),";
     "                    catch mpfrp_registry_update_party_status(Party, suspended, Token),";
     "                    Caller ! {suspended, Party, Token},";
-    "                    run_party_suspended(Config, Ver + 1, Token, Timeout);";
+    "                    run_party_suspended(Config, Ver + 1, Token, Timeout, undefined);";
     "                {get_version, Caller} ->";
     "                    Caller ! {version, Ver + 1},";
-    "                    run_party(Config, Ver);";
+    "                    run_party_loop(Config, Ver, undefined);";
     "                {DepParty, _DepVer} ->";
     "                    case lists:member(DepParty, Dependencies) of";
     "                        true ->";
     "                            Leader ! {Party, Ver},";
-    "                            run_party(Config, Ver + 1);";
+    "                            run_party_loop(Config, Ver + 1, undefined);";
     "                        false ->";
-    "                            run_party(Config, Ver)";
+    "                            run_party_loop(Config, Ver, undefined)";
     "                    end";
     "            end";
     "    end.";
     "";
     "%% Suspended state - waiting for resume with token validation";
-    "%% Includes timeout for automatic recovery";
-    "run_party_suspended(Config, Ver, Token, Timeout) ->";
-    "    #{party := Party, leader := Leader} = Config,";
+    "%% NextFireTime is preserved to maintain timing consistency";
+    "run_party_suspended(Config, Ver, Token, Timeout, NextFireTime) ->";
+    "    #{party := Party, leader := Leader, mode := Mode, interval := Interval} = Config,";
     "    receive";
     "        {resume, Token, Caller} ->";
     "            io:format(\"[PARTY] ~p resumed at Ver:~p (token=~p)~n\", [Party, Ver, Token]),";
     "            catch mpfrp_registry_update_party_status(Party, running, undefined),";
     "            Caller ! {resumed, Party, Token},";
-    "            Leader ! {Party, Ver},";
-    "            run_party(Config, Ver);";
+    "            %% For periodic mode: check if we missed the fire time";
+    "            case Mode of";
+    "                periodic ->";
+    "                    Now = erlang:monotonic_time(millisecond),";
+    "                    case NextFireTime =< Now of";
+    "                        true ->";
+    "                            %% Missed fire time - fire immediately and reset";
+    "                            Leader ! {Party, Ver},";
+    "                            NewNextFireTime = Now + Interval,";
+    "                            run_party_loop(Config, Ver + 1, NewNextFireTime);";
+    "                        false ->";
+    "                            %% Still time left - continue waiting";
+    "                            Leader ! {Party, Ver},";
+    "                            run_party_loop(Config, Ver, NextFireTime)";
+    "                    end;";
+    "                any_party ->";
+    "                    Leader ! {Party, Ver},";
+    "                    run_party_loop(Config, Ver, undefined)";
+    "            end;";
     "        {resume, WrongToken, Caller} ->";
     "            io:format(\"[PARTY] ~p resume rejected: wrong token (got=~p, expected=~p)~n\", [Party, WrongToken, Token]),";
     "            Caller ! {error, invalid_token},";
-    "            run_party_suspended(Config, Ver, Token, Timeout);";
+    "            run_party_suspended(Config, Ver, Token, Timeout, NextFireTime);";
     "        {get_version, Caller} ->";
     "            Caller ! {version, Ver},";
-    "            run_party_suspended(Config, Ver, Token, Timeout);";
+    "            run_party_suspended(Config, Ver, Token, Timeout, NextFireTime);";
     "        {suspend, _NewToken, _NewTimeout, Caller} ->";
     "            %% Already suspended, reply with current token";
     "            Caller ! {suspended, Party, Token},";
-    "            run_party_suspended(Config, Ver, Token, Timeout)";
+    "            run_party_suspended(Config, Ver, Token, Timeout, NextFireTime)";
     "    after Timeout ->";
     "        %% Timeout - auto resume for safety";
     "        io:format(\"[PARTY] ~p TIMEOUT: auto-resuming at Ver:~p~n\", [Party, Ver]),";
     "        catch mpfrp_registry_update_party_status(Party, running, undefined),";
-    "        Leader ! {Party, Ver},";
-    "        run_party(Config, Ver)";
+    "        case Mode of";
+    "            periodic ->";
+    "                Now = erlang:monotonic_time(millisecond),";
+    "                case NextFireTime =< Now of";
+    "                    true ->";
+    "                        Leader ! {Party, Ver},";
+    "                        NewNextFireTime = Now + Interval,";
+    "                        run_party_loop(Config, Ver + 1, NewNextFireTime);";
+    "                    false ->";
+    "                        Leader ! {Party, Ver},";
+    "                        run_party_loop(Config, Ver, NextFireTime)";
+    "                end;";
+    "            any_party ->";
+    "                Leader ! {Party, Ver},";
+    "                run_party_loop(Config, Ver, undefined)";
+    "        end";
     "    end.";
   ]
 
@@ -1412,16 +1678,29 @@ let gen_start inst_prog module_map =
   
   String.concat "\n" ([
     "start() ->";
-    gen_node_specs inst_prog module_map ^ ",";
+    "    %% Check if already started (idempotent)";
+    "    case whereis(mpfrp_controller) of";
+    "        undefined ->";
+    "            %% Initialize embedded runtime registry";
+    "            mpfrp_registry_init(),";
     "";
-    "    %% Spawn module actors and node actors for all parties";
-  ] @ spawn_with_commas @ [
+    "            %% Initialize controller (ETS + spawn + monitor)";
+    "            init_controller(),";
+    "";
+    "            " ^ gen_node_specs inst_prog module_map ^ ",";
+    "";
+    "            %% Spawn module actors and node actors for all parties";
+  ] @ (List.map (fun s -> "            " ^ s) spawn_with_commas) @ [
     ",";
     "";
-    "    %% Spawn party actors";
-  ] @ party_with_commas @ [
+    "            %% Spawn party actors";
+  ] @ (List.map (fun s -> "            " ^ s) party_with_commas) @ [
     ",";
-    "    void.";
+    "            void;";
+    "        _Pid ->";
+    "            %% Already started";
+    "            {ok, already_started}";
+    "    end.";
   ])
 
 (* Generate trace helper function *)
@@ -1438,6 +1717,7 @@ let gen_trace_helper () =
   ]
 
 (* Generate output handler *)
+(* Task 08: Output handler now checks for API command strings and dispatches to controller *)
 let gen_out inst_prog module_map =
   let entries = ref [] in
   
@@ -1456,7 +1736,8 @@ let gen_out inst_prog module_map =
         
         (* Check if this is a sink node *)
         if List.mem node_id mod_info.sink then
-          entries := (Printf.sprintf "out(%s, Value) -> io:format(\"Output from %s: ~p~n\", [Value]), void;"
+          (* Sink node: check for API commands before printing *)
+          entries := (Printf.sprintf "out(%s, Value) ->\n    case is_api_command(Value) of\n        true -> dispatch_to_controller(Value);\n        false -> io:format(\"Output from %s: ~p~n\", [Value])\n    end,\n    void;"
             qualified qualified) :: !entries
         else
           entries := (Printf.sprintf "out(%s, _) -> void;" qualified) :: !entries
@@ -1464,8 +1745,20 @@ let gen_out inst_prog module_map =
     ) party_block.Syntax.instances
   ) inst_prog.Syntax.parties;
   
+  (* API command detection helper *)
+  let api_helper = String.concat "\n" [
+    "%% Check if value is an API command string";
+    "is_api_command(Value) when is_list(Value) ->";
+    "    case Value of";
+    "        \"CREATE:\" ++ _ -> true;";
+    "        \"STOP:\" ++ _ -> true;";
+    "        _ -> false";
+    "    end;";
+    "is_api_command(_) -> false.";
+  ] in
+  
   (* Default case: allow dynamic nodes (undefined name) or unknown nodes *)
-  String.concat "\n" (!entries @ ["out(undefined, Value) -> io:format(\"[Dynamic] Output: ~p~n\", [Value]), void;"; "out(_, _) -> void."])
+  String.concat "\n" ([api_helper; ""] @ !entries @ ["out(undefined, Value) -> io:format(\"[Dynamic] Output: ~p~n\", [Value]), void;"; "out(_, _) -> void."])
 
 (* Generate export declarations *)
 let gen_exports inst_prog module_map =
@@ -1478,6 +1771,9 @@ let gen_exports inst_prog module_map =
   exports := "-export([mpfrp_suspend_party/1, mpfrp_suspend_party/2, mpfrp_resume_party/2])." :: !exports;
   exports := "-export([mpfrp_connect/3, mpfrp_connect/4, mpfrp_disconnect/2, mpfrp_disconnect/3])." :: !exports;
   exports := "-export([mpfrp_get_connections/1, mpfrp_get_node_version/1])." :: !exports;
+  
+  (* Export controller functions (Task 08) *)
+  exports := "-export([init_controller/0, dispatch_to_controller/1, get_controller_stats/0])." :: !exports;
   
   (* Export module actors *)
   let module_exports = List.map (fun m -> "run_" ^ m ^ "/6") unique_modules in
@@ -1503,13 +1799,17 @@ let gen_template_exports inst_prog =
   let templates = inst_prog.Syntax.templates in
   if List.length templates = 0 then ""
   else begin
+    (* Layer 2: Internal factory functions (create_<template>/N) *)
     let factory_exports = List.map (fun template ->
       let has_params = List.length template.Syntax.template_params > 0 in
-      let arity = if has_params then "3" else "2" in  (* PartyName, InstanceNameMap [, ConnectionTargets] *)
+      let arity = if has_params then "3" else "2" in
       "create_" ^ template.Syntax.template_id ^ "/" ^ arity
     ) templates in
+    (* Layer 1: High-level public API *)
+    let public_api = ["spawn_worker/4"; "stop_worker/1"; "hot_swap/4"; "list_workers/0"; "get_worker_status/1"] in
+    (* Layer 2: Manager functions *)
     let manager_exports = ["list_templates/0"; "stop_party/1"; "get_parties/0"; "get_instances/0"; "check_instance_names/1"] in
-    "-export([" ^ String.concat ", " (factory_exports @ manager_exports) ^ "])."
+    "-export([" ^ String.concat ", " (public_api @ factory_exports @ manager_exports) ^ "])."
   end
 
 (* Generate a single template factory function with dynamic instance naming *)
@@ -1723,21 +2023,20 @@ let gen_single_template_factory template module_map inst_prog =
                 connection_lines := (Printf.sprintf "                    %% Plan B+ Connection Resolution for %s" param_name) :: !connection_lines;
                 connection_lines := (Printf.sprintf "                    ConnectionTarget_%s = maps:get(%s, ConnectionTargets)" local_name param_name) :: !connection_lines;
                 connection_lines := (Printf.sprintf "                    ResolvedConnections_%s = resolve_connection(ConnectionTarget_%s, '%s')" local_name local_name module_id) :: !connection_lines;
-                (* For each resolved connection, establish the link *)
-                connection_lines := "                    lists:foreach(fun({UpstreamNodeName, _UpstreamPort}) ->" :: !connection_lines;
-                connection_lines := "                        %% Extract party from upstream node name" :: !connection_lines;
-                connection_lines := "                        UpstreamParty = list_to_atom(hd(string:split(atom_to_list(UpstreamNodeName), \"_\", leading)))," :: !connection_lines;
-                connection_lines := "                        %% Get current version from upstream party" :: !connection_lines;
-                connection_lines := "                        UpstreamParty ! {get_version, self()}," :: !connection_lines;
-                connection_lines := "                        UpstreamVer = receive {version, V} -> V after 5000 -> 0 end," :: !connection_lines;
-                connection_lines := "                        %% Upstream adds local as downstream" :: !connection_lines;
-                connection_lines := (Printf.sprintf "                        UpstreamNodeName ! {add_downstream, {%s, %s}, self()}, receive {ok, connected} -> ok after 5000 -> timeout end," local_node_name port_name) :: !connection_lines;
-                connection_lines := "                        %% Local adds upstream with initial version" :: !connection_lines;
-                connection_lines := (Printf.sprintf "                        %s ! {add_upstream, %s, UpstreamParty, %s, UpstreamVer, self()}, receive {ok, connected} -> ok after 5000 -> timeout end," local_node_name port_name port_name) :: !connection_lines;
-                connection_lines := "                        %% Add sync downstream: upstream's module forwards sync pulses to local's module" :: !connection_lines;
-                connection_lines := "                        UpstreamModuleName = list_to_atom(string:join(lists:droplast(string:split(atom_to_list(UpstreamNodeName), \"_\", all)), \"_\"))," :: !connection_lines;
-                connection_lines := (Printf.sprintf "                        UpstreamModuleName ! {add_sync_downstream, %s, self()}, receive {ok, connected} -> ok after 5000 -> timeout end" local_module_name) :: !connection_lines;
-                connection_lines := (Printf.sprintf "                    end, ResolvedConnections_%s)" local_name) :: !connection_lines
+                (* For each resolved connection, establish the link - use a single multi-line string to avoid comma issues *)
+                let foreach_body = Printf.sprintf 
+                  "                    lists:foreach(fun({UpstreamNodeName, _UpstreamPort}) ->\n\
+                   \                        UpstreamParty = list_to_atom(hd(string:split(atom_to_list(UpstreamNodeName), \"_\", leading))),\n\
+                   \                        UpstreamParty ! {get_version, self()},\n\
+                   \                        UpstreamVer = receive {version, V} -> V after 5000 -> 0 end,\n\
+                   \                        UpstreamNodeName ! {add_downstream, {%s, %s}, self()}, receive {ok, connected} -> ok after 5000 -> timeout end,\n\
+                   \                        %s ! {add_upstream, %s, UpstreamParty, %s, UpstreamVer, self()}, receive {ok, connected} -> ok after 5000 -> timeout end,\n\
+                   \                        UpstreamModuleName = list_to_atom(string:join(lists:droplast(string:split(atom_to_list(UpstreamNodeName), \"_\", all)), \"_\")),\n\
+                   \                        UpstreamModuleName ! {add_sync_downstream, %s, self()}, receive {ok, connected} -> ok after 5000 -> timeout end\n\
+                   \                    end, ResolvedConnections_%s)"
+                  local_node_name port_name local_node_name port_name port_name local_module_name local_name
+                in
+                connection_lines := foreach_body :: !connection_lines
             | [] -> ())
         | Syntax.SimpleId _ | Syntax.QualifiedId _ -> ()  (* Handled elsewhere *)
       ) inputs
@@ -2066,6 +2365,162 @@ let gen_manager inst_prog =
     ]
   end
 
+(* Generate Layer 1: High-Level Public API *)
+(* These functions wrap the complexity of suspend/resume and provide safe, idempotent operations *)
+let gen_high_level_api inst_prog =
+  let templates = inst_prog.Syntax.templates in
+  if List.length templates = 0 then ""
+  else
+    String.concat "\n" [
+      "%% ============================================================";
+      "%% Layer 1: High-Level Public API";
+      "%% ============================================================";
+      "%% These are the RECOMMENDED functions for users.";
+      "%% They handle suspend/resume automatically and are safe to use.";
+      "";
+      "%% spawn_worker/4 - Create a new worker from a template";
+      "%% @param Name      - Atom: unique name for this worker (e.g., worker1)";
+      "%% @param Template  - Atom: template name (e.g., add_worker)";
+      "%% @param Params    - Map: instance name mappings (e.g., #{w => w1})";
+      "%% @param Connections - Map: upstream connections (e.g., #{upstream => main_src})";
+      "%% @returns {ok, Pid} | {error, Reason}";
+      "spawn_worker(Name, Template, Params, Connections) ->";
+      "    %% Validate template exists";
+      "    case lists:member(Template, list_templates()) of";
+      "        false ->";
+      "            {error, {template_not_found, Template}};";
+      "        true ->";
+      "            %% Check if worker already exists";
+      "            case get_worker_status(Name) of";
+      "                {ok, _} ->";
+      "                    {error, {already_exists, Name}};";
+      "                {error, not_found} ->";
+      "                    %% Dynamically call create_<Template>/3";
+      "                    FactoryFun = list_to_atom(\"create_\" ++ atom_to_list(Template)),";
+      "                    try";
+      "                        case erlang:apply(?MODULE, FactoryFun, [Name, Params, Connections]) of";
+      "                            {ok, PartyName, Pid} ->";
+      "                                {ok, #{name => PartyName, pid => Pid}};";
+      "                            {error, Reason} ->";
+      "                                {error, Reason}";
+      "                        end";
+      "                    catch";
+      "                        error:undef ->";
+      "                            %% Template might not have connection params, try 2-arity version";
+      "                            try";
+      "                                case erlang:apply(?MODULE, FactoryFun, [Name, Params]) of";
+      "                                    {ok, PartyName2, Pid2} ->";
+      "                                        {ok, #{name => PartyName2, pid => Pid2}};";
+      "                                    {error, Reason2} ->";
+      "                                        {error, Reason2}";
+      "                                end";
+      "                            catch";
+      "                                _:Err2 -> {error, {spawn_failed, Err2}}";
+      "                            end;";
+      "                        _:Err -> {error, {spawn_failed, Err}}";
+      "                    end";
+      "            end";
+      "    end.";
+      "";
+      "%% stop_worker/1 - Stop a running worker";
+      "%% @param Name - Atom: the worker name to stop";
+      "%% @returns ok | {error, not_found}";
+      "stop_worker(Name) ->";
+      "    stop_party(Name).";
+      "";
+      "%% hot_swap/4 - Replace a worker with a new one (Blue-Green deployment)";
+      "%% Strategy: Start new worker first, then stop old one (safe rollback on failure)";
+      "%% @param OldName    - Atom: name of worker to replace";
+      "%% @param NewName    - Atom: name for the new worker";
+      "%% @param Template   - Atom: template for new worker";
+      "%% @param Params     - Map: instance params for new worker";
+      "%% @param Connections - Map: connections for new worker";
+      "%% @returns {ok, #{old => OldName, new => NewPid}} | {error, Reason}";
+      "hot_swap(OldName, NewName, Template, Params, Connections) ->";
+      "    %% Phase 1: Validate old worker exists";
+      "    case get_worker_status(OldName) of";
+      "        {error, not_found} ->";
+      "            {error, {old_worker_not_found, OldName}};";
+      "        {ok, _OldStatus} ->";
+      "            %% Phase 2: Spawn new worker (Blue-Green: new first)";
+      "            case spawn_worker(NewName, Template, Params, Connections) of";
+      "                {error, SpawnError} ->";
+      "                    %% New worker failed - old worker still running (safe)";
+      "                    {error, {new_worker_spawn_failed, SpawnError}};";
+      "                {ok, NewInfo} ->";
+      "                    %% Phase 3: Stop old worker";
+      "                    case stop_worker(OldName) of";
+      "                        ok ->";
+      "                            {ok, #{old => OldName, new => NewInfo}};";
+      "                        {error, StopError} ->";
+      "                            %% Old worker failed to stop - new worker running";
+      "                            %% This is a partial success (both running)";
+      "                            {warning, #{";
+      "                                message => old_worker_stop_failed,";
+      "                                old => OldName,";
+      "                                new => NewInfo,";
+      "                                error => StopError";
+      "                            }}";
+      "                    end";
+      "            end";
+      "    end.";
+      "";
+      "%% Convenience wrapper for hot_swap with 4 args (uses OldName with suffix)";
+      "hot_swap(OldName, Template, Params, Connections) ->";
+      "    NewName = list_to_atom(atom_to_list(OldName) ++ \"_v2\"),";
+      "    hot_swap(OldName, NewName, Template, Params, Connections).";
+      "";
+      "%% list_workers/0 - List all running workers with their status";
+      "%% @returns [{Name, Status}]";
+      "list_workers() ->";
+      "    ensure_manager_table(),";
+      "    Parties = ets:tab2list(mpfrp_parties),";
+      "    lists:filtermap(fun({Name, Value}) ->";
+      "        case Value of";
+      "            Pids when is_list(Pids) ->";
+      "                %% Dynamic party: Value is list of PIDs";
+      "                {true, {Name, #{";
+      "                    status => running,";
+      "                    type => dynamic,";
+      "                    process_count => length(Pids),";
+      "                    pids => Pids";
+      "                }}};";
+      "            #{status := Status} ->";
+      "                %% Static party: Value is status map";
+      "                {true, {Name, #{";
+      "                    status => Status,";
+      "                    type => static";
+      "                }}};";
+      "            _ ->";
+      "                false";
+      "        end";
+      "    end, Parties).";
+      "";
+      "%% get_worker_status/1 - Get status of a specific worker";
+      "%% @param Name - Atom: worker name";
+      "%% @returns {ok, Status} | {error, not_found}";
+      "get_worker_status(Name) ->";
+      "    ensure_manager_table(),";
+      "    case ets:lookup(mpfrp_parties, Name) of";
+      "        [{Name, Pids}] when is_list(Pids) ->";
+      "            {ok, #{";
+      "                name => Name,";
+      "                status => running,";
+      "                type => dynamic,";
+      "                process_count => length(Pids),";
+      "                pids => Pids";
+      "            }};";
+      "        [{Name, #{status := Status}}] ->";
+      "            {ok, #{";
+      "                name => Name,";
+      "                status => Status,";
+      "                type => static";
+      "            }};";
+      "        [] ->";
+      "            {error, not_found}";
+      "    end.";
+    ]
+
 (* Main entry point *)
 let gen_new_inst inst_prog module_map =
   let party_block = List.hd inst_prog.Syntax.parties in
@@ -2075,6 +2530,7 @@ let gen_new_inst inst_prog module_map =
   let template_exports = gen_template_exports inst_prog in
   let template_factories = gen_template_factories inst_prog module_map in
   let manager_code = gen_manager inst_prog in
+  let high_level_api = gen_high_level_api inst_prog in
   
   (* Generate INSTANCE_REGISTRY for Plan B+ support *)
   let instance_registry = gen_instance_registry inst_prog module_map in
@@ -2107,4 +2563,6 @@ let gen_new_inst inst_prog module_map =
     template_factories;
     "";
     manager_code;
+    "";
+    high_level_api;
   ]

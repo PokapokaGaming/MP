@@ -1,0 +1,10 @@
+party main
+leader = src
+periodic(1000)
+newnode (src) = source()
+newnode (ctrl) = controller(src)
+
+template add_worker(upstream)
+leader = w
+periodic(1000)
+newnode (w) = worker($upstream)

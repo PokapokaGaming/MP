@@ -1,0 +1,6 @@
+module Receiver
+party p2
+in val{p2}: Int
+out res{p2}: Int
+party p2 = periodic(500)
+node res{p2}: Int = val + 100
