@@ -148,36 +148,36 @@ let unique_list lst =
 
 (* Generate helper macros and functions *)
 let gen_helpers () =
-  String.concat "\n" [
-    "-define(SORTBuffer, fun ({{K1, V1}, _}, {{K2, V2}, _}) ->";
-    "    if V1 == V2 -> K1 < K2; true -> V1 < V2 end";
-    "end).";
-    "";
-    "-define(SORTVerBuffer, fun ({P1, V1}, {P2, V2}) ->";
-    "    if P1 == P2 -> V1 < V2; true -> P1 < P2 end";
-    "end).";
-    "";
-    "-define(SORTInBuffer, fun ({{P1, V1}, _, _}, {{P2, V2}, _, _}) ->";
-    "    if P1 == P2 -> V1 < V2; true -> P1 < P2 end";
-    "end).";
-    "";
-    "buffer_update(Current, Last, {{RVId, RVersion}, Id, RValue}, Buffer) ->";
-    "    H1 = case lists:member(Id, Current) of";
-    "        true  -> maps:update_with({RVId, RVersion},";
-    "                    fun(M) -> M#{Id => RValue} end,";
-    "                    #{Id => RValue}, Buffer);";
-    "        false -> Buffer";
-    "    end,";
-    "    case lists:member(Id, Last) of";
-    "        true  -> maps:update_with({RVId, RVersion + 1},";
-    "                    fun(M) -> M#{{last, Id} => RValue} end,";
-    "                    #{{last, Id} => RValue}, H1);";
-    "        false -> H1";
-    "    end.";
-    "";
-    "periodic(Interval) ->";
-    "    timer:sleep(Interval).";
-  ]
+  {|
+-define(SORTBuffer, fun ({{K1, V1}, _}, {{K2, V2}, _}) ->
+    if V1 == V2 -> K1 < K2; true -> V1 < V2 end
+end).
+
+-define(SORTVerBuffer, fun ({P1, V1}, {P2, V2}) ->
+    if P1 == P2 -> V1 < V2; true -> P1 < P2 end
+end).
+
+-define(SORTInBuffer, fun ({{P1, V1}, _, _}, {{P2, V2}, _, _}) ->
+    if P1 == P2 -> V1 < V2; true -> P1 < P2 end
+end).
+
+buffer_update(Current, Last, {{RVId, RVersion}, Id, RValue}, Buffer) ->
+    H1 = case lists:member(Id, Current) of
+        true  -> maps:update_with({RVId, RVersion},
+                    fun(M) -> M#{Id => RValue} end,
+                    #{Id => RValue}, Buffer);
+        false -> Buffer
+    end,
+    case lists:member(Id, Last) of
+        true  -> maps:update_with({RVId, RVersion + 1},
+                    fun(M) -> M#{{last, Id} => RValue} end,
+                    #{{last, Id} => RValue}, H1);
+        false -> H1
+    end.
+
+periodic(Interval) ->
+    timer:sleep(Interval).
+|}
 
 (* Generate embedded runtime library functions *)
 (* These replace the need for separate mpfrp_registry.erl and mpfrp_runtime.erl *)
@@ -1794,16 +1794,16 @@ let gen_start inst_prog module_map =
 
 (* Generate trace helper function *)
 let gen_trace_helper () =
-  String.concat "\n" [
-    "%% Trace helper: removes party prefix from node name for comparison";
-    "trace_node_name(FullName) ->";
-    "    NameStr = atom_to_list(FullName),";
-    "    case string:split(NameStr, \"_\", leading) of";
-    "        [_Party, Rest] -> list_to_atom(Rest);";
-    "        _ -> FullName";
-    "    end.";
-    "";
-  ]
+  {|
+%% Trace helper: removes party prefix from node name for comparison
+trace_node_name(FullName) ->
+    NameStr = atom_to_list(FullName),
+    case string:split(NameStr, "_", leading) of
+        [_Party, Rest] -> list_to_atom(Rest);
+        _ -> FullName
+    end.
+
+|}
 
 (* Generate output handler *)
 (* Task 08: Output handler now checks for API command strings and dispatches to controller *)
